@@ -29,15 +29,14 @@ import { TelemetryService } from './telemetry/telemetry.service';
       autoLoadEntities: true,
       synchronize: true,
     }),
-    MongooseModule.forRoot(
-      process.env.MONGO_URI || 'mongodb://localhost:27017/nxdb',
-    ),
+    // Removed
     AuthModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, PollController],
   providers: [
     AppService,
-    TelemetryService,
+    PollService,
+    PollService,
     {
       provide: APP_INTERCEPTOR,
       useClass: TelemetryInterceptor,

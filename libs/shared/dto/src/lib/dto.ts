@@ -9,6 +9,18 @@ import {
   authResponseSchema,
   messageResponseSchema,
   successResponseSchema,
+  // Poll schemas
+  pollStatusSchema,
+  pollVisibilitySchema,
+  createPollSchema,
+  updatePollSchema,
+  pollResponseSchema,
+  // Theme schemas
+  createThemeSchema,
+  themeResponseSchema,
+  // Vote schemas
+  castVoteSchema,
+  voteResponseSchema,
 } from '@libs/shared-validation-schemas';
 
 // ---------------------------------------------------------------------------
@@ -37,9 +49,51 @@ export const AuthResponseDtoSchema = authResponseSchema;
 
 export type LoginDto = z.infer<typeof LoginDtoSchema>;
 export type RegisterDto = z.infer<typeof RegisterDtoSchema>;
-export type ForgotPasswordRequestDto = z.infer<typeof ForgotPasswordRequestDtoSchema>;
+export type ForgotPasswordRequestDto = z.infer<
+  typeof ForgotPasswordRequestDtoSchema
+>;
 export type ResetPasswordDto = z.infer<typeof ResetPasswordDtoSchema>;
 export type AuthResponseDto = z.infer<typeof AuthResponseDtoSchema>;
+
+// ---------------------------------------------------------------------------
+// Poll DTOs
+// ---------------------------------------------------------------------------
+
+export const CreatePollDtoSchema = createPollSchema;
+export const UpdatePollDtoSchema = updatePollSchema;
+export const ClosePollDtoSchema = closePollSchema;
+export const PollResponseDtoSchema = pollResponseSchema;
+
+export type CreatePollDto = z.infer<typeof CreatePollDtoSchema>;
+export type UpdatePollDto = z.infer<typeof UpdatePollDtoSchema>;
+export type ClosePollDto = z.infer<typeof ClosePollDtoSchema>;
+export type PollResponseDto = z.infer<typeof PollResponseDtoSchema>;
+
+// ---------------------------------------------------------------------------
+// Theme DTOs
+// ---------------------------------------------------------------------------
+
+export const CreatePollThemeDtoSchema = z.object({
+  pollId: z.string().uuid(),
+  themeId: z.string().uuid(),
+});
+export const PollThemeResponseDtoSchema = z.object({
+  pollId: z.string(),
+  themeId: z.string(),
+});
+
+export type CreatePollThemeDto = z.infer<typeof CreatePollThemeDtoSchema>;
+export type PollThemeResponseDto = z.infer<typeof PollThemeResponseDtoSchema>;
+
+// ---------------------------------------------------------------------------
+// Vote DTOs
+// ---------------------------------------------------------------------------
+
+export const CastVoteDtoSchema = castVoteSchema;
+export const VoteResponseDtoSchema = voteResponseSchema;
+
+export type CastVoteDto = z.infer<typeof CastVoteDtoSchema>;
+export type VoteResponseDto = z.infer<typeof VoteResponseDtoSchema>;
 
 // ---------------------------------------------------------------------------
 // Common response DTOs

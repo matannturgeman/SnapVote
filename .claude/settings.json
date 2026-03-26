@@ -9,5 +9,11 @@
   },
   "enabledPlugins": {
     "nx@nx-claude-plugins": true
+  },
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
+    "ANTHROPIC_AUTH_TOKEN": "",
+    "ANTHROPIC_API_KEY": "",
+    "ANTHROPIC_MODEL": "nvidia/nemotron-3-super-120b-a12b:free"
   }
 }

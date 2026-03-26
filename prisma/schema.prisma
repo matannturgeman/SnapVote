@@ -7,43 +7,147 @@ datasource db {
 }
 
 model User {
-  id                  Int                  @id @default(autoincrement())
-  email               String               @unique
-  name                String?
-  passwordHash        String
-  emailVerifiedAt     DateTime?
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  sessions            Session[]
+  id            Int             @id @default(autoincrement())
+  email         String          @unique
+  name          String?
+  passwordHash  String
+  emailVerifiedAt DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  deleted       Boolean         @default(false)
+  sessions      Session[]
   passwordResetTokens PasswordResetToken[]
 
   @@index([email])
 }
 
 model Session {
-  id        String   @id @default(cuid())
-  userId    Int
-  tokenHash String   @unique
-  userAgent String?
-  ipAddress String?
-  createdAt DateTime @default(now())
-  expiresAt DateTime
-  revokedAt DateTime?
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String   @id @default(cuid())
+  userId      Int
+  tokenHash   String   @unique
+  userAgent   String?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  deleted     Boolean  @default(false)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expiresAt])
 }
 
 model PasswordResetToken {
-  id        String   @id @default(cuid())
-  userId    Int
-  tokenHash String   @unique
-  createdAt DateTime @default(now())
-  expiresAt DateTime
-  usedAt    DateTime?
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String   @id @default(cuid())
+  userId        Int
+  tokenHash     String   @unique
+  createdAt     DateTime @default(now())
+  expiresAt     DateTime
+  usedAt        DateTime?
+  deleted       Boolean  @default(false)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+// ---------------------------------------------------------------------------
+// Poll Domain Models
+// ---------------------------------------------------------------------------
+
+model Poll {
+  id            String      @id @default(cuid())
+  title         String
+  description   String?
+  ownerId       Int
+  status        PollStatus  @default(DRAFT)
+  visibilityMode PollVisibility @default(TRANSPARENT)
+  allowMultipleAnswers Boolean @default(false)
+  openedAt      DateTime?
+  closedAt      DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  deleted       Boolean     @default(false)
+
+  owner         User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  options       PollOption[]
+  votes         Vote[]
+  themes        PollTheme[]
+
+  @@index([ownerId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum PollStatus {
+  DRAFT
+  OPEN
+  CLOSED
+}
+
+enum PollVisibility {
+  PRIVATE
+  TRANSPARENT
+  ANONYMOUS
+}
+
+model PollOption {
+  id          Int         @id @default(autoincrement())
+  pollId      String
+  text        String
+  voteCount   Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deleted     Boolean     @default(false)
+
+  poll        Poll        @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes       Vote[]
+
+  @@index([pollId])
+}
+
+model PollTheme {
+  id        String   @id @default(cuid())
+  pollId    String
+  themeId   String
+  createdAt DateTime @default(now())
+  deleted   Boolean  @default(false)
+
+  poll    Poll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  theme   Theme    @relation(fields: [themeId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, themeId])
+  @@index([pollId])
+  @@index([themeId])
+}
+
+model Theme {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deleted     Boolean   @default(false)
+
+  polls      PollTheme[]
+}
+
+model Vote {
+  id            String   @id @default(cuid())
+  pollId        String
+  participantId Int
+  optionId      Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deleted       Boolean  @default(false)
+
+  poll           Poll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  participant    User     @relation("VoteParticipant", fields: [participantId], references: [id], onDelete: Cascade)
+  option         PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, participantId])
+  @@index([pollId])
+  @@index([participantId])
+  @@index([optionId])
 }

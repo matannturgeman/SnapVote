@@ -93,6 +93,146 @@ export const errorResponseSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Poll schemas
+// ---------------------------------------------------------------------------
+
+export const pollStatusSchema = z.enum(['DRAFT', 'OPEN', 'CLOSED']);
+
+export const pollVisibilitySchema = z.enum([
+  'PRIVATE',
+  'TRANSPARENT',
+  'ANONYMOUS',
+]);
+
+export const createPollSchema = z.object({
+  title: z
+    .string()
+    .min(1, 'Title is required')
+    .max(200, 'Title must be at most 200 characters'),
+  description: z
+    .string()
+    .max(1000, 'Description must be at most 1000 characters')
+    .optional(),
+  options: z
+    .array(
+      z.object({
+        text: z
+          .string()
+          .min(1, 'Option text is required')
+          .max(100, 'Option text must be at most 100 characters'),
+      }),
+    )
+    .min(2, 'Poll must have at least 2 options')
+    .max(10, 'Poll can have at most 10 options'),
+  visibilityMode: pollVisibilitySchema.default('TRANSPARENT'),
+  allowMultipleAnswers: z.boolean().default(false),
+  themeIds: z
+    .array(z.string().uuid())
+    .min(1, 'At least one theme is required')
+    .optional(),
+});
+
+export const updatePollSchema = z.object({
+  title: z
+    .string()
+    .min(1, 'Title is required')
+    .max(200, 'Title must be at most 200 characters')
+    .optional(),
+  description: z
+    .string()
+    .max(1000, 'Description must be at most 1000 characters')
+    .optional(),
+  options: z
+    .array(
+      z.object({
+        id: z.number(),
+        text: z
+          .string()
+          .min(1, 'Option text is required')
+          .max(100, 'Option text must be at most 100 characters'),
+      }),
+    )
+    .min(2, 'Poll must have at least 2 options')
+    .max(10, 'Poll can have at most 10 options')
+    .optional(),
+  visibilityMode: pollVisibilitySchema.optional(),
+  allowMultipleAnswers: z.boolean().optional(),
+});
+
+export const closePollSchema = z.object({}).passthrough();
+
+export const pollResponseSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string().nullable(),
+  ownerId: z.number(),
+  status: pollStatusSchema,
+  visibilityMode: pollVisibilitySchema,
+  allowMultipleAnswers: z.boolean(),
+  openedAt: z.date().nullable(),
+  closedAt: z.date().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  options: z
+    .array(
+      z.object({
+        id: z.number(),
+        text: z.string(),
+        voteCount: z.number(),
+      }),
+    )
+    .min(2),
+  themes: z.array(
+    z.object({ id: z.string(), name: z.string(), slug: z.string() }),
+  ),
+});
+
+// ---------------------------------------------------------------------------
+// Theme schemas
+// ---------------------------------------------------------------------------
+
+export const createThemeSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Name is required')
+    .max(50, 'Name must be at most 50 characters'),
+  slug: z
+    .string()
+    .min(1, 'Slug is required')
+    .max(50, 'Slug must be at most 50 characters'),
+  description: z
+    .string()
+    .max(500, 'Description must be at most 500 characters')
+    .optional(),
+});
+
+export const themeResponseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  description: z.string().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+// ---------------------------------------------------------------------------
+// Vote schemas
+// ---------------------------------------------------------------------------
+
+export const castVoteSchema = z.object({
+  optionId: z.number().int().positive('Option ID must be a positive number'),
+});
+
+export const voteResponseSchema = z.object({
+  id: z.string(),
+  pollId: z.string(),
+  optionId: z.number(),
+  optionText: z.string(),
+  optionVoteCount: z.number(),
+  pollStatus: pollStatusSchema,
+});
+
+// ---------------------------------------------------------------------------
 // Namespace exports for convenient grouped imports
 // ---------------------------------------------------------------------------
 
@@ -116,4 +256,23 @@ export const CommonSchemas = {
   successResponse: successResponseSchema,
   paginationQuery: paginationQuerySchema,
   errorResponse: errorResponseSchema,
+} as const;
+
+export const PollSchemas = {
+  create: createPollSchema,
+  update: updatePollSchema,
+  close: closePollSchema,
+  response: pollResponseSchema,
+  status: pollStatusSchema,
+  visibility: pollVisibilitySchema,
+} as const;
+
+export const ThemeSchemas = {
+  create: createThemeSchema,
+  response: themeResponseSchema,
+} as const;
+
+export const VoteSchemas = {
+  cast: castVoteSchema,
+  response: voteResponseSchema,
 } as const;
