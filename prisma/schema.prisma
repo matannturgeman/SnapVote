@@ -6,6 +6,12 @@ datasource db {
   provider = "postgresql"
 }
 
+enum PollStatus {
+  DRAFT
+  OPEN
+  CLOSED
+}
+
 model User {
   id                  Int                  @id @default(autoincrement())
   email               String               @unique
@@ -16,8 +22,37 @@ model User {
   updatedAt           DateTime             @updatedAt
   sessions            Session[]
   passwordResetTokens PasswordResetToken[]
+  polls               Poll[]
 
   @@index([email])
+}
+
+model Poll {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  status      PollStatus  @default(DRAFT)
+  ownerId     Int
+  openedAt    DateTime?
+  closedAt    DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  owner       User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  options     PollOption[]
+
+  @@index([ownerId])
+  @@index([status])
+}
+
+model PollOption {
+  id        String   @id @default(cuid())
+  pollId    String
+  text      String
+  order     Int
+  createdAt DateTime @default(now())
+  poll      Poll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
+
+  @@index([pollId])
 }
 
 model Session {

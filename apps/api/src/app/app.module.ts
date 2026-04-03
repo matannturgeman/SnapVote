@@ -5,6 +5,7 @@ import { RedisModule } from '@nestjs-labs/nestjs-ioredis';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from '@libs/server-auth';
+import { PollModule } from '@libs/server-poll';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TelemetryInterceptor } from './telemetry/telemetry.interceptor';
@@ -33,6 +34,7 @@ import { TelemetryService } from './telemetry/telemetry.service';
       process.env.MONGO_URI || 'mongodb://localhost:27017/nxdb',
     ),
     AuthModule,
+    PollModule,
   ],
   controllers: [AppController],
   providers: [

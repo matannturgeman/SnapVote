@@ -1,0 +1,19 @@
+{
+  "name": "server-poll",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/server/poll/src",
+  "projectType": "library",
+  "tags": ["scope:server", "type:feature"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/server-poll",
+        "main": "libs/server/poll/src/index.ts",
+        "tsConfig": "libs/server/poll/tsconfig.lib.json",
+        "assets": ["libs/server/poll/*.md"]
+      }
+    }
+  }
+}

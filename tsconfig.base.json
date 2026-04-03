@@ -23,6 +23,7 @@
     "target": "es2022",
     "paths": {
       "@libs/server-auth": ["libs/server/auth/src/index.ts"],
+      "@libs/server-poll": ["libs/server/poll/src/index.ts"],
       "@libs/server-data-access": ["libs/server/data-access/src/index.ts"],
       "@libs/server-user": ["libs/server/user/src/index.ts"],
       "@libs/server-shared": ["libs/server/shared/src/index.ts"],
