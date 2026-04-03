@@ -25,6 +25,9 @@
       "path": "../../libs/server/auth/tsconfig.lib.json"
     },
     {
+      "path": "../../libs/server/poll/tsconfig.lib.json"
+    },
+    {
       "path": "../../libs/shared/dto/tsconfig.lib.json"
     }
   ]

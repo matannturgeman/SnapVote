@@ -9,6 +9,10 @@ import {
   authResponseSchema,
   messageResponseSchema,
   successResponseSchema,
+  pollSchema,
+  pollOptionSchema,
+  createPollSchema,
+  updatePollSchema,
 } from '@libs/shared-validation-schemas';
 
 // ---------------------------------------------------------------------------
@@ -79,6 +83,20 @@ export type PaginatedResponseDto<T> = {
   limit: number;
   totalPages: number;
 };
+
+// ---------------------------------------------------------------------------
+// Poll DTOs
+// ---------------------------------------------------------------------------
+
+export const PollOptionResponseDtoSchema = pollOptionSchema;
+export const PollResponseDtoSchema = pollSchema;
+export const CreatePollDtoSchema = createPollSchema;
+export const UpdatePollDtoSchema = updatePollSchema;
+
+export type PollOptionResponseDto = z.infer<typeof PollOptionResponseDtoSchema>;
+export type PollResponseDto = z.infer<typeof PollResponseDtoSchema>;
+export type CreatePollDto = z.infer<typeof CreatePollDtoSchema>;
+export type UpdatePollDto = z.infer<typeof UpdatePollDtoSchema>;
 
 // ---------------------------------------------------------------------------
 // Helpers
