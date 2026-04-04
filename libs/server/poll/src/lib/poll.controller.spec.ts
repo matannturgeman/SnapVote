@@ -1,4 +1,4 @@
-import { ZodError } from 'zod';
+import { BadRequestException } from '@nestjs/common';
 import { PollController } from './poll.controller';
 import type { PollService } from './poll.service';
 
@@ -56,19 +56,19 @@ describe('PollController', () => {
       expect(result.options).toHaveLength(2);
     });
 
-    it('throws ZodError for invalid body (missing title)', async () => {
+    it('throws BadRequestException for invalid body (missing title)', async () => {
       await expect(
         controller.create({ options: ['A', 'B'] }, CURRENT_USER),
-      ).rejects.toBeInstanceOf(ZodError);
+      ).rejects.toBeInstanceOf(BadRequestException);
     });
 
-    it('throws ZodError when fewer than 2 options provided', async () => {
+    it('throws BadRequestException when fewer than 2 options provided', async () => {
       await expect(
         controller.create(
           { title: 'Poll', options: ['Only one'] },
           CURRENT_USER,
         ),
-      ).rejects.toBeInstanceOf(ZodError);
+      ).rejects.toBeInstanceOf(BadRequestException);
     });
 
     it('throws ZodError for invalid response shape from service', async () => {
@@ -133,10 +133,10 @@ describe('PollController', () => {
       });
     });
 
-    it('throws ZodError when options array has fewer than 2 items', async () => {
+    it('throws BadRequestException when options array has fewer than 2 items', async () => {
       await expect(
         controller.update('poll-1', { options: ['solo'] }, CURRENT_USER),
-      ).rejects.toBeInstanceOf(ZodError);
+      ).rejects.toBeInstanceOf(BadRequestException);
     });
   });
 
