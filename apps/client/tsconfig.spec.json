@@ -5,9 +5,11 @@
     "module": "commonjs",
     "moduleResolution": "node10",
     "jsx": "react-jsx",
+    "lib": ["es2022", "dom", "dom.iterable"],
     "types": [
       "jest",
       "node",
+      "@testing-library/jest-dom",
       "@nx/react/typings/cssmodule.d.ts",
       "@nx/react/typings/image.d.ts"
     ]
@@ -15,14 +17,14 @@
   "include": [
     "jest.config.ts",
     "jest.config.cts",
-    "src/**/*.test.ts",
-    "src/**/*.spec.ts",
-    "src/**/*.test.tsx",
-    "src/**/*.spec.tsx",
-    "src/**/*.test.js",
-    "src/**/*.spec.js",
-    "src/**/*.test.jsx",
-    "src/**/*.spec.jsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
     "src/**/*.d.ts"
+  ],
+  "references": [
+    { "path": "../../libs/client/server-communication/tsconfig.lib.json" },
+    { "path": "../../libs/client/store/tsconfig.lib.json" },
+    { "path": "../../libs/shared/dto/tsconfig.lib.json" },
+    { "path": "../../libs/shared/validation-schemas/tsconfig.lib.json" }
   ]
 }

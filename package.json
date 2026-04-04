@@ -5,8 +5,10 @@
   "scripts": {
     "dev:api": "nx serve api",
     "build:api": "nx build api",
+    "lint:api": "nx lint api",
     "dev:client": "nx serve client",
     "build:client": "nx build client",
+    "lint:client": "nx lint client",
     "postinstall": "prisma generate",
     "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "test:unit": "nx run-many -t test --exclude=api-e2e",

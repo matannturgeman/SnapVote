@@ -17,9 +17,6 @@
       "path": "../user/tsconfig.lib.json"
     },
     {
-      "path": "../../shared/validation-schemas/tsconfig.lib.json"
-    },
-    {
       "path": "../../shared/dto/tsconfig.lib.json"
     }
   ]

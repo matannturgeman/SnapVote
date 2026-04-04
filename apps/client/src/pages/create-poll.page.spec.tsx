@@ -1,6 +1,8 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
+import { CreatePollPage } from './create-poll.page';
+
 const mockNavigate = jest.fn();
 const mockCreatePoll = jest.fn();
 const mockUseCreatePollMutation = jest.fn();
@@ -14,8 +16,6 @@ jest.mock('@libs/client-server-communication', () => ({
   useCreatePollMutation: (...args: unknown[]) =>
     mockUseCreatePollMutation(...args),
 }));
-
-import { CreatePollPage } from './create-poll.page';
 
 function renderPage() {
   return render(
