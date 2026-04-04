@@ -14,6 +14,13 @@
         "tsConfig": "libs/server/poll/tsconfig.lib.json",
         "assets": ["libs/server/poll/*.md"]
       }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/server/poll/jest.config.cts"
+      }
     }
   }
 }
