@@ -6,8 +6,6 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { ZodError } from 'zod';
-
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
@@ -20,9 +18,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       message = exception.message;
-    } else if (exception instanceof ZodError) {
+    } else if (
+      exception instanceof Error &&
+      exception.constructor.name === 'ZodError' &&
+      Array.isArray((exception as any).issues)
+    ) {
       status = HttpStatus.BAD_REQUEST;
-      message = exception.errors.map((e) => e.message).join(', ');
+      message = (exception as any).issues
+        .map((e: { message: string }) => e.message)
+        .join(', ');
     } else {
       status = HttpStatus.INTERNAL_SERVER_ERROR;
       message = (exception as any).message || 'Internal server error';

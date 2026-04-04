@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -17,6 +18,15 @@ import {
 import { CurrentUser, type LoggedInUser } from '@libs/server-user';
 import { PollService } from './poll.service';
 
+function parsePollDto<T>(schema: { parse: (data: unknown) => T }, data: unknown): T {
+  try {
+    return schema.parse(data);
+  } catch (err: any) {
+    const msg = err?.issues?.map((i: any) => i.message).join(', ') ?? err?.message ?? 'Validation error';
+    throw new BadRequestException(msg);
+  }
+}
+
 @Controller('polls')
 export class PollController {
   constructor(private readonly pollService: PollService) {}
@@ -26,7 +36,7 @@ export class PollController {
     @Body() body: unknown,
     @CurrentUser() user: LoggedInUser,
   ): Promise<PollResponseDto> {
-    const dto = parseDto(CreatePollDtoSchema, body);
+    const dto = parsePollDto(CreatePollDtoSchema, body);
     const result = await this.pollService.create(user.id, dto);
     return parseDto(PollResponseDtoSchema, result);
   }
@@ -45,7 +55,7 @@ export class PollController {
     @Body() body: unknown,
     @CurrentUser() user: LoggedInUser,
   ): Promise<PollResponseDto> {
-    const dto = parseDto(UpdatePollDtoSchema, body);
+    const dto = parsePollDto(UpdatePollDtoSchema, body);
     const result = await this.pollService.update(id, user.id, dto);
     return parseDto(PollResponseDtoSchema, result);
   }
