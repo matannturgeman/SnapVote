@@ -24,10 +24,11 @@ export default defineConfig({
   },
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'pnpm exec nx run client:preview',
+    command: 'npx nx run client:preview',
     url: 'http://localhost:4200',
     reuseExistingServer: true,
     cwd: workspaceRoot,
+    timeout: 120000,
   },
   projects: [
     {
