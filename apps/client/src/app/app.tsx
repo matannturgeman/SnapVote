@@ -1,6 +1,10 @@
 import { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { clearCredentials, setCredentials, useAppDispatch } from '@libs/client-store';
+import {
+  clearCredentials,
+  setCredentials,
+  useAppDispatch,
+} from '@libs/client-store';
 import { useGetMeQuery } from '@libs/client-server-communication';
 import { SessionGate } from '../components/session-gate';
 import { HomePage } from '../pages/home.page';
@@ -16,7 +20,12 @@ export function App() {
   const dispatch = useAppDispatch();
   const token = getPersistedToken();
 
-  const { data: me, isFetching, isSuccess, isError } = useGetMeQuery(undefined, {
+  const {
+    data: me,
+    isFetching,
+    isSuccess,
+    isError,
+  } = useGetMeQuery(undefined, {
     skip: !token,
     refetchOnMountOrArgChange: true,
   });
@@ -67,7 +76,10 @@ export function App() {
           </SessionGate>
         }
       />
-      <Route path="*" element={<Navigate to={token ? '/' : '/login'} replace />} />
+      <Route
+        path="*"
+        element={<Navigate to={token ? '/' : '/login'} replace />}
+      />
     </Routes>
   );
 }

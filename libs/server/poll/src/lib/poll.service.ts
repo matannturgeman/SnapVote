@@ -15,10 +15,7 @@ import type {
 export class PollService {
   private readonly logger = new Logger(PollService.name);
 
-  async create(
-    ownerId: number,
-    dto: CreatePollDto,
-  ): Promise<PollResponseDto> {
+  async create(ownerId: number, dto: CreatePollDto): Promise<PollResponseDto> {
     const poll = await prisma.poll.create({
       data: {
         title: dto.title,
@@ -106,26 +103,26 @@ export class PollService {
     }
 
     if (poll.ownerId !== requesterId) {
-      throw new ForbiddenException('Only the poll owner can perform this action');
+      throw new ForbiddenException(
+        'Only the poll owner can perform this action',
+      );
     }
 
     return poll;
   }
 
-  private toDto(
-    poll: {
-      id: string;
-      title: string;
-      description: string | null;
-      status: 'DRAFT' | 'OPEN' | 'CLOSED';
-      ownerId: number;
-      openedAt: Date | null;
-      closedAt: Date | null;
-      createdAt: Date;
-      updatedAt: Date;
-      options: { id: string; text: string; order: number; createdAt: Date }[];
-    },
-  ): PollResponseDto {
+  private toDto(poll: {
+    id: string;
+    title: string;
+    description: string | null;
+    status: 'DRAFT' | 'OPEN' | 'CLOSED';
+    ownerId: number;
+    openedAt: Date | null;
+    closedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+    options: { id: string; text: string; order: number; createdAt: Date }[];
+  }): PollResponseDto {
     return {
       id: poll.id,
       title: poll.title,

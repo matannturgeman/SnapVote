@@ -41,7 +41,9 @@ export const AuthResponseDtoSchema = authResponseSchema;
 
 export type LoginDto = z.infer<typeof LoginDtoSchema>;
 export type RegisterDto = z.infer<typeof RegisterDtoSchema>;
-export type ForgotPasswordRequestDto = z.infer<typeof ForgotPasswordRequestDtoSchema>;
+export type ForgotPasswordRequestDto = z.infer<
+  typeof ForgotPasswordRequestDtoSchema
+>;
 export type ResetPasswordDto = z.infer<typeof ResetPasswordDtoSchema>;
 export type AuthResponseDto = z.infer<typeof AuthResponseDtoSchema>;
 

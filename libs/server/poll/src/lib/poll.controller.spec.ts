@@ -64,12 +64,18 @@ describe('PollController', () => {
 
     it('throws ZodError when fewer than 2 options provided', async () => {
       await expect(
-        controller.create({ title: 'Poll', options: ['Only one'] }, CURRENT_USER),
+        controller.create(
+          { title: 'Poll', options: ['Only one'] },
+          CURRENT_USER,
+        ),
       ).rejects.toBeInstanceOf(ZodError);
     });
 
     it('throws ZodError for invalid response shape from service', async () => {
-      pollService.create.mockResolvedValue({ ...POLL_RESPONSE, options: [] } as never);
+      pollService.create.mockResolvedValue({
+        ...POLL_RESPONSE,
+        options: [],
+      } as never);
 
       await expect(
         controller.create({ title: 'Poll', options: ['A', 'B'] }, CURRENT_USER),
@@ -101,22 +107,30 @@ describe('PollController', () => {
       const updated = { ...POLL_RESPONSE, title: 'Updated' };
       pollService.update.mockResolvedValue(updated);
 
-      const result = await controller.update('poll-1', { title: 'Updated' }, CURRENT_USER);
+      const result = await controller.update(
+        'poll-1',
+        { title: 'Updated' },
+        CURRENT_USER,
+      );
 
-      expect(pollService.update).toHaveBeenCalledWith('poll-1', 1, { title: 'Updated' });
+      expect(pollService.update).toHaveBeenCalledWith('poll-1', 1, {
+        title: 'Updated',
+      });
       expect(result.title).toBe('Updated');
     });
 
     it('accepts partial update body (only description)', async () => {
       pollService.update.mockResolvedValue(POLL_RESPONSE);
 
-      await controller.update('poll-1', { description: 'New desc' }, CURRENT_USER);
-
-      expect(pollService.update).toHaveBeenCalledWith(
+      await controller.update(
         'poll-1',
-        1,
         { description: 'New desc' },
+        CURRENT_USER,
       );
+
+      expect(pollService.update).toHaveBeenCalledWith('poll-1', 1, {
+        description: 'New desc',
+      });
     });
 
     it('throws ZodError when options array has fewer than 2 items', async () => {
@@ -132,7 +146,11 @@ describe('PollController', () => {
 
   describe('close', () => {
     it('calls service with id and user, and returns closed poll dto', async () => {
-      const closed = { ...POLL_RESPONSE, status: 'CLOSED' as const, closedAt: new Date() };
+      const closed = {
+        ...POLL_RESPONSE,
+        status: 'CLOSED' as const,
+        closedAt: new Date(),
+      };
       pollService.close.mockResolvedValue(closed);
 
       const result = await controller.close('poll-1', CURRENT_USER);

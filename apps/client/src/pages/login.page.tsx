@@ -32,7 +32,9 @@ export function LoginPage() {
     try {
       const response = await login({ email, password }).unwrap();
       persistToken(response.accessToken);
-      dispatch(setCredentials({ user: response.user, token: response.accessToken }));
+      dispatch(
+        setCredentials({ user: response.user, token: response.accessToken }),
+      );
       navigate('/', { replace: true });
     } catch {
       // RTK Query exposes error state.
@@ -89,13 +91,19 @@ export function LoginPage() {
 
       <p className="text-sm text-slate-600">
         Forgot your password?{' '}
-        <Link className="font-semibold text-cyan-700 hover:text-cyan-600" to="/forgot-password">
+        <Link
+          className="font-semibold text-cyan-700 hover:text-cyan-600"
+          to="/forgot-password"
+        >
           Reset it here
         </Link>
       </p>
       <p className="text-sm text-slate-600">
         Don&apos;t have an account?{' '}
-        <Link className="font-semibold text-cyan-700 hover:text-cyan-600" to="/register">
+        <Link
+          className="font-semibold text-cyan-700 hover:text-cyan-600"
+          to="/register"
+        >
           Create one
         </Link>
       </p>

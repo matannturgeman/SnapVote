@@ -26,11 +26,16 @@ const STATUS_COLORS: Record<string, string> = {
 
 export function PollDetailPage() {
   const { id } = useParams<{ id?: string }>();
-  const { data: poll, isLoading, isError } = useGetPollQuery(id ?? '', { skip: !id });
+  const {
+    data: poll,
+    isLoading,
+    isError,
+  } = useGetPollQuery(id ?? '', { skip: !id });
   const [closePoll, { isLoading: isClosing }] = useClosePollMutation();
   const user = useAppSelector(selectCurrentUser);
 
-  const [updatePoll, { isLoading: isUpdating, error: updateError }] = useUpdatePollMutation();
+  const [updatePoll, { isLoading: isUpdating, error: updateError }] =
+    useUpdatePollMutation();
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [editOptions, setEditOptions] = useState<string[]>([]);
@@ -85,7 +90,8 @@ export function PollDetailPage() {
   };
 
   const nonEmptyEditOptions = editOptions.filter((o) => o.trim().length > 0);
-  const canSaveEdit = editTitle.trim().length > 0 && nonEmptyEditOptions.length >= 2;
+  const canSaveEdit =
+    editTitle.trim().length > 0 && nonEmptyEditOptions.length >= 2;
 
   const onSaveEdit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -116,7 +122,10 @@ export function PollDetailPage() {
               >
                 {poll.status}
               </span>
-              <Link to="/" className="text-sm text-slate-500 hover:text-slate-700">
+              <Link
+                to="/"
+                className="text-sm text-slate-500 hover:text-slate-700"
+              >
                 Back
               </Link>
             </div>
@@ -198,7 +207,9 @@ export function PollDetailPage() {
                         value={opt}
                         onChange={(e) =>
                           setEditOptions((prev) =>
-                            prev.map((o, idx) => (idx === i ? e.target.value : o)),
+                            prev.map((o, idx) =>
+                              idx === i ? e.target.value : o,
+                            ),
                           )
                         }
                         placeholder={`Option ${i + 1}`}
@@ -208,7 +219,9 @@ export function PollDetailPage() {
                         <button
                           type="button"
                           onClick={() =>
-                            setEditOptions((prev) => prev.filter((_, idx) => idx !== i))
+                            setEditOptions((prev) =>
+                              prev.filter((_, idx) => idx !== i),
+                            )
                           }
                           className="text-slate-400 hover:text-slate-600"
                         >
@@ -228,7 +241,9 @@ export function PollDetailPage() {
                     </button>
                   )}
                   {nonEmptyEditOptions.length < 2 && (
-                    <p className="text-xs text-slate-500">Fill in at least 2 options to save.</p>
+                    <p className="text-xs text-slate-500">
+                      Fill in at least 2 options to save.
+                    </p>
                   )}
                 </div>
                 {updateError ? (
@@ -242,7 +257,11 @@ export function PollDetailPage() {
                     className="flex-1"
                     disabled={isUpdating || !canSaveEdit}
                   >
-                    {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
+                    {isUpdating ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      'Save'
+                    )}
                   </Button>
                   <Button
                     type="button"

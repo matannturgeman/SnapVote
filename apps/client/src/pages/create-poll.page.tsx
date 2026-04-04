@@ -30,7 +30,8 @@ export function CreatePollPage() {
   };
 
   const removeOption = (index: number) => {
-    if (options.length > 2) setOptions((prev) => prev.filter((_, i) => i !== index));
+    if (options.length > 2)
+      setOptions((prev) => prev.filter((_, i) => i !== index));
   };
 
   const nonEmptyOptions = options.filter((o) => o.trim().length > 0);
@@ -120,11 +121,17 @@ export function CreatePollPage() {
                   </button>
                 )}
                 {nonEmptyOptions.length < 2 && (
-                  <p className="text-xs text-slate-500">Fill in at least 2 options to continue.</p>
+                  <p className="text-xs text-slate-500">
+                    Fill in at least 2 options to continue.
+                  </p>
                 )}
               </div>
               <div className="flex gap-2 pt-2">
-                <Button type="submit" className="flex-1" disabled={isLoading || !canSubmit}>
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  disabled={isLoading || !canSubmit}
+                >
                   {isLoading ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />

@@ -33,7 +33,9 @@ export function RegisterPage() {
     try {
       const response = await register({ name, email, password }).unwrap();
       persistToken(response.accessToken);
-      dispatch(setCredentials({ user: response.user, token: response.accessToken }));
+      dispatch(
+        setCredentials({ user: response.user, token: response.accessToken }),
+      );
       navigate('/', { replace: true });
     } catch {
       // RTK Query exposes error state.
@@ -102,7 +104,10 @@ export function RegisterPage() {
 
       <p className="text-sm text-slate-600">
         Already have an account?{' '}
-        <Link className="font-semibold text-cyan-700 hover:text-cyan-600" to="/login">
+        <Link
+          className="font-semibold text-cyan-700 hover:text-cyan-600"
+          to="/login"
+        >
           Sign in
         </Link>
       </p>

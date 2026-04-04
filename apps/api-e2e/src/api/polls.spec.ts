@@ -10,7 +10,10 @@ async function register(suffix: string) {
     email: `poll-user-${suffix}-${Date.now()}@example.com`,
     password: 'Password123!',
   });
-  return res.data as { accessToken: string; user: { id: number; email: string } };
+  return res.data as {
+    accessToken: string;
+    user: { id: number; email: string };
+  };
 }
 
 function authHeader(token: string) {
@@ -42,7 +45,11 @@ describe('POST /api/polls', () => {
     const { accessToken } = await register('create-2');
 
     await expect(
-      axios.post('/api/polls', { options: ['A', 'B'] }, { headers: authHeader(accessToken) }),
+      axios.post(
+        '/api/polls',
+        { options: ['A', 'B'] },
+        { headers: authHeader(accessToken) },
+      ),
     ).rejects.toMatchObject({ response: { status: 400 } });
   });
 
@@ -90,7 +97,9 @@ describe('GET /api/polls/:id', () => {
     const { accessToken } = await register('get-2');
 
     await expect(
-      axios.get('/api/polls/nonexistent-id', { headers: authHeader(accessToken) }),
+      axios.get('/api/polls/nonexistent-id', {
+        headers: authHeader(accessToken),
+      }),
     ).rejects.toMatchObject({ response: { status: 404 } });
   });
 
@@ -140,7 +149,11 @@ describe('PATCH /api/polls/:id', () => {
     );
 
     expect(res.status).toBe(200);
-    expect(res.data.options.map((o: { text: string }) => o.text)).toEqual(['X', 'Y', 'Z']);
+    expect(res.data.options.map((o: { text: string }) => o.text)).toEqual([
+      'X',
+      'Y',
+      'Z',
+    ]);
   });
 
   it('returns 403 when non-owner tries to update', async () => {
@@ -193,9 +206,13 @@ describe('POST /api/polls/:id/close', () => {
     );
     const pollId = created.data.id;
 
-    const res = await axios.post(`/api/polls/${pollId}/close`, {}, {
-      headers: authHeader(accessToken),
-    });
+    const res = await axios.post(
+      `/api/polls/${pollId}/close`,
+      {},
+      {
+        headers: authHeader(accessToken),
+      },
+    );
 
     expect(res.status).toBe(200);
     expect(res.data.status).toBe('CLOSED');
@@ -212,7 +229,11 @@ describe('POST /api/polls/:id/close', () => {
     );
     const pollId = created.data.id;
 
-    await axios.post(`/api/polls/${pollId}/close`, {}, { headers: authHeader(accessToken) });
+    await axios.post(
+      `/api/polls/${pollId}/close`,
+      {},
+      { headers: authHeader(accessToken) },
+    );
 
     await expect(
       axios.patch(
