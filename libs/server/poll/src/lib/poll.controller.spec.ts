@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { ZodError } from 'zod';
 import { PollController } from './poll.controller';
 import type { PollService } from './poll.service';
 
