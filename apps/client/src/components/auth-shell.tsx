@@ -15,7 +15,12 @@ interface AuthShellProps {
   children: ReactNode;
 }
 
-export function AuthShell({ eyebrow, title, description, children }: AuthShellProps) {
+export function AuthShell({
+  eyebrow,
+  title,
+  description,
+  children,
+}: AuthShellProps) {
   return (
     <div className="auth-canvas flex min-h-screen items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-md auth-float">

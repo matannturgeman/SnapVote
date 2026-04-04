@@ -84,7 +84,10 @@ export function ResetPasswordPage() {
       ) : null}
 
       <p className="text-sm text-slate-600">
-        <Link className="font-semibold text-cyan-700 hover:text-cyan-600" to="/login">
+        <Link
+          className="font-semibold text-cyan-700 hover:text-cyan-600"
+          to="/login"
+        >
           Back to login
         </Link>
       </p>

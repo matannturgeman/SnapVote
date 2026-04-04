@@ -11,7 +11,8 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@libs/client-server-communication', () => ({
-  useCreatePollMutation: (...args: unknown[]) => mockUseCreatePollMutation(...args),
+  useCreatePollMutation: (...args: unknown[]) =>
+    mockUseCreatePollMutation(...args),
 }));
 
 import { CreatePollPage } from './create-poll.page';
@@ -95,13 +96,17 @@ describe('CreatePollPage', () => {
       target: { value: 'Vue' },
     });
 
-    expect(screen.getByRole('button', { name: 'Create poll' })).not.toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Create poll' }),
+    ).not.toBeDisabled();
   });
 
   it('shows helper text when fewer than 2 options are filled', () => {
     renderPage();
 
-    expect(screen.getByText('Fill in at least 2 options to continue.')).toBeTruthy();
+    expect(
+      screen.getByText('Fill in at least 2 options to continue.'),
+    ).toBeTruthy();
   });
 
   it('hides helper text once 2 options are filled', () => {
@@ -114,7 +119,9 @@ describe('CreatePollPage', () => {
       target: { value: 'Vue' },
     });
 
-    expect(screen.queryByText('Fill in at least 2 options to continue.')).toBeNull();
+    expect(
+      screen.queryByText('Fill in at least 2 options to continue.'),
+    ).toBeNull();
   });
 
   // ---------------------------------------------------------------------------
@@ -142,7 +149,9 @@ describe('CreatePollPage', () => {
     fireEvent.click(screen.getByText('Add option'));
 
     // There should now be remove buttons (one per option row since length > 2)
-    const xButtons = screen.getAllByRole('button').filter((btn) => btn.getAttribute('type') === 'button');
+    const xButtons = screen
+      .getAllByRole('button')
+      .filter((btn) => btn.getAttribute('type') === 'button');
     // At least one non-add remove button
     expect(xButtons.length).toBeGreaterThan(1);
   });
@@ -212,7 +221,9 @@ describe('CreatePollPage', () => {
     renderPage();
 
     // Submit with empty title
-    fireEvent.submit(screen.getByRole('button', { name: 'Create poll' }).closest('form')!);
+    fireEvent.submit(
+      screen.getByRole('button', { name: 'Create poll' }).closest('form')!,
+    );
 
     expect(mockCreatePoll).not.toHaveBeenCalled();
   });
@@ -229,7 +240,9 @@ describe('CreatePollPage', () => {
 
     renderPage();
 
-    expect(screen.getByText('Could not create poll. Please try again.')).toBeTruthy();
+    expect(
+      screen.getByText('Could not create poll. Please try again.'),
+    ).toBeTruthy();
   });
 
   // ---------------------------------------------------------------------------

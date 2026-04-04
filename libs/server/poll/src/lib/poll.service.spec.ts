@@ -126,7 +126,9 @@ describe('PollService', () => {
     it('throws NotFoundException when poll does not exist', async () => {
       prismaMock.poll.findUnique.mockResolvedValue(null);
 
-      await expect(service.findById('missing')).rejects.toThrow(NotFoundException);
+      await expect(service.findById('missing')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -136,13 +138,18 @@ describe('PollService', () => {
 
   describe('update', () => {
     it('updates title on an open poll owned by the requester', async () => {
-      prismaMock.poll.findUnique.mockResolvedValue({ ...POLL_WITH_OPTIONS, options: undefined });
+      prismaMock.poll.findUnique.mockResolvedValue({
+        ...POLL_WITH_OPTIONS,
+        options: undefined,
+      });
       prismaMock.poll.update.mockResolvedValue({
         ...POLL_WITH_OPTIONS,
         title: 'Updated title',
       });
 
-      const result = await service.update('poll-1', 1, { title: 'Updated title' });
+      const result = await service.update('poll-1', 1, {
+        title: 'Updated title',
+      });
 
       expect(prismaMock.poll.update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -154,7 +161,10 @@ describe('PollService', () => {
     });
 
     it('replaces options when options array is provided', async () => {
-      prismaMock.poll.findUnique.mockResolvedValue({ ...POLL_WITH_OPTIONS, options: undefined });
+      prismaMock.poll.findUnique.mockResolvedValue({
+        ...POLL_WITH_OPTIONS,
+        options: undefined,
+      });
       prismaMock.poll.update.mockResolvedValue(POLL_WITH_OPTIONS);
 
       await service.update('poll-1', 1, { options: ['A', 'B', 'C'] });
@@ -178,13 +188,16 @@ describe('PollService', () => {
     it('throws NotFoundException when poll does not exist', async () => {
       prismaMock.poll.findUnique.mockResolvedValue(null);
 
-      await expect(service.update('missing', 1, { title: 'X' })).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.update('missing', 1, { title: 'X' }),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('throws ForbiddenException when requester is not the owner', async () => {
-      prismaMock.poll.findUnique.mockResolvedValue({ ...POLL_WITH_OPTIONS, ownerId: 99 });
+      prismaMock.poll.findUnique.mockResolvedValue({
+        ...POLL_WITH_OPTIONS,
+        ownerId: 99,
+      });
 
       await expect(service.update('poll-1', 1, { title: 'X' })).rejects.toThrow(
         ForbiddenException,
@@ -209,7 +222,10 @@ describe('PollService', () => {
 
   describe('close', () => {
     it('closes an open poll owned by the requester', async () => {
-      prismaMock.poll.findUnique.mockResolvedValue({ ...POLL_WITH_OPTIONS, options: undefined });
+      prismaMock.poll.findUnique.mockResolvedValue({
+        ...POLL_WITH_OPTIONS,
+        options: undefined,
+      });
       prismaMock.poll.update.mockResolvedValue({
         ...POLL_WITH_OPTIONS,
         status: 'CLOSED',
@@ -233,13 +249,20 @@ describe('PollService', () => {
     it('throws NotFoundException when poll does not exist', async () => {
       prismaMock.poll.findUnique.mockResolvedValue(null);
 
-      await expect(service.close('missing', 1)).rejects.toThrow(NotFoundException);
+      await expect(service.close('missing', 1)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('throws ForbiddenException when requester is not the owner', async () => {
-      prismaMock.poll.findUnique.mockResolvedValue({ ...POLL_WITH_OPTIONS, ownerId: 99 });
+      prismaMock.poll.findUnique.mockResolvedValue({
+        ...POLL_WITH_OPTIONS,
+        ownerId: 99,
+      });
 
-      await expect(service.close('poll-1', 1)).rejects.toThrow(ForbiddenException);
+      await expect(service.close('poll-1', 1)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 });

@@ -17,13 +17,17 @@ jest.mock('react-router-dom', () => ({
 jest.mock('@libs/client-store', () => ({
   selectCurrentUser: jest.fn(),
   useAppSelector: (selector: unknown) =>
-    typeof selector === 'function' ? selector({ auth: { user: mockCurrentUser } }) : mockCurrentUser,
+    typeof selector === 'function'
+      ? selector({ auth: { user: mockCurrentUser } })
+      : mockCurrentUser,
 }));
 
 jest.mock('@libs/client-server-communication', () => ({
   useGetPollQuery: (...args: unknown[]) => mockUseGetPollQuery(...args),
-  useUpdatePollMutation: (...args: unknown[]) => mockUseUpdatePollMutation(...args),
-  useClosePollMutation: (...args: unknown[]) => mockUseClosePollMutation(...args),
+  useUpdatePollMutation: (...args: unknown[]) =>
+    mockUseUpdatePollMutation(...args),
+  useClosePollMutation: (...args: unknown[]) =>
+    mockUseClosePollMutation(...args),
 }));
 
 import { PollDetailPage } from './poll-detail.page';
@@ -203,7 +207,9 @@ describe('PollDetailPage', () => {
 
     renderPage();
 
-    expect(screen.getByText('Voting will be available in a future update.')).toBeTruthy();
+    expect(
+      screen.getByText('Voting will be available in a future update.'),
+    ).toBeTruthy();
   });
 
   // ---------------------------------------------------------------------------
@@ -211,7 +217,9 @@ describe('PollDetailPage', () => {
   // ---------------------------------------------------------------------------
 
   it('calls closePoll with the poll id when Close poll is clicked', async () => {
-    mockClosePoll.mockReturnValue({ unwrap: () => Promise.resolve({ ...OPEN_POLL, status: 'CLOSED' }) });
+    mockClosePoll.mockReturnValue({
+      unwrap: () => Promise.resolve({ ...OPEN_POLL, status: 'CLOSED' }),
+    });
 
     renderPage();
 
@@ -223,19 +231,26 @@ describe('PollDetailPage', () => {
   });
 
   it('shows close error message when closePoll rejects', async () => {
-    mockClosePoll.mockReturnValue({ unwrap: () => Promise.reject(new Error('Server error')) });
+    mockClosePoll.mockReturnValue({
+      unwrap: () => Promise.reject(new Error('Server error')),
+    });
 
     renderPage();
 
     fireEvent.click(screen.getByRole('button', { name: 'Close poll' }));
 
     await waitFor(() => {
-      expect(screen.getByText('Could not close the poll. Please try again.')).toBeTruthy();
+      expect(
+        screen.getByText('Could not close the poll. Please try again.'),
+      ).toBeTruthy();
     });
   });
 
   it('shows spinner on close button while closing', () => {
-    mockUseClosePollMutation.mockReturnValue([mockClosePoll, { isLoading: true }]);
+    mockUseClosePollMutation.mockReturnValue([
+      mockClosePoll,
+      { isLoading: true },
+    ]);
 
     renderPage();
 
@@ -261,9 +276,10 @@ describe('PollDetailPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
 
-    expect((screen.getByDisplayValue('Favourite framework?') as HTMLInputElement).value).toBe(
-      'Favourite framework?',
-    );
+    expect(
+      (screen.getByDisplayValue('Favourite framework?') as HTMLInputElement)
+        .value,
+    ).toBe('Favourite framework?');
     expect(screen.getByDisplayValue('React')).toBeTruthy();
     expect(screen.getByDisplayValue('Vue')).toBeTruthy();
   });
@@ -279,7 +295,9 @@ describe('PollDetailPage', () => {
   });
 
   it('calls updatePoll with trimmed values and exits edit mode on success', async () => {
-    mockUpdatePoll.mockReturnValue({ unwrap: () => Promise.resolve(OPEN_POLL) });
+    mockUpdatePoll.mockReturnValue({
+      unwrap: () => Promise.resolve(OPEN_POLL),
+    });
 
     renderPage();
 
@@ -313,7 +331,9 @@ describe('PollDetailPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
 
-    expect(screen.getByText('Could not save changes. Please try again.')).toBeTruthy();
+    expect(
+      screen.getByText('Could not save changes. Please try again.'),
+    ).toBeTruthy();
   });
 
   it('disables Save when edit title is empty', () => {
