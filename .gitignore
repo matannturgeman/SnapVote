@@ -11,6 +11,10 @@ node_modules
 # Claude Code
 .claude/settings.local.json
 
+# Wrong package manager lockfiles
+pnpm-lock.yaml
+yarn.lock
+
 # IDEs and editors
 /.idea
 .project
