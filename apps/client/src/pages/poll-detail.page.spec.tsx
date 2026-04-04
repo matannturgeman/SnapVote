@@ -1,6 +1,8 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
+import { PollDetailPage } from './poll-detail.page';
+
 const mockUseGetPollQuery = jest.fn();
 const mockUseUpdatePollMutation = jest.fn();
 const mockUseClosePollMutation = jest.fn();
@@ -29,8 +31,6 @@ jest.mock('@libs/client-server-communication', () => ({
   useClosePollMutation: (...args: unknown[]) =>
     mockUseClosePollMutation(...args),
 }));
-
-import { PollDetailPage } from './poll-detail.page';
 
 const OWNER = { id: 1, email: 'owner@example.com', name: 'Owner' };
 

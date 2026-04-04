@@ -1,5 +1,13 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+
+import App from './app';
 
 const mockDispatch = jest.fn();
 
@@ -22,13 +30,17 @@ const mockUseResetPasswordMutation = jest.fn();
 
 jest.mock('@libs/client-store', () => ({
   clearCredentials: () => ({ type: 'auth/clearCredentials' }),
-  setCredentials: (payload: unknown) => ({ type: 'auth/setCredentials', payload }),
+  setCredentials: (payload: unknown) => ({
+    type: 'auth/setCredentials',
+    payload,
+  }),
   selectCurrentUser: (state: { auth: typeof mockAuthState }) => state.auth.user,
   selectIsAuthenticated: (state: { auth: typeof mockAuthState }) =>
     state.auth.isAuthenticated,
   useAppDispatch: () => mockDispatch,
-  useAppSelector: (selector: (state: { auth: typeof mockAuthState }) => unknown) =>
-    selector({ auth: mockAuthState }),
+  useAppSelector: (
+    selector: (state: { auth: typeof mockAuthState }) => unknown,
+  ) => selector({ auth: mockAuthState }),
 }));
 
 jest.mock('@libs/client-server-communication', () => ({
@@ -41,8 +53,6 @@ jest.mock('@libs/client-server-communication', () => ({
   useResetPasswordMutation: (...args: unknown[]) =>
     mockUseResetPasswordMutation(...args),
 }));
-
-import App from './app';
 
 function renderAt(path: string) {
   return render(
@@ -106,7 +116,9 @@ describe('App auth flow', () => {
   it('dispatches clearCredentials when no persisted token exists', () => {
     renderAt('/login');
 
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/clearCredentials' });
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'auth/clearCredentials',
+    });
   });
 
   it('redirects unauthenticated users from protected route to login', () => {
@@ -187,7 +199,9 @@ describe('App auth flow', () => {
     renderAt('/login');
 
     await waitFor(() => {
-      expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/clearCredentials' });
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'auth/clearCredentials',
+      });
     });
 
     expect(localStorage.getItem('accessToken')).toBeNull();
@@ -372,9 +386,9 @@ describe('App auth flow', () => {
 
     renderAt('/reset-password?token=from-link');
 
-    expect((screen.getByLabelText('Reset token') as HTMLInputElement).value).toBe(
-      'from-link',
-    );
+    expect(
+      (screen.getByLabelText('Reset token') as HTMLInputElement).value,
+    ).toBe('from-link');
 
     fireEvent.change(screen.getByLabelText('New password'), {
       target: { value: 'NewPassword123!' },
@@ -389,7 +403,9 @@ describe('App auth flow', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Password updated. Redirecting to login...')).toBeTruthy();
+      expect(
+        screen.getByText('Password updated. Redirecting to login...'),
+      ).toBeTruthy();
     });
 
     act(() => {
@@ -440,7 +456,10 @@ describe('App auth flow', () => {
       unwrap: () => Promise.reject(new Error('Network error')),
     }));
 
-    mockUseLogoutMutation.mockReturnValue([logoutMutation, { isLoading: false }]);
+    mockUseLogoutMutation.mockReturnValue([
+      logoutMutation,
+      { isLoading: false },
+    ]);
 
     renderAt('/');
 
@@ -451,12 +470,11 @@ describe('App auth flow', () => {
     });
 
     await waitFor(() => {
-      expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/clearCredentials' });
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'auth/clearCredentials',
+      });
     });
 
     expect(localStorage.getItem('accessToken')).toBeNull();
   });
 });
-
-
-
