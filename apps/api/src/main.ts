@@ -40,7 +40,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('/api', app, document);
+  SwaggerModule.setup('/docs', app, document);
 
   // Enable CORS for all origins (adjust if needed for production)
   app.enableCors({
@@ -63,7 +63,7 @@ async function bootstrap() {
     console.log(
       `🚀 API Server running at: http://${host}:${port}/${globalPrefix}`,
     );
-    console.log(`📚 Swagger Documentation: http://${host}:${port}/api`);
+    console.log(`📚 Swagger Documentation: http://${host}:${port}/docs`);
     console.log('\n');
 
     // Optional: Log database/redis connection status if available
