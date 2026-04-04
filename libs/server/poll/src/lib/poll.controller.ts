@@ -18,11 +18,17 @@ import {
 import { CurrentUser, type LoggedInUser } from '@libs/server-user';
 import { PollService } from './poll.service';
 
-function parsePollDto<T>(schema: { parse: (data: unknown) => T }, data: unknown): T {
+function parsePollDto<T>(
+  schema: { parse: (data: unknown) => T },
+  data: unknown,
+): T {
   try {
     return schema.parse(data);
   } catch (err: any) {
-    const msg = err?.issues?.map((i: any) => i.message).join(', ') ?? err?.message ?? 'Validation error';
+    const msg =
+      err?.issues?.map((i: any) => i.message).join(', ') ??
+      err?.message ??
+      'Validation error';
     throw new BadRequestException(msg);
   }
 }
