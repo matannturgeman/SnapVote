@@ -15,7 +15,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@libs/client-store', () => ({
-  selectCurrentUser: jest.fn(),
+  selectCurrentUser: (state: { auth: { user: unknown } }) => state?.auth?.user,
   useAppSelector: (selector: unknown) =>
     typeof selector === 'function'
       ? selector({ auth: { user: mockCurrentUser } })
