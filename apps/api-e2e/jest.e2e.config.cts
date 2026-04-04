@@ -1,9 +1,10 @@
 module.exports = {
   displayName: 'api-e2e',
   preset: '../../jest.preset.js',
+  globalSetup: '<rootDir>/src/support/global-setup.ts',
+  globalTeardown: '<rootDir>/src/support/global-teardown.ts',
+  setupFiles: ['<rootDir>/src/support/test-setup.ts'],
   testEnvironment: 'node',
-  // Exclude e2e specs — they require a running server and belong to the e2e target
-  testPathIgnorePatterns: ['/node_modules/', '/src/api/'],
   transform: {
     '^.+\\.[tj]s$': [
       'ts-jest',

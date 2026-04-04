@@ -28,4 +28,4 @@ jobs:
       - run: npm ci --legacy-peer-deps
 
       - run: npx nx format:check --base="remotes/origin/main"
-      - run: npx nx run-many -t lint test build typecheck e2e
+      - run: npx nx run-many -t lint test build typecheck

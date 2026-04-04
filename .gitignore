@@ -54,3 +54,7 @@ vite.config.*.timestamp*
 **/generated/prisma
 **/coverage/
 
+# E2E test output
+test-output-e2e/
+**/test-output/
+
