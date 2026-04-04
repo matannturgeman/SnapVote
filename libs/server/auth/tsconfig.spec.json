@@ -5,12 +5,19 @@
     "module": "commonjs",
     "moduleResolution": "node10",
     "types": ["jest", "node"],
+    "noPropertyAccessFromIndexSignature": false
   },
   "include": [
     "jest.config.ts",
     "jest.config.cts",
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
-    "src/**/*.d.ts",
+    "src/**/*.d.ts"
   ],
+  "references": [
+    { "path": "./tsconfig.lib.json" },
+    { "path": "../data-access/tsconfig.lib.json" },
+    { "path": "../user/tsconfig.lib.json" },
+    { "path": "../../shared/dto/tsconfig.lib.json" }
+  ]
 }

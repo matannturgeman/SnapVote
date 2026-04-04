@@ -8,10 +8,12 @@ type PrepareHeaders = (
 let capturedPrepareHeaders: PrepareHeaders | undefined;
 
 const rawBaseQueryMock = jest.fn();
-const fetchBaseQueryMock = jest.fn((options: { prepareHeaders: PrepareHeaders }) => {
-  capturedPrepareHeaders = options.prepareHeaders;
-  return rawBaseQueryMock;
-});
+const fetchBaseQueryMock = jest.fn(
+  (options: { prepareHeaders: PrepareHeaders }) => {
+    capturedPrepareHeaders = options.prepareHeaders;
+    return rawBaseQueryMock;
+  },
+);
 
 const createApiMock = jest.fn((options: { reducerPath: string }) => ({
   reducerPath: options.reducerPath,
@@ -25,8 +27,10 @@ jest.mock('@reduxjs/toolkit/query/react', () => {
 
   return {
     ...actual,
-    fetchBaseQuery: (options: unknown) => fetchBaseQueryMock(options),
-    createApi: (options: unknown) => createApiMock(options),
+    fetchBaseQuery: (options: unknown) =>
+      fetchBaseQueryMock(options as { prepareHeaders: PrepareHeaders }),
+    createApi: (options: unknown) =>
+      createApiMock(options as { reducerPath: string }),
   };
 });
 
@@ -55,7 +59,8 @@ function mockLocalStorage(initialToken?: string) {
     }),
   };
 
-  (globalThis as { localStorage?: StorageLike }).localStorage = localStorageMock;
+  (globalThis as { localStorage?: StorageLike }).localStorage =
+    localStorageMock;
 
   return localStorageMock;
 }
@@ -80,7 +85,10 @@ describe('base-api', () => {
       getState: () => ({ auth: { token: 'redux-token' } }),
     });
 
-    expect(headers.set).toHaveBeenCalledWith('Authorization', 'Bearer redux-token');
+    expect(headers.set).toHaveBeenCalledWith(
+      'Authorization',
+      'Bearer redux-token',
+    );
   });
 
   it('should fall back to persisted token when redux token is missing', () => {
@@ -91,7 +99,10 @@ describe('base-api', () => {
       getState: () => ({ auth: { token: null } }),
     });
 
-    expect(headers.set).toHaveBeenCalledWith('Authorization', 'Bearer persisted-token');
+    expect(headers.set).toHaveBeenCalledWith(
+      'Authorization',
+      'Bearer persisted-token',
+    );
   });
 
   it('should not set Authorization header when token is missing everywhere', () => {
@@ -148,7 +159,11 @@ describe('base-api', () => {
     const dispatch = jest.fn();
 
     await expect(
-      baseQueryWithReauth('/auth/me', { dispatch } as unknown as BaseQueryApi, {}),
+      baseQueryWithReauth(
+        '/auth/me',
+        { dispatch } as unknown as BaseQueryApi,
+        {},
+      ),
     ).resolves.toEqual({
       error: { status: 401, data: { message: 'Unauthorized' } },
     });

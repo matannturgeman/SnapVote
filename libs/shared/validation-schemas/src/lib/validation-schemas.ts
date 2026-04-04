@@ -93,6 +93,50 @@ export const errorResponseSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Poll schemas
+// ---------------------------------------------------------------------------
+
+export const pollStatusSchema = z.enum(['DRAFT', 'OPEN', 'CLOSED']);
+
+export const pollOptionSchema = z.object({
+  id: z.string(),
+  text: z.string().min(1).max(200),
+  order: z.number().int().nonnegative(),
+});
+
+export const pollSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1, 'Title is required').max(200),
+  description: z.string().max(1000).optional(),
+  status: pollStatusSchema,
+  ownerId: z.number().int(),
+  openedAt: z.date().nullable().optional(),
+  closedAt: z.date().nullable().optional(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  options: z.array(pollOptionSchema).min(1),
+});
+
+export const createPollSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(200),
+  description: z.string().max(1000).optional(),
+  options: z
+    .array(z.string().min(1, 'Option text is required').max(200))
+    .min(2, 'At least 2 options are required')
+    .max(10, 'At most 10 options are allowed'),
+});
+
+export const updatePollSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(200).optional(),
+  description: z.string().max(1000).optional(),
+  options: z
+    .array(z.string().min(1, 'Option text is required').max(200))
+    .min(2, 'At least 2 options are required')
+    .max(10, 'At most 10 options are allowed')
+    .optional(),
+});
+
+// ---------------------------------------------------------------------------
 // Namespace exports for convenient grouped imports
 // ---------------------------------------------------------------------------
 
@@ -116,4 +160,12 @@ export const CommonSchemas = {
   successResponse: successResponseSchema,
   paginationQuery: paginationQuerySchema,
   errorResponse: errorResponseSchema,
+} as const;
+
+export const PollSchemas = {
+  pollStatus: pollStatusSchema,
+  pollOption: pollOptionSchema,
+  poll: pollSchema,
+  create: createPollSchema,
+  update: updatePollSchema,
 } as const;

@@ -25,6 +25,18 @@ export {
 } from './lib/auth.api';
 
 // ---------------------------------------------------------------------------
+// Poll endpoints & hooks
+// ---------------------------------------------------------------------------
+export { pollApi } from './lib/poll.api';
+export {
+  useCreatePollMutation,
+  useGetPollQuery,
+  useLazyGetPollQuery,
+  useUpdatePollMutation,
+  useClosePollMutation,
+} from './lib/poll.api';
+
+// ---------------------------------------------------------------------------
 // Users endpoints & hooks
 // ---------------------------------------------------------------------------
 export { usersApi } from './lib/users.api';
