@@ -53,6 +53,9 @@
     },
     {
       "path": "./libs/client/ui"
+    },
+    {
+      "path": "./libs/server/poll"
     }
   ]
 }

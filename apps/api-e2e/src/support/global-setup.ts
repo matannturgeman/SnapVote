@@ -1,7 +1,6 @@
 import { waitForPortOpen } from '@nx/node/utils';
 
 /* eslint-disable */
-var __TEARDOWN_MESSAGE__: string;
 
 module.exports = async function () {
   // Start services that that the app needs to run (e.g. database, docker-compose, etc.).
@@ -9,8 +8,9 @@ module.exports = async function () {
 
   const host = process.env.HOST ?? 'localhost';
   const port = process.env.PORT ? Number(process.env.PORT) : 3000;
-  await waitForPortOpen(port, { host });
+  await waitForPortOpen(port, { host, retries: 30, retryDelay: 1000 });
 
   // Hint: Use `globalThis` to pass variables to global teardown.
-  globalThis.__TEARDOWN_MESSAGE__ = '\nTearing down...\n';
+  (globalThis as Record<string, unknown>)['__TEARDOWN_MESSAGE__'] =
+    '\nTearing down...\n';
 };

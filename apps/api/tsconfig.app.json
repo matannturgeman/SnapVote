@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "composite": false,
-    "declaration": false,
+    "declaration": true,
     "declarationMap": false,
     "emitDeclarationOnly": false
   },
@@ -23,6 +23,9 @@
     },
     {
       "path": "../../libs/server/auth/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/server/poll/tsconfig.lib.json"
     },
     {
       "path": "../../libs/shared/dto/tsconfig.lib.json"

@@ -8,6 +8,13 @@ out-tsc
 # dependencies
 node_modules
 
+# Claude Code
+.claude/settings.local.json
+
+# Wrong package manager lockfiles
+pnpm-lock.yaml
+yarn.lock
+
 # IDEs and editors
 /.idea
 .project
@@ -46,4 +53,8 @@ Thumbs.db
 vite.config.*.timestamp*
 **/generated/prisma
 **/coverage/
+
+# E2E test output
+test-output-e2e/
+**/test-output/
 

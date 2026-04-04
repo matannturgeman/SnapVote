@@ -9,6 +9,10 @@ import {
   authResponseSchema,
   messageResponseSchema,
   successResponseSchema,
+  pollSchema,
+  pollOptionSchema,
+  createPollSchema,
+  updatePollSchema,
 } from '@libs/shared-validation-schemas';
 
 // ---------------------------------------------------------------------------
@@ -37,7 +41,9 @@ export const AuthResponseDtoSchema = authResponseSchema;
 
 export type LoginDto = z.infer<typeof LoginDtoSchema>;
 export type RegisterDto = z.infer<typeof RegisterDtoSchema>;
-export type ForgotPasswordRequestDto = z.infer<typeof ForgotPasswordRequestDtoSchema>;
+export type ForgotPasswordRequestDto = z.infer<
+  typeof ForgotPasswordRequestDtoSchema
+>;
 export type ResetPasswordDto = z.infer<typeof ResetPasswordDtoSchema>;
 export type AuthResponseDto = z.infer<typeof AuthResponseDtoSchema>;
 
@@ -79,6 +85,20 @@ export type PaginatedResponseDto<T> = {
   limit: number;
   totalPages: number;
 };
+
+// ---------------------------------------------------------------------------
+// Poll DTOs
+// ---------------------------------------------------------------------------
+
+export const PollOptionResponseDtoSchema = pollOptionSchema;
+export const PollResponseDtoSchema = pollSchema;
+export const CreatePollDtoSchema = createPollSchema;
+export const UpdatePollDtoSchema = updatePollSchema;
+
+export type PollOptionResponseDto = z.infer<typeof PollOptionResponseDtoSchema>;
+export type PollResponseDto = z.infer<typeof PollResponseDtoSchema>;
+export type CreatePollDto = z.infer<typeof CreatePollDtoSchema>;
+export type UpdatePollDto = z.infer<typeof UpdatePollDtoSchema>;
 
 // ---------------------------------------------------------------------------
 // Helpers

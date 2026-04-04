@@ -6,7 +6,6 @@
  */
 
 import 'dotenv/config'; // Load env vars from parent directory before importing other modules
-import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AllExceptionsFilter } from '@libs/server-data-access';
@@ -40,7 +39,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('/api', app, document);
+  SwaggerModule.setup('/docs', app, document);
 
   // Enable CORS for all origins (adjust if needed for production)
   app.enableCors({
@@ -63,7 +62,7 @@ async function bootstrap() {
     console.log(
       `🚀 API Server running at: http://${host}:${port}/${globalPrefix}`,
     );
-    console.log(`📚 Swagger Documentation: http://${host}:${port}/api`);
+    console.log(`📚 Swagger Documentation: http://${host}:${port}/docs`);
     console.log('\n');
 
     // Optional: Log database/redis connection status if available
@@ -78,8 +77,9 @@ async function bootstrap() {
       // Silent fail - database may not be connected yet or config is wrong
     }
   } catch (error) {
-    console.error('\n❌ Failed to start server:', error.message);
-    console.error(`Error details: ${error.stack}`);
+    const err = error as Error;
+    console.error('\n❌ Failed to start server:', err.message);
+    console.error(`Error details: ${err.stack}`);
     process.exit(1);
   }
 }

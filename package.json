@@ -5,9 +5,15 @@
   "scripts": {
     "dev:api": "nx serve api",
     "build:api": "nx build api",
+    "lint:api": "nx lint api",
     "dev:client": "nx serve client",
     "build:client": "nx build client",
-    "test": "nx run-many -t test"
+    "lint:client": "nx lint client",
+    "postinstall": "prisma generate",
+    "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:unit": "nx run-many -t test --exclude=api-e2e",
+    "test:integration": "echo \"No integration tests yet\" && exit 0",
+    "test:e2e": "nx run api-e2e:test && nx run client-e2e:e2e"
   },
   "private": true,
   "devDependencies": {
@@ -15,7 +21,7 @@
     "@babel/preset-react": "7.14.5",
     "@eslint/js": "9.8.0",
     "@nestjs/schematics": "11.0.0",
-    "@nestjs/testing": "11.0.0",
+    "@nestjs/testing": "11.1.17",
     "@nx/devkit": "22.6.1",
     "@nx/eslint": "22.6.1",
     "@nx/eslint-plugin": "22.6.1",
@@ -35,15 +41,17 @@
     "@swc/helpers": "0.5.18",
     "@tailwindcss/vite": "4.2.1",
     "@testing-library/dom": "10.4.0",
+    "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "16.3.0",
     "@types/express": "5.0.6",
     "@types/jest": "30.0.0",
     "@types/node": "20.19.9",
+    "@types/nodemailer": "^7.0.11",
     "@types/pg": "8.18.0",
     "@types/react": "19.0.0",
     "@types/react-dom": "19.0.0",
     "@types/react-redux": "7.1.34",
-    "@vitejs/plugin-react": "4.2.0",
+    "@vitejs/plugin-react": "5.2.0",
     "@vitest/ui": "4.0.0",
     "babel-jest": "30.0.2",
     "class-transformer": "0.5.1",
@@ -86,7 +94,7 @@
     "@nestjs-labs/nestjs-ioredis": "11.0.4",
     "@nestjs/common": "11.1.17",
     "@nestjs/config": "4.0.3",
-    "@nestjs/core": "11.0.0",
+    "@nestjs/core": "11.1.17",
     "@nestjs/mongoose": "11.0.4",
     "@nestjs/platform-express": "11.1.17",
     "@nestjs/swagger": "11.2.6",
@@ -119,6 +127,12 @@
     "picomatch": "4.0.4",
     "file-type": "21.3.4",
     "ajv": "8.18.0",
+    "@eslint/eslintrc": {
+      "ajv": "6.12.6"
+    },
+    "eslint": {
+      "ajv": "6.12.6"
+    },
     "effect": "3.21.0",
     "@hono/node-server": "1.19.11",
     "@tootallnate/once": "3.0.1",

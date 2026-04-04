@@ -74,7 +74,6 @@
       }
     }
   ],
-  "nxCloudId": "69a5290027ac5f29b831b9b6",
   "generators": {
     "@nx/react": {
       "application": {
@@ -98,6 +97,12 @@
       "cache": true,
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
+    },
+    "test": {
+      "options": {
+        "passWithNoTests": true
+      }
     }
-  }
+  },
+  "analytics": true
 }
