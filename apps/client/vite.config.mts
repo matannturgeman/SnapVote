@@ -18,7 +18,7 @@ export default defineConfig(() => ({
   },
   plugins: [react(), tailwindcss(), nxViteTsPaths(), nxCopyAssetsPlugin(['*.md'])],
   build: {
-    outDir: '../dist/client',
+    outDir: '../../dist/client',
     emptyOutDir: true,
     reportCompressedSize: true,
     commonjsOptions: {
