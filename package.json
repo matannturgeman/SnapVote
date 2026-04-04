@@ -7,7 +7,10 @@
     "build:api": "nx build api",
     "dev:client": "nx serve client",
     "build:client": "nx build client",
-    "test": "nx run-many -t test"
+    "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:unit": "nx run-many -t test --exclude=api-e2e",
+    "test:integration": "echo \"No integration tests yet\" && exit 0",
+    "test:e2e": "nx run api-e2e:test && nx run client-e2e:e2e"
   },
   "private": true,
   "devDependencies": {
