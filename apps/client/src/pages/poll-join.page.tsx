@@ -32,9 +32,7 @@ export function PollJoinPage() {
     );
   }
 
-  const status = isError
-    ? (error as { status?: number })?.status
-    : undefined;
+  const status = isError ? (error as { status?: number })?.status : undefined;
 
   const message =
     status === 403

@@ -461,8 +461,8 @@ describe('GET /api/polls/join/:token', () => {
       { headers: authHeader(accessToken) },
     );
 
-    await expect(
-      axios.get(`/api/polls/join/${token}`),
-    ).rejects.toMatchObject({ response: { status: 403 } });
+    await expect(axios.get(`/api/polls/join/${token}`)).rejects.toMatchObject({
+      response: { status: 403 },
+    });
   });
 });

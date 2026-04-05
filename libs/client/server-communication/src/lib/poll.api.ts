@@ -60,9 +60,7 @@ export const pollApi = baseApi.injectEndpoints({
         method: 'POST',
         body,
       }),
-      invalidatesTags: (_result, _error, { id }) => [
-        { type: 'ShareLink', id },
-      ],
+      invalidatesTags: (_result, _error, { id }) => [{ type: 'ShareLink', id }],
     }),
 
     revokeShareLink: build.mutation<
@@ -73,9 +71,7 @@ export const pollApi = baseApi.injectEndpoints({
         url: `/polls/${id}/share-links/${linkId}/revoke`,
         method: 'POST',
       }),
-      invalidatesTags: (_result, _error, { id }) => [
-        { type: 'ShareLink', id },
-      ],
+      invalidatesTags: (_result, _error, { id }) => [{ type: 'ShareLink', id }],
     }),
 
     joinPollByToken: build.query<JoinPollResponseDto, string>({
