@@ -12,6 +12,11 @@ enum PollStatus {
   CLOSED
 }
 
+enum ShareLinkStatus {
+  ACTIVE
+  REVOKED
+}
+
 model User {
   id                  Int                  @id @default(autoincrement())
   email               String               @unique
@@ -37,11 +42,25 @@ model Poll {
   closedAt    DateTime?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  owner       User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner       User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   options     PollOption[]
+  shareLinks  PollShareLink[]
 
   @@index([ownerId])
   @@index([status])
+}
+
+model PollShareLink {
+  id        String          @id @default(cuid())
+  pollId    String
+  token     String          @unique @default(cuid())
+  status    ShareLinkStatus @default(ACTIVE)
+  expiresAt DateTime?
+  createdAt DateTime        @default(now())
+  poll      Poll            @relation(fields: [pollId], references: [id], onDelete: Cascade)
+
+  @@index([pollId])
+  @@index([token])
 }
 
 model PollOption {

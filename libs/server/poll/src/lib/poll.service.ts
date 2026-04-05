@@ -7,7 +7,10 @@ import {
 import { prisma } from '@libs/server-data-access';
 import type {
   CreatePollDto,
+  CreateShareLinkDto,
+  JoinPollResponseDto,
   PollResponseDto,
+  ShareLinkResponseDto,
   UpdatePollDto,
 } from '@libs/shared-dto';
 
@@ -95,6 +98,88 @@ export class PollService {
     return this.toDto(closed);
   }
 
+  async createShareLink(
+    pollId: string,
+    ownerId: number,
+    dto: CreateShareLinkDto,
+  ): Promise<ShareLinkResponseDto> {
+    await this.requireOwner(pollId, ownerId);
+
+    const link = await prisma.pollShareLink.create({
+      data: {
+        pollId,
+        expiresAt: dto.expiresAt ?? null,
+      },
+    });
+
+    this.logger.log(`Share link created: ${link.id} for poll ${pollId}`);
+    return this.toShareLinkDto(link);
+  }
+
+  async listShareLinks(
+    pollId: string,
+    ownerId: number,
+  ): Promise<ShareLinkResponseDto[]> {
+    await this.requireOwner(pollId, ownerId);
+
+    const links = await prisma.pollShareLink.findMany({
+      where: { pollId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return links.map((l) => this.toShareLinkDto(l));
+  }
+
+  async revokeShareLink(
+    pollId: string,
+    linkId: string,
+    ownerId: number,
+  ): Promise<ShareLinkResponseDto> {
+    await this.requireOwner(pollId, ownerId);
+
+    const link = await prisma.pollShareLink.findUnique({
+      where: { id: linkId },
+    });
+
+    if (!link || link.pollId !== pollId) {
+      throw new NotFoundException(`Share link ${linkId} not found`);
+    }
+
+    const revoked = await prisma.pollShareLink.update({
+      where: { id: linkId },
+      data: { status: 'REVOKED' },
+    });
+
+    this.logger.log(`Share link revoked: ${linkId} for poll ${pollId}`);
+    return this.toShareLinkDto(revoked);
+  }
+
+  async findByShareToken(token: string): Promise<JoinPollResponseDto> {
+    const link = await prisma.pollShareLink.findUnique({
+      where: { token },
+      include: {
+        poll: { include: { options: { orderBy: { order: 'asc' } } } },
+      },
+    });
+
+    if (!link) {
+      throw new NotFoundException('Share link not found');
+    }
+
+    if (link.status === 'REVOKED') {
+      throw new ForbiddenException('This share link has been revoked');
+    }
+
+    if (link.expiresAt && link.expiresAt < new Date()) {
+      throw new ForbiddenException('This share link has expired');
+    }
+
+    return {
+      poll: this.toDto(link.poll),
+      shareLink: this.toShareLinkDto(link),
+    };
+  }
+
   private async requireOwner(id: string, requesterId: number) {
     const poll = await prisma.poll.findUnique({ where: { id } });
 
@@ -109,6 +194,24 @@ export class PollService {
     }
 
     return poll;
+  }
+
+  private toShareLinkDto(link: {
+    id: string;
+    pollId: string;
+    token: string;
+    status: 'ACTIVE' | 'REVOKED';
+    expiresAt: Date | null;
+    createdAt: Date;
+  }): ShareLinkResponseDto {
+    return {
+      id: link.id,
+      pollId: link.pollId,
+      token: link.token,
+      status: link.status,
+      expiresAt: link.expiresAt,
+      createdAt: link.createdAt,
+    };
   }
 
   private toDto(poll: {

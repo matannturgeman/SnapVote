@@ -1,7 +1,10 @@
 import { baseApi } from './base-api';
 import type {
   CreatePollDto,
+  CreateShareLinkDto,
+  JoinPollResponseDto,
   PollResponseDto,
+  ShareLinkResponseDto,
   UpdatePollDto,
 } from '@libs/shared-dto';
 
@@ -40,6 +43,40 @@ export const pollApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: (_result, _error, id) => [{ type: 'Poll', id }],
     }),
+
+    listShareLinks: build.query<ShareLinkResponseDto[], string>({
+      query: (pollId) => `/polls/${pollId}/share-links`,
+      providesTags: (_result, _error, pollId) => [
+        { type: 'ShareLink', id: pollId },
+      ],
+    }),
+
+    createShareLink: build.mutation<
+      ShareLinkResponseDto,
+      { id: string; body: CreateShareLinkDto }
+    >({
+      query: ({ id, body }) => ({
+        url: `/polls/${id}/share-links`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: (_result, _error, { id }) => [{ type: 'ShareLink', id }],
+    }),
+
+    revokeShareLink: build.mutation<
+      ShareLinkResponseDto,
+      { id: string; linkId: string }
+    >({
+      query: ({ id, linkId }) => ({
+        url: `/polls/${id}/share-links/${linkId}/revoke`,
+        method: 'POST',
+      }),
+      invalidatesTags: (_result, _error, { id }) => [{ type: 'ShareLink', id }],
+    }),
+
+    joinPollByToken: build.query<JoinPollResponseDto, string>({
+      query: (token) => `/polls/join/${token}`,
+    }),
   }),
   overrideExisting: false,
 });
@@ -50,4 +87,8 @@ export const {
   useLazyGetPollQuery,
   useUpdatePollMutation,
   useClosePollMutation,
+  useListShareLinksQuery,
+  useCreateShareLinkMutation,
+  useRevokeShareLinkMutation,
+  useJoinPollByTokenQuery,
 } = pollApi;
