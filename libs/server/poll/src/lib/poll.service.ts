@@ -157,7 +157,9 @@ export class PollService {
   async findByShareToken(token: string): Promise<JoinPollResponseDto> {
     const link = await prisma.pollShareLink.findUnique({
       where: { token },
-      include: { poll: { include: { options: { orderBy: { order: 'asc' } } } } },
+      include: {
+        poll: { include: { options: { orderBy: { order: 'asc' } } } },
+      },
     });
 
     if (!link) {
