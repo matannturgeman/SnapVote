@@ -21,6 +21,15 @@ const POLL_RESPONSE = {
 
 const CURRENT_USER = { id: 1, email: 'owner@example.com', name: 'Owner' };
 
+const SHARE_LINK_RESPONSE = {
+  id: 'link-1',
+  pollId: 'poll-1',
+  token: 'token-abc',
+  status: 'ACTIVE' as const,
+  expiresAt: null,
+  createdAt: new Date('2026-01-01'),
+};
+
 describe('PollController', () => {
   let controller: PollController;
   let pollService: jest.Mocked<PollService>;
@@ -31,6 +40,10 @@ describe('PollController', () => {
       findById: jest.fn(),
       update: jest.fn(),
       close: jest.fn(),
+      createShareLink: jest.fn(),
+      listShareLinks: jest.fn(),
+      revokeShareLink: jest.fn(),
+      findByShareToken: jest.fn(),
     } as unknown as jest.Mocked<PollService>;
 
     controller = new PollController(pollService);
@@ -158,6 +171,84 @@ describe('PollController', () => {
 
       expect(pollService.close).toHaveBeenCalledWith('poll-1', 1);
       expect(result.status).toBe('CLOSED');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // GET /polls/join/:token
+  // ---------------------------------------------------------------------------
+
+  describe('joinByToken', () => {
+    it('returns poll and shareLink for a valid token', async () => {
+      pollService.findByShareToken.mockResolvedValue({
+        poll: POLL_RESPONSE,
+        shareLink: SHARE_LINK_RESPONSE,
+      });
+
+      const result = await controller.joinByToken('token-abc');
+
+      expect(pollService.findByShareToken).toHaveBeenCalledWith('token-abc');
+      expect(result.poll.id).toBe('poll-1');
+      expect(result.shareLink.token).toBe('token-abc');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // GET /polls/:id/share-links
+  // ---------------------------------------------------------------------------
+
+  describe('listShareLinks', () => {
+    it('returns share links for the poll owner', async () => {
+      pollService.listShareLinks.mockResolvedValue([SHARE_LINK_RESPONSE]);
+
+      const result = await controller.listShareLinks('poll-1', CURRENT_USER);
+
+      expect(pollService.listShareLinks).toHaveBeenCalledWith('poll-1', 1);
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('link-1');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // POST /polls/:id/share-links
+  // ---------------------------------------------------------------------------
+
+  describe('createShareLink', () => {
+    it('creates a share link and returns the dto', async () => {
+      pollService.createShareLink.mockResolvedValue(SHARE_LINK_RESPONSE);
+
+      const result = await controller.createShareLink(
+        'poll-1',
+        {},
+        CURRENT_USER,
+      );
+
+      expect(pollService.createShareLink).toHaveBeenCalledWith('poll-1', 1, {});
+      expect(result.token).toBe('token-abc');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // POST /polls/:id/share-links/:linkId/revoke
+  // ---------------------------------------------------------------------------
+
+  describe('revokeShareLink', () => {
+    it('revokes a share link and returns the updated dto', async () => {
+      const revoked = { ...SHARE_LINK_RESPONSE, status: 'REVOKED' as const };
+      pollService.revokeShareLink.mockResolvedValue(revoked);
+
+      const result = await controller.revokeShareLink(
+        'poll-1',
+        'link-1',
+        CURRENT_USER,
+      );
+
+      expect(pollService.revokeShareLink).toHaveBeenCalledWith(
+        'poll-1',
+        'link-1',
+        1,
+      );
+      expect(result.status).toBe('REVOKED');
     });
   });
 });

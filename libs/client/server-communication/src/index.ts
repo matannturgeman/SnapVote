@@ -34,6 +34,10 @@ export {
   useLazyGetPollQuery,
   useUpdatePollMutation,
   useClosePollMutation,
+  useListShareLinksQuery,
+  useCreateShareLinkMutation,
+  useRevokeShareLinkMutation,
+  useJoinPollByTokenQuery,
 } from './lib/poll.api';
 
 // ---------------------------------------------------------------------------

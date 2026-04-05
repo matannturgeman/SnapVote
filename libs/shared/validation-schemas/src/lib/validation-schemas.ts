@@ -136,6 +136,26 @@ export const updatePollSchema = z.object({
     .optional(),
 });
 
+export const shareLinkStatusSchema = z.enum(['ACTIVE', 'REVOKED']);
+
+export const shareLinkSchema = z.object({
+  id: z.string(),
+  pollId: z.string(),
+  token: z.string(),
+  status: shareLinkStatusSchema,
+  expiresAt: z.date().nullable().optional(),
+  createdAt: z.date(),
+});
+
+export const createShareLinkSchema = z.object({
+  expiresAt: z.date().optional(),
+});
+
+export const joinPollResponseSchema = z.object({
+  poll: z.lazy(() => pollSchema),
+  shareLink: shareLinkSchema,
+});
+
 // ---------------------------------------------------------------------------
 // Namespace exports for convenient grouped imports
 // ---------------------------------------------------------------------------
@@ -168,4 +188,8 @@ export const PollSchemas = {
   poll: pollSchema,
   create: createPollSchema,
   update: updatePollSchema,
+  shareLinkStatus: shareLinkStatusSchema,
+  shareLink: shareLinkSchema,
+  createShareLink: createShareLinkSchema,
+  joinPollResponse: joinPollResponseSchema,
 } as const;
