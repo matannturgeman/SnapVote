@@ -269,3 +269,200 @@ describe('POST /api/polls/:id/close', () => {
     ).rejects.toMatchObject({ response: { status: 401 } });
   });
 });
+
+// ---------------------------------------------------------------------------
+// Share links
+// ---------------------------------------------------------------------------
+
+describe('POST /api/polls/:id/share-links', () => {
+  it('owner can create a share link', async () => {
+    const { accessToken } = await register('share-create-1');
+
+    const created = await axios.post(
+      '/api/polls',
+      { title: 'Share test', options: ['A', 'B'] },
+      { headers: authHeader(accessToken) },
+    );
+    const pollId = created.data.id;
+
+    const res = await axios.post(
+      `/api/polls/${pollId}/share-links`,
+      {},
+      { headers: authHeader(accessToken) },
+    );
+
+    expect(res.status).toBe(201);
+    expect(res.data.token).toBeDefined();
+    expect(res.data.status).toBe('ACTIVE');
+    expect(res.data.pollId).toBe(pollId);
+  });
+
+  it('returns 403 when non-owner tries to create a share link', async () => {
+    const owner = await register('share-create-owner');
+    const other = await register('share-create-other');
+
+    const created = await axios.post(
+      '/api/polls',
+      { title: 'Owner only share', options: ['A', 'B'] },
+      { headers: authHeader(owner.accessToken) },
+    );
+
+    await expect(
+      axios.post(
+        `/api/polls/${created.data.id}/share-links`,
+        {},
+        { headers: authHeader(other.accessToken) },
+      ),
+    ).rejects.toMatchObject({ response: { status: 403 } });
+  });
+
+  it('returns 401 when unauthenticated', async () => {
+    await expect(
+      axios.post('/api/polls/some-id/share-links', {}),
+    ).rejects.toMatchObject({ response: { status: 401 } });
+  });
+});
+
+describe('GET /api/polls/:id/share-links', () => {
+  it('owner can list share links', async () => {
+    const { accessToken } = await register('share-list-1');
+
+    const created = await axios.post(
+      '/api/polls',
+      { title: 'List links test', options: ['A', 'B'] },
+      { headers: authHeader(accessToken) },
+    );
+    const pollId = created.data.id;
+
+    await axios.post(
+      `/api/polls/${pollId}/share-links`,
+      {},
+      { headers: authHeader(accessToken) },
+    );
+
+    const res = await axios.get(`/api/polls/${pollId}/share-links`, {
+      headers: authHeader(accessToken),
+    });
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.data)).toBe(true);
+    expect(res.data.length).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe('POST /api/polls/:id/share-links/:linkId/revoke', () => {
+  it('owner can revoke a share link', async () => {
+    const { accessToken } = await register('share-revoke-1');
+
+    const created = await axios.post(
+      '/api/polls',
+      { title: 'Revoke test', options: ['A', 'B'] },
+      { headers: authHeader(accessToken) },
+    );
+    const pollId = created.data.id;
+
+    const linkRes = await axios.post(
+      `/api/polls/${pollId}/share-links`,
+      {},
+      { headers: authHeader(accessToken) },
+    );
+    const linkId = linkRes.data.id;
+
+    const res = await axios.post(
+      `/api/polls/${pollId}/share-links/${linkId}/revoke`,
+      {},
+      { headers: authHeader(accessToken) },
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.data.status).toBe('REVOKED');
+  });
+
+  it('returns 403 when non-owner tries to revoke', async () => {
+    const owner = await register('share-revoke-owner');
+    const other = await register('share-revoke-other');
+
+    const created = await axios.post(
+      '/api/polls',
+      { title: 'Revoke owner test', options: ['A', 'B'] },
+      { headers: authHeader(owner.accessToken) },
+    );
+    const pollId = created.data.id;
+
+    const linkRes = await axios.post(
+      `/api/polls/${pollId}/share-links`,
+      {},
+      { headers: authHeader(owner.accessToken) },
+    );
+
+    await expect(
+      axios.post(
+        `/api/polls/${pollId}/share-links/${linkRes.data.id}/revoke`,
+        {},
+        { headers: authHeader(other.accessToken) },
+      ),
+    ).rejects.toMatchObject({ response: { status: 403 } });
+  });
+});
+
+describe('GET /api/polls/join/:token', () => {
+  it('returns poll and shareLink for a valid active token (no auth required)', async () => {
+    const { accessToken } = await register('share-join-1');
+
+    const created = await axios.post(
+      '/api/polls',
+      { title: 'Join test', options: ['A', 'B'] },
+      { headers: authHeader(accessToken) },
+    );
+    const pollId = created.data.id;
+
+    const linkRes = await axios.post(
+      `/api/polls/${pollId}/share-links`,
+      {},
+      { headers: authHeader(accessToken) },
+    );
+    const token = linkRes.data.token;
+
+    // No auth header — public endpoint
+    const res = await axios.get(`/api/polls/join/${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.data.poll.id).toBe(pollId);
+    expect(res.data.shareLink.token).toBe(token);
+    expect(res.data.shareLink.status).toBe('ACTIVE');
+  });
+
+  it('returns 404 for a non-existent token', async () => {
+    await expect(
+      axios.get('/api/polls/join/nonexistent-token'),
+    ).rejects.toMatchObject({ response: { status: 404 } });
+  });
+
+  it('returns 403 for a revoked token', async () => {
+    const { accessToken } = await register('share-join-revoked');
+
+    const created = await axios.post(
+      '/api/polls',
+      { title: 'Revoked join test', options: ['A', 'B'] },
+      { headers: authHeader(accessToken) },
+    );
+    const pollId = created.data.id;
+
+    const linkRes = await axios.post(
+      `/api/polls/${pollId}/share-links`,
+      {},
+      { headers: authHeader(accessToken) },
+    );
+    const { id: linkId, token } = linkRes.data;
+
+    await axios.post(
+      `/api/polls/${pollId}/share-links/${linkId}/revoke`,
+      {},
+      { headers: authHeader(accessToken) },
+    );
+
+    await expect(axios.get(`/api/polls/join/${token}`)).rejects.toMatchObject({
+      response: { status: 403 },
+    });
+  });
+});

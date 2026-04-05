@@ -14,6 +14,7 @@ import { ForgotPasswordPage } from '../pages/forgot-password.page';
 import { ResetPasswordPage } from '../pages/reset-password.page';
 import { CreatePollPage } from '../pages/create-poll.page';
 import { PollDetailPage } from '../pages/poll-detail.page';
+import { PollJoinPage } from '../pages/poll-join.page';
 import { clearPersistedToken, getPersistedToken } from '../lib/token';
 
 export function App() {
@@ -76,6 +77,7 @@ export function App() {
           </SessionGate>
         }
       />
+      <Route path="/polls/join/:token" element={<PollJoinPage />} />
       <Route
         path="*"
         element={<Navigate to={token ? '/' : '/login'} replace />}

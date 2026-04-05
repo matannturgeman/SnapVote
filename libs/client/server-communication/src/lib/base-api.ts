@@ -32,7 +32,7 @@ function clearPersistedToken(): void {
   getLocalStorage()?.removeItem('accessToken');
 }
 
-export type ApiTagType = 'User' | 'Auth' | 'Poll';
+export type ApiTagType = 'User' | 'Auth' | 'Poll' | 'ShareLink';
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
@@ -66,6 +66,6 @@ export const baseQueryWithReauth: BaseQueryFn<
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['User', 'Auth', 'Poll'] satisfies ApiTagType[],
+  tagTypes: ['User', 'Auth', 'Poll', 'ShareLink'] satisfies ApiTagType[],
   endpoints: () => ({}),
 });

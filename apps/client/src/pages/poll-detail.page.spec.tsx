@@ -6,6 +6,9 @@ import { PollDetailPage } from './poll-detail.page';
 const mockUseGetPollQuery = jest.fn();
 const mockUseUpdatePollMutation = jest.fn();
 const mockUseClosePollMutation = jest.fn();
+const mockUseListShareLinksQuery = jest.fn();
+const mockUseCreateShareLinkMutation = jest.fn();
+const mockUseRevokeShareLinkMutation = jest.fn();
 const mockUpdatePoll = jest.fn();
 const mockClosePoll = jest.fn();
 
@@ -30,6 +33,12 @@ jest.mock('@libs/client-server-communication', () => ({
     mockUseUpdatePollMutation(...args),
   useClosePollMutation: (...args: unknown[]) =>
     mockUseClosePollMutation(...args),
+  useListShareLinksQuery: (...args: unknown[]) =>
+    mockUseListShareLinksQuery(...args),
+  useCreateShareLinkMutation: (...args: unknown[]) =>
+    mockUseCreateShareLinkMutation(...args),
+  useRevokeShareLinkMutation: (...args: unknown[]) =>
+    mockUseRevokeShareLinkMutation(...args),
 }));
 
 const OWNER = { id: 1, email: 'owner@example.com', name: 'Owner' };
@@ -79,6 +88,13 @@ describe('PollDetailPage', () => {
       mockClosePoll,
       { isLoading: false },
     ]);
+
+    mockUseListShareLinksQuery.mockReturnValue({ data: [] });
+    mockUseCreateShareLinkMutation.mockReturnValue([
+      jest.fn(),
+      { isLoading: false },
+    ]);
+    mockUseRevokeShareLinkMutation.mockReturnValue([jest.fn()]);
   });
 
   // ---------------------------------------------------------------------------

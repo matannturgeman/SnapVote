@@ -10,12 +10,18 @@ import {
 } from '@nestjs/common';
 import {
   CreatePollDtoSchema,
+  CreateShareLinkDtoSchema,
+  JoinPollResponseDtoSchema,
   PollResponseDtoSchema,
+  ShareLinkResponseDtoSchema,
   UpdatePollDtoSchema,
   parseDto,
+  type JoinPollResponseDto,
   type PollResponseDto,
+  type ShareLinkResponseDto,
 } from '@libs/shared-dto';
 import { CurrentUser, type LoggedInUser } from '@libs/server-user';
+import { Public } from '@libs/server-auth';
 import { PollService } from './poll.service';
 
 function parsePollDto<T>(
@@ -36,6 +42,16 @@ function parsePollDto<T>(
 @Controller('polls')
 export class PollController {
   constructor(private readonly pollService: PollService) {}
+
+  // Public: participants access poll via share token (declared first to avoid :id capture)
+  @Public()
+  @Get('join/:token')
+  async joinByToken(
+    @Param('token') token: string,
+  ): Promise<JoinPollResponseDto> {
+    const result = await this.pollService.findByShareToken(token);
+    return parseDto(JoinPollResponseDtoSchema, result);
+  }
 
   @Post()
   async create(
@@ -74,5 +90,35 @@ export class PollController {
   ): Promise<PollResponseDto> {
     const result = await this.pollService.close(id, user.id);
     return parseDto(PollResponseDtoSchema, result);
+  }
+
+  @Get(':id/share-links')
+  async listShareLinks(
+    @Param('id') id: string,
+    @CurrentUser() user: LoggedInUser,
+  ): Promise<ShareLinkResponseDto[]> {
+    return this.pollService.listShareLinks(id, user.id);
+  }
+
+  @Post(':id/share-links')
+  async createShareLink(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @CurrentUser() user: LoggedInUser,
+  ): Promise<ShareLinkResponseDto> {
+    const dto = parsePollDto(CreateShareLinkDtoSchema, body);
+    const result = await this.pollService.createShareLink(id, user.id, dto);
+    return parseDto(ShareLinkResponseDtoSchema, result);
+  }
+
+  @HttpCode(200)
+  @Post(':id/share-links/:linkId/revoke')
+  async revokeShareLink(
+    @Param('id') id: string,
+    @Param('linkId') linkId: string,
+    @CurrentUser() user: LoggedInUser,
+  ): Promise<ShareLinkResponseDto> {
+    const result = await this.pollService.revokeShareLink(id, linkId, user.id);
+    return parseDto(ShareLinkResponseDtoSchema, result);
   }
 }

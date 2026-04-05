@@ -1,10 +1,13 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Loader2, Plus, X } from 'lucide-react';
+import { Check, Copy, Loader2, Plus, X } from 'lucide-react';
 import { selectCurrentUser, useAppSelector } from '@libs/client-store';
 import {
   useClosePollMutation,
+  useCreateShareLinkMutation,
   useGetPollQuery,
+  useListShareLinksQuery,
+  useRevokeShareLinkMutation,
   useUpdatePollMutation,
 } from '@libs/client-server-communication';
 import { Button } from '../components/ui/button';
@@ -36,11 +39,20 @@ export function PollDetailPage() {
 
   const [updatePoll, { isLoading: isUpdating, error: updateError }] =
     useUpdatePollMutation();
+  const ownerCheck = user?.id === poll?.ownerId;
+  const { data: shareLinks = [] } = useListShareLinksQuery(id ?? '', {
+    skip: !id || !ownerCheck,
+  });
+  const [createShareLink, { isLoading: isCreatingLink }] =
+    useCreateShareLinkMutation();
+  const [revokeShareLink] = useRevokeShareLinkMutation();
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [editOptions, setEditOptions] = useState<string[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [closeError, setCloseError] = useState(false);
+  const [showShare, setShowShare] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
     if (poll && !isEditing) {
@@ -78,6 +90,27 @@ export function PollDetailPage() {
 
   const isOwner = user?.id === poll.ownerId;
   const canEdit = isOwner && poll.status !== 'CLOSED';
+
+  const onCopyLink = (token: string, linkId: string) => {
+    const url = `${window.location.origin}/polls/join/${token}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedId(linkId);
+      setTimeout(() => setCopiedId(null), 2000);
+    });
+  };
+
+  const onGenerateLink = async () => {
+    if (!id) return;
+    await createShareLink({ id, body: {} });
+    setShowShare(true);
+  };
+
+  const onRevoke = async (linkId: string) => {
+    if (!id) return;
+    await revokeShareLink({ id, linkId });
+  };
+
+  const activeLinks = shareLinks.filter((l) => l.status === 'ACTIVE');
 
   const onClose = async () => {
     if (!id) return;
@@ -272,6 +305,76 @@ export function PollDetailPage() {
                   </Button>
                 </div>
               </form>
+            )}
+            {isOwner && !isEditing && (
+              <div className="border-t border-slate-100 pt-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-slate-700">
+                    Share links{' '}
+                    {activeLinks.length > 0 && (
+                      <span className="ml-1 rounded-full bg-cyan-100 px-2 py-0.5 text-xs text-cyan-700">
+                        {activeLinks.length}
+                      </span>
+                    )}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setShowShare((v) => !v)}
+                    className="text-xs text-slate-500 hover:text-slate-700"
+                  >
+                    {showShare ? 'Hide' : 'Manage'}
+                  </button>
+                </div>
+                {showShare && (
+                  <div className="mt-3 space-y-2">
+                    {activeLinks.map((link) => (
+                      <div
+                        key={link.id}
+                        className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs"
+                      >
+                        <span className="truncate font-mono text-slate-600">
+                          /polls/join/{link.token.slice(0, 12)}…
+                        </span>
+                        <div className="ml-2 flex shrink-0 gap-1">
+                          <button
+                            type="button"
+                            onClick={() => onCopyLink(link.token, link.id)}
+                            className="rounded p-1 text-slate-400 hover:text-cyan-700"
+                            title="Copy link"
+                          >
+                            {copiedId === link.id ? (
+                              <Check className="h-3.5 w-3.5 text-emerald-600" />
+                            ) : (
+                              <Copy className="h-3.5 w-3.5" />
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onRevoke(link.id)}
+                            className="rounded p-1 text-slate-400 hover:text-red-600"
+                            title="Revoke link"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={onGenerateLink}
+                      disabled={isCreatingLink}
+                      className="w-full"
+                    >
+                      {isCreatingLink ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        'Generate share link'
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
             )}
             {!isOwner && poll.status === 'OPEN' && (
               <p className="text-xs text-slate-500">

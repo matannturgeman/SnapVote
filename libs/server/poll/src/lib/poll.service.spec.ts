@@ -9,12 +9,24 @@ jest.mock('@libs/server-data-access', () => ({
       findUnique: jest.fn(),
       update: jest.fn(),
     },
+    pollShareLink: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+    },
   },
 }));
 
 type PrismaMock = {
   poll: {
     create: jest.Mock;
+    findUnique: jest.Mock;
+    update: jest.Mock;
+  };
+  pollShareLink: {
+    create: jest.Mock;
+    findMany: jest.Mock;
     findUnique: jest.Mock;
     update: jest.Mock;
   };
@@ -34,6 +46,15 @@ const POLL_WITH_OPTIONS = {
     { id: 'opt-1', text: 'React', order: 0, createdAt: new Date('2026-01-01') },
     { id: 'opt-2', text: 'Vue', order: 1, createdAt: new Date('2026-01-01') },
   ],
+};
+
+const SHARE_LINK = {
+  id: 'link-1',
+  pollId: 'poll-1',
+  token: 'token-abc',
+  status: 'ACTIVE' as const,
+  expiresAt: null,
+  createdAt: new Date('2026-01-01'),
 };
 
 describe('PollService', () => {
@@ -261,6 +282,182 @@ describe('PollService', () => {
       });
 
       await expect(service.close('poll-1', 1)).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // createShareLink
+  // ---------------------------------------------------------------------------
+
+  describe('createShareLink', () => {
+    it('creates and returns a share link dto for the poll owner', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue({
+        ...POLL_WITH_OPTIONS,
+        options: undefined,
+      });
+      prismaMock.pollShareLink.create.mockResolvedValue(SHARE_LINK);
+
+      const result = await service.createShareLink('poll-1', 1, {});
+
+      expect(prismaMock.pollShareLink.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ pollId: 'poll-1', expiresAt: null }),
+        }),
+      );
+      expect(result.token).toBe('token-abc');
+      expect(result.status).toBe('ACTIVE');
+    });
+
+    it('throws ForbiddenException when requester is not the owner', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue({
+        ...POLL_WITH_OPTIONS,
+        ownerId: 99,
+      });
+
+      await expect(service.createShareLink('poll-1', 1, {})).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // listShareLinks
+  // ---------------------------------------------------------------------------
+
+  describe('listShareLinks', () => {
+    it('returns share links for the poll owner', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue({
+        ...POLL_WITH_OPTIONS,
+        options: undefined,
+      });
+      prismaMock.pollShareLink.findMany.mockResolvedValue([SHARE_LINK]);
+
+      const result = await service.listShareLinks('poll-1', 1);
+
+      expect(prismaMock.pollShareLink.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { pollId: 'poll-1' } }),
+      );
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('link-1');
+    });
+
+    it('throws ForbiddenException when requester is not the owner', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue({
+        ...POLL_WITH_OPTIONS,
+        ownerId: 99,
+      });
+
+      await expect(service.listShareLinks('poll-1', 1)).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // revokeShareLink
+  // ---------------------------------------------------------------------------
+
+  describe('revokeShareLink', () => {
+    it('revokes an active share link', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue({
+        ...POLL_WITH_OPTIONS,
+        options: undefined,
+      });
+      prismaMock.pollShareLink.findUnique.mockResolvedValue(SHARE_LINK);
+      prismaMock.pollShareLink.update.mockResolvedValue({
+        ...SHARE_LINK,
+        status: 'REVOKED',
+      });
+
+      const result = await service.revokeShareLink('poll-1', 'link-1', 1);
+
+      expect(prismaMock.pollShareLink.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'link-1' },
+          data: { status: 'REVOKED' },
+        }),
+      );
+      expect(result.status).toBe('REVOKED');
+    });
+
+    it('throws NotFoundException when link does not exist', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue({
+        ...POLL_WITH_OPTIONS,
+        options: undefined,
+      });
+      prismaMock.pollShareLink.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.revokeShareLink('poll-1', 'missing', 1),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('throws NotFoundException when link belongs to a different poll', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue({
+        ...POLL_WITH_OPTIONS,
+        options: undefined,
+      });
+      prismaMock.pollShareLink.findUnique.mockResolvedValue({
+        ...SHARE_LINK,
+        pollId: 'other-poll',
+      });
+
+      await expect(
+        service.revokeShareLink('poll-1', 'link-1', 1),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // findByShareToken
+  // ---------------------------------------------------------------------------
+
+  describe('findByShareToken', () => {
+    it('returns poll and share link for a valid active token', async () => {
+      prismaMock.pollShareLink.findUnique.mockResolvedValue({
+        ...SHARE_LINK,
+        poll: POLL_WITH_OPTIONS,
+      });
+
+      const result = await service.findByShareToken('token-abc');
+
+      expect(prismaMock.pollShareLink.findUnique).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { token: 'token-abc' } }),
+      );
+      expect(result.poll.id).toBe('poll-1');
+      expect(result.shareLink.token).toBe('token-abc');
+    });
+
+    it('throws NotFoundException when token does not exist', async () => {
+      prismaMock.pollShareLink.findUnique.mockResolvedValue(null);
+
+      await expect(service.findByShareToken('bad-token')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('throws ForbiddenException when link is revoked', async () => {
+      prismaMock.pollShareLink.findUnique.mockResolvedValue({
+        ...SHARE_LINK,
+        status: 'REVOKED',
+        poll: POLL_WITH_OPTIONS,
+      });
+
+      await expect(service.findByShareToken('token-abc')).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+
+    it('throws ForbiddenException when link is expired', async () => {
+      prismaMock.pollShareLink.findUnique.mockResolvedValue({
+        ...SHARE_LINK,
+        expiresAt: new Date('2020-01-01'),
+        poll: POLL_WITH_OPTIONS,
+      });
+
+      await expect(service.findByShareToken('token-abc')).rejects.toThrow(
         ForbiddenException,
       );
     });
