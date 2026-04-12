@@ -221,7 +221,10 @@ export class PollService {
     return this.getResults(pollId, participantId);
   }
 
-  async getResults(pollId: string, requesterId: number): Promise<PollResultsDto> {
+  async getResults(
+    pollId: string,
+    requesterId: number,
+  ): Promise<PollResultsDto> {
     const poll = await prisma.poll.findUnique({
       where: { id: pollId },
       include: {
@@ -240,10 +243,7 @@ export class PollService {
       where: { pollId_participantId: { pollId, participantId: requesterId } },
     });
 
-    const totalVotes = poll.options.reduce(
-      (sum, o) => sum + o._count.votes,
-      0,
-    );
+    const totalVotes = poll.options.reduce((sum, o) => sum + o._count.votes, 0);
 
     return {
       pollId,

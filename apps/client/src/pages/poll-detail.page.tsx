@@ -452,7 +452,8 @@ export function PollDetailPage() {
                 </ul>
                 {results?.myVote && (
                   <p className="text-xs text-slate-400 text-center">
-                    {results.totalVotes} vote{results.totalVotes !== 1 ? 's' : ''} total
+                    {results.totalVotes} vote
+                    {results.totalVotes !== 1 ? 's' : ''} total
                   </p>
                 )}
               </div>
@@ -487,7 +488,8 @@ export function PollDetailPage() {
                   })}
                 </ul>
                 <p className="text-xs text-slate-400 text-center">
-                  {results.totalVotes} vote{results.totalVotes !== 1 ? 's' : ''} total
+                  {results.totalVotes} vote{results.totalVotes !== 1 ? 's' : ''}{' '}
+                  total
                 </p>
               </div>
             )}
