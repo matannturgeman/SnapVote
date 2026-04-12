@@ -1,4 +1,8 @@
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { prisma } from '@libs/server-data-access';
 import { PollService } from './poll.service';
 
@@ -15,6 +19,10 @@ jest.mock('@libs/server-data-access', () => ({
       findUnique: jest.fn(),
       update: jest.fn(),
     },
+    vote: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+    },
   },
 }));
 
@@ -29,6 +37,10 @@ type PrismaMock = {
     findMany: jest.Mock;
     findUnique: jest.Mock;
     update: jest.Mock;
+  };
+  vote: {
+    findUnique: jest.Mock;
+    create: jest.Mock;
   };
 };
 
@@ -55,6 +67,26 @@ const SHARE_LINK = {
   status: 'ACTIVE' as const,
   expiresAt: null,
   createdAt: new Date('2026-01-01'),
+};
+
+const POLL_WITH_VOTE_COUNTS = {
+  ...POLL_WITH_OPTIONS,
+  options: [
+    {
+      id: 'opt-1',
+      text: 'React',
+      order: 0,
+      createdAt: new Date('2026-01-01'),
+      _count: { votes: 3 },
+    },
+    {
+      id: 'opt-2',
+      text: 'Vue',
+      order: 1,
+      createdAt: new Date('2026-01-01'),
+      _count: { votes: 1 },
+    },
+  ],
 };
 
 describe('PollService', () => {
@@ -407,6 +439,120 @@ describe('PollService', () => {
       await expect(
         service.revokeShareLink('poll-1', 'link-1', 1),
       ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // castVote
+  // ---------------------------------------------------------------------------
+
+  describe('castVote', () => {
+    it('creates a vote and returns results for a valid open poll', async () => {
+      prismaMock.poll.findUnique
+        .mockResolvedValueOnce(POLL_WITH_OPTIONS)
+        .mockResolvedValueOnce(POLL_WITH_VOTE_COUNTS);
+      prismaMock.vote.findUnique.mockResolvedValue(null);
+      prismaMock.vote.create.mockResolvedValue({
+        id: 'vote-1',
+        pollId: 'poll-1',
+        optionId: 'opt-1',
+        participantId: 2,
+        createdAt: new Date('2026-01-01'),
+      });
+
+      const result = await service.castVote('poll-1', 2, { optionId: 'opt-1' });
+
+      expect(prismaMock.vote.create).toHaveBeenCalledWith({
+        data: { pollId: 'poll-1', optionId: 'opt-1', participantId: 2 },
+      });
+      expect(result.pollId).toBe('poll-1');
+      expect(result.totalVotes).toBe(4);
+      expect(result.options[0].voteCount).toBe(3);
+    });
+
+    it('is idempotent: skips create when vote already exists', async () => {
+      prismaMock.poll.findUnique
+        .mockResolvedValueOnce(POLL_WITH_OPTIONS)
+        .mockResolvedValueOnce(POLL_WITH_VOTE_COUNTS);
+      prismaMock.vote.findUnique.mockResolvedValue({
+        id: 'vote-1',
+        pollId: 'poll-1',
+        optionId: 'opt-1',
+        participantId: 2,
+        createdAt: new Date('2026-01-01'),
+      });
+
+      await service.castVote('poll-1', 2, { optionId: 'opt-1' });
+
+      expect(prismaMock.vote.create).not.toHaveBeenCalled();
+    });
+
+    it('throws NotFoundException when poll does not exist', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.castVote('missing', 2, { optionId: 'opt-1' }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('throws ForbiddenException when poll is not OPEN', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue({
+        ...POLL_WITH_OPTIONS,
+        status: 'CLOSED',
+      });
+
+      await expect(
+        service.castVote('poll-1', 2, { optionId: 'opt-1' }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('throws BadRequestException when optionId does not belong to poll', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue(POLL_WITH_OPTIONS);
+
+      await expect(
+        service.castVote('poll-1', 2, { optionId: 'opt-999' }),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // getResults
+  // ---------------------------------------------------------------------------
+
+  describe('getResults', () => {
+    it('returns vote counts and myVote for the requesting user', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue(POLL_WITH_VOTE_COUNTS);
+      prismaMock.vote.findUnique.mockResolvedValue({
+        id: 'vote-1',
+        pollId: 'poll-1',
+        optionId: 'opt-1',
+        participantId: 2,
+        createdAt: new Date('2026-01-01'),
+      });
+
+      const result = await service.getResults('poll-1', 2);
+
+      expect(result.pollId).toBe('poll-1');
+      expect(result.totalVotes).toBe(4);
+      expect(result.options).toHaveLength(2);
+      expect(result.myVote).toEqual({ optionId: 'opt-1' });
+    });
+
+    it('returns myVote: null when user has not voted', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue(POLL_WITH_VOTE_COUNTS);
+      prismaMock.vote.findUnique.mockResolvedValue(null);
+
+      const result = await service.getResults('poll-1', 2);
+
+      expect(result.myVote).toBeNull();
+    });
+
+    it('throws NotFoundException when poll does not exist', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue(null);
+
+      await expect(service.getResults('missing', 2)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

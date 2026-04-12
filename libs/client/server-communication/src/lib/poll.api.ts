@@ -1,9 +1,11 @@
 import { baseApi } from './base-api';
 import type {
+  CastVoteDto,
   CreatePollDto,
   CreateShareLinkDto,
   JoinPollResponseDto,
   PollResponseDto,
+  PollResultsDto,
   ShareLinkResponseDto,
   UpdatePollDto,
 } from '@libs/shared-dto';
@@ -77,6 +79,22 @@ export const pollApi = baseApi.injectEndpoints({
     joinPollByToken: build.query<JoinPollResponseDto, string>({
       query: (token) => `/polls/join/${token}`,
     }),
+
+    castVote: build.mutation<PollResultsDto, { id: string; body: CastVoteDto }>(
+      {
+        query: ({ id, body }) => ({
+          url: `/polls/${id}/votes`,
+          method: 'POST',
+          body,
+        }),
+        invalidatesTags: (_result, _error, { id }) => [{ type: 'Vote', id }],
+      },
+    ),
+
+    getPollResults: build.query<PollResultsDto, string>({
+      query: (id) => `/polls/${id}/results`,
+      providesTags: (_result, _error, id) => [{ type: 'Vote', id }],
+    }),
   }),
   overrideExisting: false,
 });
@@ -91,4 +109,6 @@ export const {
   useCreateShareLinkMutation,
   useRevokeShareLinkMutation,
   useJoinPollByTokenQuery,
+  useCastVoteMutation,
+  useGetPollResultsQuery,
 } = pollApi;
