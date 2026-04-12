@@ -41,8 +41,7 @@ jest.mock('@libs/client-server-communication', () => ({
     mockUseCreateShareLinkMutation(...args),
   useRevokeShareLinkMutation: (...args: unknown[]) =>
     mockUseRevokeShareLinkMutation(...args),
-  useCastVoteMutation: (...args: unknown[]) =>
-    mockUseCastVoteMutation(...args),
+  useCastVoteMutation: (...args: unknown[]) => mockUseCastVoteMutation(...args),
   useGetPollResultsQuery: (...args: unknown[]) =>
     mockUseGetPollResultsQuery(...args),
 }));
