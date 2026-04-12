@@ -57,7 +57,7 @@ export function CreatePollPage() {
       <div className="w-full max-w-lg">
         <Card>
           <CardHeader className="space-y-3">
-            <span className="inline-flex w-fit items-center gap-2 rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-800">
+            <span className="inline-flex w-fit items-center gap-2 rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-200">
               <Sparkles className="h-3.5 w-3.5" />
               New Poll
             </span>
@@ -103,7 +103,7 @@ export function CreatePollPage() {
                       <button
                         type="button"
                         onClick={() => removeOption(i)}
-                        className="text-slate-400 hover:text-slate-600"
+                        className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -114,14 +114,14 @@ export function CreatePollPage() {
                   <button
                     type="button"
                     onClick={addOption}
-                    className="flex items-center gap-1 text-sm font-medium text-cyan-700 hover:text-cyan-600"
+                    className="flex items-center gap-1 text-sm font-medium text-cyan-700 hover:text-cyan-600 dark:text-cyan-400 dark:hover:text-cyan-300"
                   >
                     <Plus className="h-3.5 w-3.5" />
                     Add option
                   </button>
                 )}
                 {nonEmptyOptions.length < 2 && (
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Fill in at least 2 options to continue.
                   </p>
                 )}
@@ -149,7 +149,7 @@ export function CreatePollPage() {
               </div>
             </form>
             {error ? (
-              <p className="mt-3 rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-800">
+              <p className="mt-3 rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-800 dark:border-orange-800/40 dark:bg-orange-900/20 dark:text-orange-300">
                 Could not create poll. Please try again.
               </p>
             ) : null}

@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   act,
   fireEvent,
@@ -41,6 +42,15 @@ jest.mock('@libs/client-store', () => ({
   useAppSelector: (
     selector: (state: { auth: typeof mockAuthState }) => unknown,
   ) => selector({ auth: mockAuthState }),
+}));
+
+jest.mock('../context/theme.context', () => ({
+  ThemeProvider: ({ children }: { children: React.ReactNode }) => children,
+  useTheme: () => ({
+    theme: 'system' as const,
+    resolvedTheme: 'light' as const,
+    setTheme: jest.fn(),
+  }),
 }));
 
 jest.mock('@libs/client-server-communication', () => ({
@@ -463,7 +473,7 @@ describe('App auth flow', () => {
 
     renderAt('/');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Logout' }));
+    fireEvent.click(screen.getAllByRole('button', { name: 'Logout' })[0]);
 
     await waitFor(() => {
       expect(logoutMutation).toHaveBeenCalled();

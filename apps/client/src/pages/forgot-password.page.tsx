@@ -58,18 +58,18 @@ export function ForgotPasswordPage() {
       </form>
 
       {message ? (
-        <div className="space-y-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+        <div className="space-y-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:border-emerald-800/40 dark:bg-emerald-900/20 dark:text-emerald-300">
           <p>{message}</p>
         </div>
       ) : null}
 
       {error ? (
-        <p className="rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-800">
+        <p className="rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-800 dark:border-orange-800/40 dark:bg-orange-900/20 dark:text-orange-300">
           Could not submit request. Please try again.
         </p>
       ) : null}
 
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-slate-600 dark:text-slate-400">
         <Link
           className="inline-flex items-center gap-1 font-semibold text-cyan-700 hover:text-cyan-600"
           to="/login"
