@@ -95,6 +95,11 @@ export const pollApi = baseApi.injectEndpoints({
       query: (id) => `/polls/${id}/results`,
       providesTags: (_result, _error, id) => [{ type: 'Vote', id }],
     }),
+
+    getMyPolls: build.query<PollResponseDto[], void>({
+      query: () => '/polls',
+      providesTags: ['Poll'],
+    }),
   }),
   overrideExisting: false,
 });
@@ -111,4 +116,5 @@ export const {
   useJoinPollByTokenQuery,
   useCastVoteMutation,
   useGetPollResultsQuery,
+  useGetMyPollsQuery,
 } = pollApi;
