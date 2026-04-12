@@ -38,6 +38,8 @@ export {
   useCreateShareLinkMutation,
   useRevokeShareLinkMutation,
   useJoinPollByTokenQuery,
+  useCastVoteMutation,
+  useGetPollResultsQuery,
 } from './lib/poll.api';
 
 // ---------------------------------------------------------------------------

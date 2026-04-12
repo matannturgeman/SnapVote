@@ -3,9 +3,11 @@ import { Link, useParams } from 'react-router-dom';
 import { Check, Copy, Loader2, Plus, X } from 'lucide-react';
 import { selectCurrentUser, useAppSelector } from '@libs/client-store';
 import {
+  useCastVoteMutation,
   useClosePollMutation,
   useCreateShareLinkMutation,
   useGetPollQuery,
+  useGetPollResultsQuery,
   useListShareLinksQuery,
   useRevokeShareLinkMutation,
   useUpdatePollMutation,
@@ -53,6 +55,12 @@ export function PollDetailPage() {
   const [closeError, setCloseError] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [castVote, { isLoading: isVoting }] = useCastVoteMutation();
+  const [voteError, setVoteError] = useState(false);
+  const { data: results, refetch: refetchResults } = useGetPollResultsQuery(
+    id ?? '',
+    { skip: !id },
+  );
 
   useEffect(() => {
     if (poll && !isEditing) {
@@ -376,10 +384,114 @@ export function PollDetailPage() {
                 )}
               </div>
             )}
-            {!isOwner && poll.status === 'OPEN' && (
-              <p className="text-xs text-slate-500">
-                Voting will be available in a future update.
-              </p>
+            {poll.status === 'OPEN' && !isOwner && (
+              <div className="border-t border-slate-100 pt-4 space-y-3">
+                <p className="text-sm font-medium text-slate-700">
+                  {results?.myVote ? 'Your vote' : 'Cast your vote'}
+                </p>
+                {voteError && (
+                  <p className="rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-800">
+                    Could not submit vote. Please try again.
+                  </p>
+                )}
+                <ul className="space-y-2">
+                  {poll.options.map((opt) => {
+                    const voted = results?.myVote?.optionId === opt.id;
+                    const count =
+                      results?.options.find((o) => o.id === opt.id)
+                        ?.voteCount ?? 0;
+                    const total = results?.totalVotes ?? 0;
+                    const pct =
+                      total > 0 ? Math.round((count / total) * 100) : 0;
+                    return (
+                      <li key={opt.id}>
+                        <button
+                          type="button"
+                          disabled={!!results?.myVote || isVoting}
+                          onClick={async () => {
+                            if (!id) return;
+                            setVoteError(false);
+                            try {
+                              await castVote({
+                                id,
+                                body: { optionId: opt.id },
+                              }).unwrap();
+                              refetchResults();
+                            } catch {
+                              setVoteError(true);
+                            }
+                          }}
+                          className={`w-full text-left rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                            voted
+                              ? 'border-cyan-400 bg-cyan-50 text-cyan-800'
+                              : results?.myVote
+                                ? 'border-slate-200 bg-slate-50 text-slate-500 cursor-default'
+                                : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-cyan-300 hover:bg-cyan-50'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span>{opt.text}</span>
+                            {results?.myVote && (
+                              <span className="ml-2 text-xs text-slate-400">
+                                {pct}% ({count})
+                              </span>
+                            )}
+                          </div>
+                          {results?.myVote && (
+                            <div className="mt-1 h-1 w-full rounded-full bg-slate-200">
+                              <div
+                                className={`h-1 rounded-full ${voted ? 'bg-cyan-500' : 'bg-slate-300'}`}
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                          )}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+                {results?.myVote && (
+                  <p className="text-xs text-slate-400 text-center">
+                    {results.totalVotes} vote
+                    {results.totalVotes !== 1 ? 's' : ''} total
+                  </p>
+                )}
+              </div>
+            )}
+            {(isOwner || poll.status === 'CLOSED') && results && (
+              <div className="border-t border-slate-100 pt-4 space-y-3">
+                <p className="text-sm font-medium text-slate-700">Results</p>
+                <ul className="space-y-2">
+                  {results.options.map((opt) => {
+                    const pct =
+                      results.totalVotes > 0
+                        ? Math.round((opt.voteCount / results.totalVotes) * 100)
+                        : 0;
+                    return (
+                      <li key={opt.id}>
+                        <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm">
+                          <div className="flex items-center justify-between font-medium text-slate-700">
+                            <span>{opt.text}</span>
+                            <span className="text-xs text-slate-400">
+                              {pct}% ({opt.voteCount})
+                            </span>
+                          </div>
+                          <div className="mt-1 h-1 w-full rounded-full bg-slate-200">
+                            <div
+                              className="h-1 rounded-full bg-cyan-500"
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <p className="text-xs text-slate-400 text-center">
+                  {results.totalVotes} vote{results.totalVotes !== 1 ? 's' : ''}{' '}
+                  total
+                </p>
+              </div>
             )}
           </CardContent>
         </Card>

@@ -9,6 +9,8 @@ const mockUseClosePollMutation = jest.fn();
 const mockUseListShareLinksQuery = jest.fn();
 const mockUseCreateShareLinkMutation = jest.fn();
 const mockUseRevokeShareLinkMutation = jest.fn();
+const mockUseCastVoteMutation = jest.fn();
+const mockUseGetPollResultsQuery = jest.fn();
 const mockUpdatePoll = jest.fn();
 const mockClosePoll = jest.fn();
 
@@ -39,6 +41,9 @@ jest.mock('@libs/client-server-communication', () => ({
     mockUseCreateShareLinkMutation(...args),
   useRevokeShareLinkMutation: (...args: unknown[]) =>
     mockUseRevokeShareLinkMutation(...args),
+  useCastVoteMutation: (...args: unknown[]) => mockUseCastVoteMutation(...args),
+  useGetPollResultsQuery: (...args: unknown[]) =>
+    mockUseGetPollResultsQuery(...args),
 }));
 
 const OWNER = { id: 1, email: 'owner@example.com', name: 'Owner' };
@@ -95,6 +100,11 @@ describe('PollDetailPage', () => {
       { isLoading: false },
     ]);
     mockUseRevokeShareLinkMutation.mockReturnValue([jest.fn()]);
+    mockUseCastVoteMutation.mockReturnValue([jest.fn(), { isLoading: false }]);
+    mockUseGetPollResultsQuery.mockReturnValue({
+      data: undefined,
+      refetch: jest.fn(),
+    });
   });
 
   // ---------------------------------------------------------------------------
@@ -218,14 +228,12 @@ describe('PollDetailPage', () => {
     expect(screen.queryByRole('button', { name: 'Close poll' })).toBeNull();
   });
 
-  it('shows "Voting will be available" hint for non-owner open poll', () => {
+  it('shows vote panel for non-owner on an open poll', () => {
     mockCurrentUser = { id: 99, email: 'other@example.com', name: 'Other' };
 
     renderPage();
 
-    expect(
-      screen.getByText('Voting will be available in a future update.'),
-    ).toBeTruthy();
+    expect(screen.getByText('Cast your vote')).toBeTruthy();
   });
 
   // ---------------------------------------------------------------------------
