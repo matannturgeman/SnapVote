@@ -40,6 +40,16 @@ export class PollService {
     return this.toDto(poll);
   }
 
+  async listOwn(ownerId: number): Promise<PollResponseDto[]> {
+    const polls = await prisma.poll.findMany({
+      where: { ownerId },
+      include: { options: { orderBy: { order: 'asc' } } },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    });
+    return polls.map((p) => this.toDto(p));
+  }
+
   async findById(id: string): Promise<PollResponseDto> {
     const poll = await prisma.poll.findUnique({
       where: { id },
