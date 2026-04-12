@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   Logger,
@@ -6,10 +7,12 @@ import {
 } from '@nestjs/common';
 import { prisma } from '@libs/server-data-access';
 import type {
+  CastVoteDto,
   CreatePollDto,
   CreateShareLinkDto,
   JoinPollResponseDto,
   PollResponseDto,
+  PollResultsDto,
   ShareLinkResponseDto,
   UpdatePollDto,
 } from '@libs/shared-dto';
@@ -177,6 +180,81 @@ export class PollService {
     return {
       poll: this.toDto(link.poll),
       shareLink: this.toShareLinkDto(link),
+    };
+  }
+
+  async castVote(
+    pollId: string,
+    participantId: number,
+    dto: CastVoteDto,
+  ): Promise<PollResultsDto> {
+    const poll = await prisma.poll.findUnique({
+      where: { id: pollId },
+      include: { options: true },
+    });
+
+    if (!poll) {
+      throw new NotFoundException(`Poll ${pollId} not found`);
+    }
+
+    if (poll.status !== 'OPEN') {
+      throw new ForbiddenException('Poll is not open for voting');
+    }
+
+    const optionExists = poll.options.some((o) => o.id === dto.optionId);
+    if (!optionExists) {
+      throw new BadRequestException('Invalid option for this poll');
+    }
+
+    const existing = await prisma.vote.findUnique({
+      where: {
+        pollId_participantId: { pollId, participantId },
+      },
+    });
+
+    if (!existing) {
+      await prisma.vote.create({
+        data: { pollId, optionId: dto.optionId, participantId },
+      });
+    }
+
+    return this.getResults(pollId, participantId);
+  }
+
+  async getResults(pollId: string, requesterId: number): Promise<PollResultsDto> {
+    const poll = await prisma.poll.findUnique({
+      where: { id: pollId },
+      include: {
+        options: {
+          orderBy: { order: 'asc' },
+          include: { _count: { select: { votes: true } } },
+        },
+      },
+    });
+
+    if (!poll) {
+      throw new NotFoundException(`Poll ${pollId} not found`);
+    }
+
+    const myVote = await prisma.vote.findUnique({
+      where: { pollId_participantId: { pollId, participantId: requesterId } },
+    });
+
+    const totalVotes = poll.options.reduce(
+      (sum, o) => sum + o._count.votes,
+      0,
+    );
+
+    return {
+      pollId,
+      totalVotes,
+      options: poll.options.map((o) => ({
+        id: o.id,
+        text: o.text,
+        order: o.order,
+        voteCount: o._count.votes,
+      })),
+      myVote: myVote ? { optionId: myVote.optionId } : null,
     };
   }
 
