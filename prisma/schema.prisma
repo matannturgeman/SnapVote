@@ -28,6 +28,7 @@ model User {
   sessions            Session[]
   passwordResetTokens PasswordResetToken[]
   polls               Poll[]
+  votes               Vote[]
 
   @@index([email])
 }
@@ -45,6 +46,7 @@ model Poll {
   owner       User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   options     PollOption[]
   shareLinks  PollShareLink[]
+  votes       Vote[]
 
   @@index([ownerId])
   @@index([status])
@@ -70,8 +72,24 @@ model PollOption {
   order     Int
   createdAt DateTime @default(now())
   poll      Poll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes     Vote[]
 
   @@index([pollId])
+}
+
+model Vote {
+  id            String     @id @default(cuid())
+  pollId        String
+  optionId      String
+  participantId Int
+  createdAt     DateTime   @default(now())
+  poll          Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  option        PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  voter         User       @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, participantId])
+  @@index([pollId])
+  @@index([optionId])
 }
 
 model Session {

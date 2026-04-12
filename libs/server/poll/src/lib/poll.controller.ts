@@ -9,15 +9,18 @@ import {
   Post,
 } from '@nestjs/common';
 import {
+  CastVoteDtoSchema,
   CreatePollDtoSchema,
   CreateShareLinkDtoSchema,
   JoinPollResponseDtoSchema,
   PollResponseDtoSchema,
+  PollResultsDtoSchema,
   ShareLinkResponseDtoSchema,
   UpdatePollDtoSchema,
   parseDto,
   type JoinPollResponseDto,
   type PollResponseDto,
+  type PollResultsDto,
   type ShareLinkResponseDto,
 } from '@libs/shared-dto';
 import { CurrentUser, type LoggedInUser } from '@libs/server-user';
@@ -120,5 +123,26 @@ export class PollController {
   ): Promise<ShareLinkResponseDto> {
     const result = await this.pollService.revokeShareLink(id, linkId, user.id);
     return parseDto(ShareLinkResponseDtoSchema, result);
+  }
+
+  @HttpCode(200)
+  @Post(':id/votes')
+  async castVote(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @CurrentUser() user: LoggedInUser,
+  ): Promise<PollResultsDto> {
+    const dto = parsePollDto(CastVoteDtoSchema, body);
+    const result = await this.pollService.castVote(id, user.id, dto);
+    return parseDto(PollResultsDtoSchema, result);
+  }
+
+  @Get(':id/results')
+  async getResults(
+    @Param('id') id: string,
+    @CurrentUser() user: LoggedInUser,
+  ): Promise<PollResultsDto> {
+    const result = await this.pollService.getResults(id, user.id);
+    return parseDto(PollResultsDtoSchema, result);
   }
 }

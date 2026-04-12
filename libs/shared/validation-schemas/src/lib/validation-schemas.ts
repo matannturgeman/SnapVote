@@ -156,6 +156,24 @@ export const joinPollResponseSchema = z.object({
   shareLink: shareLinkSchema,
 });
 
+export const castVoteSchema = z.object({
+  optionId: z.string().min(1, 'Option ID is required'),
+});
+
+export const voteOptionResultSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  order: z.number().int().nonnegative(),
+  voteCount: z.number().int().nonnegative(),
+});
+
+export const pollResultsSchema = z.object({
+  pollId: z.string(),
+  totalVotes: z.number().int().nonnegative(),
+  options: z.array(voteOptionResultSchema),
+  myVote: z.object({ optionId: z.string() }).nullable(),
+});
+
 // ---------------------------------------------------------------------------
 // Namespace exports for convenient grouped imports
 // ---------------------------------------------------------------------------
@@ -192,4 +210,7 @@ export const PollSchemas = {
   shareLink: shareLinkSchema,
   createShareLink: createShareLinkSchema,
   joinPollResponse: joinPollResponseSchema,
+  castVote: castVoteSchema,
+  voteOptionResult: voteOptionResultSchema,
+  pollResults: pollResultsSchema,
 } as const;
