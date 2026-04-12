@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '../components/ui/card';
+import { ThemeToggle } from '../components/ui/theme-toggle';
 
 export function PollJoinPage() {
   const { token } = useParams<{ token?: string }>();
@@ -43,15 +44,18 @@ export function PollJoinPage() {
 
   return (
     <div className="auth-canvas flex min-h-screen items-center justify-center p-4">
+      <ThemeToggle className="fixed right-4 top-4 z-50" />
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Cannot access poll</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-sm text-slate-600">{message}</p>
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            {message}
+          </p>
           <Link
             to="/"
-            className="inline-block text-sm font-semibold text-cyan-700 hover:text-cyan-600"
+            className="inline-block text-sm font-semibold text-cyan-700 hover:text-cyan-600 dark:text-cyan-400 dark:hover:text-cyan-300"
           >
             Back home
           </Link>

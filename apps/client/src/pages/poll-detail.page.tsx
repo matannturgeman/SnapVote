@@ -24,9 +24,9 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 
 const STATUS_COLORS: Record<string, string> = {
-  OPEN: 'bg-emerald-100 text-emerald-800',
-  DRAFT: 'bg-slate-100 text-slate-700',
-  CLOSED: 'bg-red-100 text-red-800',
+  OPEN: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
+  DRAFT: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
+  CLOSED: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
 };
 
 export function PollDetailPage() {
@@ -83,10 +83,12 @@ export function PollDetailPage() {
       <div className="auth-canvas flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-sm">
           <CardContent className="p-6">
-            <p className="text-slate-700">Poll not found.</p>
+            <p className="text-slate-700 dark:text-slate-300">
+              Poll not found.
+            </p>
             <Link
               to="/"
-              className="mt-3 inline-block text-sm font-semibold text-cyan-700 hover:text-cyan-600"
+              className="mt-3 inline-block text-sm font-semibold text-cyan-700 hover:text-cyan-600 dark:text-cyan-400 dark:hover:text-cyan-300"
             >
               Back home
             </Link>
@@ -165,7 +167,7 @@ export function PollDetailPage() {
               </span>
               <Link
                 to="/"
-                className="text-sm text-slate-500 hover:text-slate-700"
+                className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
               >
                 Back
               </Link>
@@ -186,14 +188,14 @@ export function PollDetailPage() {
                   {poll.options.map((opt) => (
                     <li
                       key={opt.id}
-                      className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700"
+                      className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-700/50 dark:text-slate-300"
                     >
                       {opt.text}
                     </li>
                   ))}
                 </ul>
                 {closeError && (
-                  <p className="rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-800">
+                  <p className="rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-800 dark:border-orange-800/40 dark:bg-orange-900/20 dark:text-orange-300">
                     Could not close the poll. Please try again.
                   </p>
                 )}
@@ -264,7 +266,7 @@ export function PollDetailPage() {
                               prev.filter((_, idx) => idx !== i),
                             )
                           }
-                          className="text-slate-400 hover:text-slate-600"
+                          className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
                         >
                           <X className="h-4 w-4" />
                         </button>
@@ -275,20 +277,20 @@ export function PollDetailPage() {
                     <button
                       type="button"
                       onClick={() => setEditOptions((prev) => [...prev, ''])}
-                      className="flex items-center gap-1 text-sm font-medium text-cyan-700 hover:text-cyan-600"
+                      className="flex items-center gap-1 text-sm font-medium text-cyan-700 hover:text-cyan-600 dark:text-cyan-400 dark:hover:text-cyan-300"
                     >
                       <Plus className="h-3.5 w-3.5" />
                       Add option
                     </button>
                   )}
                   {nonEmptyEditOptions.length < 2 && (
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       Fill in at least 2 options to save.
                     </p>
                   )}
                 </div>
                 {updateError ? (
-                  <p className="rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-800">
+                  <p className="rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-800 dark:border-orange-800/40 dark:bg-orange-900/20 dark:text-orange-300">
                     Could not save changes. Please try again.
                   </p>
                 ) : null}
@@ -315,12 +317,12 @@ export function PollDetailPage() {
               </form>
             )}
             {isOwner && !isEditing && (
-              <div className="border-t border-slate-100 pt-4">
+              <div className="border-t border-slate-100 pt-4 dark:border-slate-700/50">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-slate-700">
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                     Share links{' '}
                     {activeLinks.length > 0 && (
-                      <span className="ml-1 rounded-full bg-cyan-100 px-2 py-0.5 text-xs text-cyan-700">
+                      <span className="ml-1 rounded-full bg-cyan-100 px-2 py-0.5 text-xs text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300">
                         {activeLinks.length}
                       </span>
                     )}
@@ -328,7 +330,7 @@ export function PollDetailPage() {
                   <button
                     type="button"
                     onClick={() => setShowShare((v) => !v)}
-                    className="text-xs text-slate-500 hover:text-slate-700"
+                    className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                   >
                     {showShare ? 'Hide' : 'Manage'}
                   </button>
@@ -338,9 +340,9 @@ export function PollDetailPage() {
                     {activeLinks.map((link) => (
                       <div
                         key={link.id}
-                        className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs"
+                        className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-700/50"
                       >
-                        <span className="truncate font-mono text-slate-600">
+                        <span className="truncate font-mono text-slate-600 dark:text-slate-300">
                           /polls/join/{link.token.slice(0, 12)}…
                         </span>
                         <div className="ml-2 flex shrink-0 gap-1">
@@ -385,12 +387,12 @@ export function PollDetailPage() {
               </div>
             )}
             {poll.status === 'OPEN' && !isOwner && (
-              <div className="border-t border-slate-100 pt-4 space-y-3">
-                <p className="text-sm font-medium text-slate-700">
+              <div className="border-t border-slate-100 pt-4 space-y-3 dark:border-slate-700/50">
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   {results?.myVote ? 'Your vote' : 'Cast your vote'}
                 </p>
                 {voteError && (
-                  <p className="rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-800">
+                  <p className="rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-800 dark:border-orange-800/40 dark:bg-orange-900/20 dark:text-orange-300">
                     Could not submit vote. Please try again.
                   </p>
                 )}
@@ -423,24 +425,24 @@ export function PollDetailPage() {
                           }}
                           className={`w-full text-left rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
                             voted
-                              ? 'border-cyan-400 bg-cyan-50 text-cyan-800'
+                              ? 'border-cyan-400 bg-cyan-50 text-cyan-800 dark:border-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300'
                               : results?.myVote
-                                ? 'border-slate-200 bg-slate-50 text-slate-500 cursor-default'
-                                : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-cyan-300 hover:bg-cyan-50'
+                                ? 'border-slate-200 bg-slate-50 text-slate-500 cursor-default dark:border-slate-700 dark:bg-slate-700/50 dark:text-slate-400'
+                                : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-cyan-300 hover:bg-cyan-50 dark:border-slate-700 dark:bg-slate-700/50 dark:text-slate-300 dark:hover:border-cyan-700 dark:hover:bg-cyan-900/20'
                           }`}
                         >
                           <div className="flex items-center justify-between">
                             <span>{opt.text}</span>
                             {results?.myVote && (
-                              <span className="ml-2 text-xs text-slate-400">
+                              <span className="ml-2 text-xs text-slate-400 dark:text-slate-500">
                                 {pct}% ({count})
                               </span>
                             )}
                           </div>
                           {results?.myVote && (
-                            <div className="mt-1 h-1 w-full rounded-full bg-slate-200">
+                            <div className="mt-1 h-1 w-full rounded-full bg-slate-200 dark:bg-slate-600">
                               <div
-                                className={`h-1 rounded-full ${voted ? 'bg-cyan-500' : 'bg-slate-300'}`}
+                                className={`h-1 rounded-full ${voted ? 'bg-cyan-500' : 'bg-slate-300 dark:bg-slate-500'}`}
                                 style={{ width: `${pct}%` }}
                               />
                             </div>
@@ -451,7 +453,7 @@ export function PollDetailPage() {
                   })}
                 </ul>
                 {results?.myVote && (
-                  <p className="text-xs text-slate-400 text-center">
+                  <p className="text-xs text-slate-400 text-center dark:text-slate-500">
                     {results.totalVotes} vote
                     {results.totalVotes !== 1 ? 's' : ''} total
                   </p>
@@ -459,8 +461,10 @@ export function PollDetailPage() {
               </div>
             )}
             {(isOwner || poll.status === 'CLOSED') && results && (
-              <div className="border-t border-slate-100 pt-4 space-y-3">
-                <p className="text-sm font-medium text-slate-700">Results</p>
+              <div className="border-t border-slate-100 pt-4 space-y-3 dark:border-slate-700/50">
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Results
+                </p>
                 <ul className="space-y-2">
                   {results.options.map((opt) => {
                     const pct =
@@ -469,14 +473,14 @@ export function PollDetailPage() {
                         : 0;
                     return (
                       <li key={opt.id}>
-                        <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm">
-                          <div className="flex items-center justify-between font-medium text-slate-700">
+                        <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm dark:border-slate-700 dark:bg-slate-700/50">
+                          <div className="flex items-center justify-between font-medium text-slate-700 dark:text-slate-300">
                             <span>{opt.text}</span>
-                            <span className="text-xs text-slate-400">
+                            <span className="text-xs text-slate-400 dark:text-slate-500">
                               {pct}% ({opt.voteCount})
                             </span>
                           </div>
-                          <div className="mt-1 h-1 w-full rounded-full bg-slate-200">
+                          <div className="mt-1 h-1 w-full rounded-full bg-slate-200 dark:bg-slate-600">
                             <div
                               className="h-1 rounded-full bg-cyan-500"
                               style={{ width: `${pct}%` }}
@@ -487,7 +491,7 @@ export function PollDetailPage() {
                     );
                   })}
                 </ul>
-                <p className="text-xs text-slate-400 text-center">
+                <p className="text-xs text-slate-400 text-center dark:text-slate-500">
                   {results.totalVotes} vote{results.totalVotes !== 1 ? 's' : ''}{' '}
                   total
                 </p>
@@ -495,7 +499,9 @@ export function PollDetailPage() {
             )}
           </CardContent>
         </Card>
-        <p className="text-center text-xs text-slate-400">Poll ID: {poll.id}</p>
+        <p className="text-center text-xs text-slate-400 dark:text-slate-500">
+          Poll ID: {poll.id}
+        </p>
       </div>
     </div>
   );

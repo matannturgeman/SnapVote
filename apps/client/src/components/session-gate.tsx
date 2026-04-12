@@ -20,7 +20,9 @@ export function SessionGate({ isBootstrapping, children }: SessionGateProps) {
         <Card className="w-full max-w-sm">
           <CardContent className="flex items-center gap-3 p-6">
             <Loader2 className="h-5 w-5 animate-spin text-cyan-700" />
-            <p className="text-sm text-slate-700">Checking your session...</p>
+            <p className="text-sm text-slate-700 dark:text-slate-300">
+              Checking your session...
+            </p>
           </CardContent>
         </Card>
       </div>
