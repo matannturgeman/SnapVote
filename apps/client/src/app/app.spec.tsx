@@ -62,6 +62,7 @@ jest.mock('@libs/client-server-communication', () => ({
     mockUseForgotPasswordMutation(...args),
   useResetPasswordMutation: (...args: unknown[]) =>
     mockUseResetPasswordMutation(...args),
+  useGetMyPollsQuery: () => ({ data: [], isLoading: false }),
 }));
 
 function renderAt(path: string) {
@@ -151,7 +152,7 @@ describe('App auth flow', () => {
 
     renderAt('/login');
 
-    expect(screen.getByText('Session Active')).toBeTruthy();
+    expect(screen.getByText('My Polls')).toBeTruthy();
   });
 
   it('shows session bootstrap state when token exists and profile is loading', () => {
@@ -282,7 +283,7 @@ describe('App auth flow', () => {
 
     renderAt('/register');
 
-    expect(screen.getByText('Session Active')).toBeTruthy();
+    expect(screen.getByText('My Polls')).toBeTruthy();
   });
 
   it('shows register error message when mutation returns an error state', () => {
@@ -450,7 +451,7 @@ describe('App auth flow', () => {
     localStorage.setItem('accessToken', 'persisted-token');
 
     renderAt('/another-unknown');
-    expect(screen.getByText('Session Active')).toBeTruthy();
+    expect(screen.getByText('My Polls')).toBeTruthy();
   });
 
   it('clears local auth state on logout even if server logout fails', async () => {
