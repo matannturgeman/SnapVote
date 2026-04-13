@@ -11,6 +11,7 @@ jest.mock('@libs/server-data-access', () => ({
     poll: {
       create: jest.fn(),
       findUnique: jest.fn(),
+      findMany: jest.fn(),
       update: jest.fn(),
     },
     pollShareLink: {
@@ -30,6 +31,7 @@ type PrismaMock = {
   poll: {
     create: jest.Mock;
     findUnique: jest.Mock;
+    findMany: jest.Mock;
     update: jest.Mock;
   };
   pollShareLink: {
@@ -157,6 +159,36 @@ describe('PollService', () => {
       });
 
       expect(result.description).toBe('Some context');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // listOwn
+  // ---------------------------------------------------------------------------
+
+  describe('listOwn', () => {
+    it('returns polls owned by the user ordered by createdAt desc', async () => {
+      prismaMock.poll.findMany.mockResolvedValue([POLL_WITH_OPTIONS]);
+
+      const result = await service.listOwn(1);
+
+      expect(prismaMock.poll.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { ownerId: 1 },
+          orderBy: { createdAt: 'desc' },
+          take: 50,
+        }),
+      );
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('poll-1');
+    });
+
+    it('returns empty array when user has no polls', async () => {
+      prismaMock.poll.findMany.mockResolvedValue([]);
+
+      const result = await service.listOwn(1);
+
+      expect(result).toEqual([]);
     });
   });
 
