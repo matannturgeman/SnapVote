@@ -56,6 +56,11 @@ export class PollController {
     return parseDto(JoinPollResponseDtoSchema, result);
   }
 
+  @Get()
+  async listOwn(@CurrentUser() user: LoggedInUser): Promise<PollResponseDto[]> {
+    return this.pollService.listOwn(user.id);
+  }
+
   @Post()
   async create(
     @Body() body: unknown,

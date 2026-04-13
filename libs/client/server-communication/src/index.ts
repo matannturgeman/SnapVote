@@ -40,6 +40,7 @@ export {
   useJoinPollByTokenQuery,
   useCastVoteMutation,
   useGetPollResultsQuery,
+  useGetMyPollsQuery,
 } from './lib/poll.api';
 
 // ---------------------------------------------------------------------------

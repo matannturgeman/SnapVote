@@ -6,6 +6,7 @@ import {
   useAppDispatch,
 } from '@libs/client-store';
 import { useGetMeQuery } from '@libs/client-server-communication';
+import { AppShell } from '../components/app-shell';
 import { SessionGate } from '../components/session-gate';
 import { HomePage } from '../pages/home.page';
 import { LoginPage } from '../pages/login.page';
@@ -57,7 +58,9 @@ export function App() {
         path="/"
         element={
           <SessionGate isBootstrapping={isBootstrapping}>
-            <HomePage />
+            <AppShell>
+              <HomePage />
+            </AppShell>
           </SessionGate>
         }
       />
@@ -65,7 +68,9 @@ export function App() {
         path="/polls/new"
         element={
           <SessionGate isBootstrapping={isBootstrapping}>
-            <CreatePollPage />
+            <AppShell>
+              <CreatePollPage />
+            </AppShell>
           </SessionGate>
         }
       />
@@ -73,7 +78,9 @@ export function App() {
         path="/polls/:id"
         element={
           <SessionGate isBootstrapping={isBootstrapping}>
-            <PollDetailPage />
+            <AppShell>
+              <PollDetailPage />
+            </AppShell>
           </SessionGate>
         }
       />
