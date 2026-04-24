@@ -6,7 +6,7 @@ Protect poll integrity and participant safety with practical anti-abuse controls
 
 ## Status
 
-Planned.
+Not implemented.
 
 ## Scope
 

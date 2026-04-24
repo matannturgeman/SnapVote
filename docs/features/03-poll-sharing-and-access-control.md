@@ -6,7 +6,7 @@ Enable poll distribution with clear, enforceable access rules for owners and par
 
 ## Status
 
-Planned.
+Implemented.
 
 ## Scope
 

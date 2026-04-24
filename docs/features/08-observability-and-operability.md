@@ -6,7 +6,7 @@ Ensure SnapVote is operable in production with actionable telemetry, alerting, a
 
 ## Status
 
-Partially implemented baseline.
+Partially implemented (telemetry done).
 
 ## Scope
 

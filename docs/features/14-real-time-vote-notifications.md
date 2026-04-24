@@ -9,7 +9,7 @@ Notify users in real time when someone votes on:
 
 ## Status
 
-Planned.
+Not implemented.
 
 ## Scope
 
