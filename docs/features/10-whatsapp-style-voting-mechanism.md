@@ -6,7 +6,7 @@ Introduce a messaging-app-style poll experience (similar to WhatsApp patterns): 
 
 ## Status
 
-Planned.
+Not implemented.
 
 ## Scope
 

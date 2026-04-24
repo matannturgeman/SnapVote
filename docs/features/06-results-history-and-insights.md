@@ -6,7 +6,7 @@ Preserve finalized poll outcomes and expose useful historical insights for decis
 
 ## Status
 
-Planned.
+Not implemented.
 
 ## Scope
 

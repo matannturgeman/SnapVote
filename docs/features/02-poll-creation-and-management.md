@@ -6,7 +6,7 @@ Allow authenticated users to create polls quickly, edit them safely, and close t
 
 ## Status
 
-Planned.
+Implemented.
 
 ## Scope
 

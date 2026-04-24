@@ -6,7 +6,7 @@ Provide a dedicated user page with actionable personal statistics across voting 
 
 ## Status
 
-Planned.
+Not implemented.
 
 ## Scope
 

@@ -6,7 +6,7 @@ Show social decision intelligence: users who vote most similarly to others, and 
 
 ## Status
 
-Planned.
+Not implemented.
 
 ## Scope
 
