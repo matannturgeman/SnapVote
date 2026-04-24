@@ -16,6 +16,9 @@
   "include": [],
   "references": [
     {
+      "path": "../server-communication"
+    },
+    {
       "path": "./tsconfig.lib.json"
     },
     {

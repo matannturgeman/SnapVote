@@ -15,6 +15,18 @@
   "include": [],
   "references": [
     {
+      "path": "../data-access"
+    },
+    {
+      "path": "../auth"
+    },
+    {
+      "path": "../user"
+    },
+    {
+      "path": "../../shared/dto"
+    },
+    {
       "path": "./tsconfig.lib.json"
     },
     {
