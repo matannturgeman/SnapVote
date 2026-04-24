@@ -44,6 +44,7 @@ jest.mock('@libs/client-server-communication', () => ({
   useCastVoteMutation: (...args: unknown[]) => mockUseCastVoteMutation(...args),
   useGetPollResultsQuery: (...args: unknown[]) =>
     mockUseGetPollResultsQuery(...args),
+  usePollStream: () => ({ presence: null, isConnected: false }),
 }));
 
 const OWNER = { id: 1, email: 'owner@example.com', name: 'Owner' };

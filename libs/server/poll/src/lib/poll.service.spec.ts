@@ -91,12 +91,21 @@ const POLL_WITH_VOTE_COUNTS = {
   ],
 };
 
+const mockPollStreamService = {
+  publish: jest.fn().mockResolvedValue(undefined),
+  subscribe: jest.fn(),
+  incrementPresence: jest.fn().mockResolvedValue(0),
+  decrementPresence: jest.fn().mockResolvedValue(0),
+  getPresence: jest.fn().mockResolvedValue(0),
+};
+
 describe('PollService', () => {
   const prismaMock = prisma as unknown as PrismaMock;
   let service: PollService;
 
   beforeEach(() => {
-    service = new PollService();
+    jest.clearAllMocks();
+    service = new PollService(mockPollStreamService as never);
     jest.clearAllMocks();
   });
 

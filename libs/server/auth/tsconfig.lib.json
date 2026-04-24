@@ -15,14 +15,9 @@
     "src/**/*.test.ts"
   ],
   "references": [
-    {
-      "path": "../data-access/tsconfig.lib.json"
-    },
-    {
-      "path": "../user/tsconfig.lib.json"
-    },
-    {
-      "path": "../../shared/dto/tsconfig.lib.json"
-    }
+    { "path": "../data-access/tsconfig.lib.json" },
+    { "path": "../user/tsconfig.lib.json" },
+    { "path": "../../shared/validation-schemas/tsconfig.lib.json" },
+    { "path": "../../shared/dto/tsconfig.lib.json" }
   ]
 }

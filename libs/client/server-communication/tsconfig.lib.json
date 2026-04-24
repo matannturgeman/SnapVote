@@ -5,7 +5,7 @@
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": false,
-    "types": ["node"],
+    "types": ["node"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": [
@@ -14,11 +14,10 @@
     "src/**/*.spec.ts",
     "src/**/*.test.ts",
     "src/**/*.spec.tsx",
-    "src/**/*.test.tsx",
+    "src/**/*.test.tsx"
   ],
   "references": [
-    {
-      "path": "../../shared/dto/tsconfig.lib.json",
-    },
-  ],
+    { "path": "../../shared/validation-schemas/tsconfig.lib.json" },
+    { "path": "../../shared/dto/tsconfig.lib.json" }
+  ]
 }

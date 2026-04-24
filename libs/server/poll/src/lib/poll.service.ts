@@ -16,10 +16,13 @@ import type {
   ShareLinkResponseDto,
   UpdatePollDto,
 } from '@libs/shared-dto';
+import { PollStreamService } from './poll-stream.service';
 
 @Injectable()
 export class PollService {
   private readonly logger = new Logger(PollService.name);
+
+  constructor(private readonly pollStreamService: PollStreamService) {}
 
   async create(ownerId: number, dto: CreatePollDto): Promise<PollResponseDto> {
     const poll = await prisma.poll.create({
@@ -108,6 +111,11 @@ export class PollService {
     });
 
     this.logger.log(`Poll closed: ${id} by user ${requesterId}`);
+
+    this.pollStreamService
+      .publish(id, { type: 'closed', data: { pollId: id } })
+      .catch((err) => this.logger.error(`Stream publish failed: ${err}`));
+
     return this.toDto(closed);
   }
 
@@ -228,7 +236,14 @@ export class PollService {
       });
     }
 
-    return this.getResults(pollId, participantId);
+    const results = await this.getResults(pollId, participantId);
+
+    // Publish to stream subscribers (fire-and-forget; don't block the response)
+    this.pollStreamService
+      .publish(pollId, { type: 'results', data: results })
+      .catch((err) => this.logger.error(`Stream publish failed: ${err}`));
+
+    return results;
   }
 
   async getResults(

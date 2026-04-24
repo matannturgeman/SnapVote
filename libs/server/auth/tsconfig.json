@@ -14,20 +14,11 @@
   "files": [],
   "include": [],
   "references": [
-    {
-      "path": "../data-access"
-    },
-    {
-      "path": "../user"
-    },
-    {
-      "path": "../../shared/dto"
-    },
-    {
-      "path": "./tsconfig.lib.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
+    { "path": "../data-access" },
+    { "path": "../user" },
+    { "path": "../../shared/validation-schemas" },
+    { "path": "../../shared/dto" },
+    { "path": "./tsconfig.lib.json" },
+    { "path": "./tsconfig.spec.json" }
   ]
 }

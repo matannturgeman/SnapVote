@@ -1,8 +1,38 @@
-import { BadRequestException } from '@nestjs/common';
+// Mock server-data-access to prevent PrismaPg from being instantiated during test init
+jest.mock('@libs/server-data-access', () => ({
+  prisma: {
+    session: { findFirst: jest.fn() },
+    user: { findUnique: jest.fn() },
+    poll: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+    },
+    pollShareLink: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+    },
+    vote: { findUnique: jest.fn(), create: jest.fn() },
+  },
+}));
+
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { ZodError } from 'zod';
+import { Subject, firstValueFrom } from 'rxjs';
+import { take, toArray } from 'rxjs/operators';
 import { PollController } from './poll.controller';
 import type { PollService } from './poll.service';
 import type { PollStreamService } from './poll-stream.service';
+import type { PollStreamEventDto } from '@libs/shared-dto';
+
+// Avoid importing from @libs/server-auth to prevent transitive
+// compilation of @libs/server-data-access (pre-existing TS error there).
+interface MockAuthService {
+  verifyToken: (token: string) => Promise<typeof CURRENT_USER>;
+}
 
 const POLL_RESPONSE = {
   id: 'poll-1',
@@ -20,6 +50,16 @@ const POLL_RESPONSE = {
   ],
 };
 
+const RESULTS_RESPONSE = {
+  pollId: 'poll-1',
+  totalVotes: 2,
+  options: [
+    { id: 'opt-1', text: 'React', order: 0, voteCount: 1 },
+    { id: 'opt-2', text: 'Vue', order: 1, voteCount: 1 },
+  ],
+  myVote: null,
+};
+
 const CURRENT_USER = { id: 1, email: 'owner@example.com', name: 'Owner' };
 
 const SHARE_LINK_RESPONSE = {
@@ -35,6 +75,7 @@ describe('PollController', () => {
   let controller: PollController;
   let pollService: jest.Mocked<PollService>;
   let pollStreamService: jest.Mocked<PollStreamService>;
+  let authService: jest.Mocked<MockAuthService>;
 
   beforeEach(() => {
     pollService = {
@@ -42,18 +83,32 @@ describe('PollController', () => {
       findById: jest.fn(),
       update: jest.fn(),
       close: jest.fn(),
+      listOwn: jest.fn(),
       createShareLink: jest.fn(),
       listShareLinks: jest.fn(),
       revokeShareLink: jest.fn(),
       findByShareToken: jest.fn(),
+      castVote: jest.fn(),
+      getResults: jest.fn(),
     } as unknown as jest.Mocked<PollService>;
 
     pollStreamService = {
+      publish: jest.fn().mockResolvedValue(undefined),
       subscribe: jest.fn(),
-      publishResults: jest.fn(),
+      incrementPresence: jest.fn().mockResolvedValue(1),
+      decrementPresence: jest.fn().mockResolvedValue(0),
+      getPresence: jest.fn().mockResolvedValue(0),
     } as unknown as jest.Mocked<PollStreamService>;
 
-    controller = new PollController(pollService, pollStreamService);
+    authService = {
+      verifyToken: jest.fn(),
+    } as unknown as jest.Mocked<MockAuthService>;
+
+    controller = new PollController(
+      pollService,
+      pollStreamService,
+      authService as never,
+    );
   });
 
   // ---------------------------------------------------------------------------
@@ -101,6 +156,22 @@ describe('PollController', () => {
       await expect(
         controller.create({ title: 'Poll', options: ['A', 'B'] }, CURRENT_USER),
       ).rejects.toBeInstanceOf(ZodError);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // GET /polls
+  // ---------------------------------------------------------------------------
+
+  describe('listOwn', () => {
+    it('returns polls for the current user', async () => {
+      pollService.listOwn.mockResolvedValue([POLL_RESPONSE]);
+
+      const result = await controller.listOwn(CURRENT_USER);
+
+      expect(pollService.listOwn).toHaveBeenCalledWith(1);
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('poll-1');
     });
   });
 
@@ -256,6 +327,125 @@ describe('PollController', () => {
         1,
       );
       expect(result.status).toBe('REVOKED');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // POST /polls/:id/votes
+  // ---------------------------------------------------------------------------
+
+  describe('castVote', () => {
+    it('calls service and returns results dto', async () => {
+      pollService.castVote.mockResolvedValue(RESULTS_RESPONSE);
+
+      const result = await controller.castVote(
+        'poll-1',
+        { optionId: 'opt-1' },
+        CURRENT_USER,
+      );
+
+      expect(pollService.castVote).toHaveBeenCalledWith('poll-1', 1, {
+        optionId: 'opt-1',
+      });
+      expect(result.totalVotes).toBe(2);
+    });
+
+    it('throws BadRequestException for missing optionId', async () => {
+      await expect(
+        controller.castVote('poll-1', {}, CURRENT_USER),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // GET /polls/:id/results
+  // ---------------------------------------------------------------------------
+
+  describe('getResults', () => {
+    it('calls service and returns results dto', async () => {
+      pollService.getResults.mockResolvedValue(RESULTS_RESPONSE);
+
+      const result = await controller.getResults('poll-1', CURRENT_USER);
+
+      expect(pollService.getResults).toHaveBeenCalledWith('poll-1', 1);
+      expect(result.pollId).toBe('poll-1');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // GET /polls/:id/stream (SSE)
+  // ---------------------------------------------------------------------------
+
+  describe('streamPoll', () => {
+    it('throws UnauthorizedException when no token provided', async () => {
+      const obs = controller.streamPoll('poll-1', '');
+      await expect(firstValueFrom(obs)).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
+    });
+
+    it('throws UnauthorizedException when token is invalid', async () => {
+      authService.verifyToken.mockRejectedValue(
+        new UnauthorizedException('Invalid token'),
+      );
+      const obs = controller.streamPoll('poll-1', 'bad-token');
+      await expect(firstValueFrom(obs)).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
+    });
+
+    it('emits initial results and presence snapshots on connect', async () => {
+      authService.verifyToken.mockResolvedValue(CURRENT_USER);
+      pollService.getResults.mockResolvedValue(RESULTS_RESPONSE);
+      pollStreamService.incrementPresence.mockResolvedValue(1);
+
+      const subject = new Subject<PollStreamEventDto>();
+      pollStreamService.subscribe.mockReturnValue(subject.asObservable());
+
+      const obs = controller.streamPoll('poll-1', 'valid-token');
+
+      // Collect the first 2 events then complete
+      const events = await firstValueFrom(obs.pipe(take(2), toArray()));
+
+      expect(events).toHaveLength(2);
+      expect((events[0].data as { type: string }).type).toBe('results');
+      expect((events[1].data as { type: string }).type).toBe('presence');
+      expect(
+        (events[1].data as { type: string; data: { count: number } }).data
+          .count,
+      ).toBe(1);
+
+      subject.complete();
+    });
+
+    it('forwards stream events from PollStreamService', async () => {
+      authService.verifyToken.mockResolvedValue(CURRENT_USER);
+      pollService.getResults.mockResolvedValue(RESULTS_RESPONSE);
+      pollStreamService.incrementPresence.mockResolvedValue(1);
+
+      const subject = new Subject<PollStreamEventDto>();
+      pollStreamService.subscribe.mockReturnValue(subject.asObservable());
+
+      const obs = controller.streamPoll('poll-1', 'valid-token');
+
+      const emitted: unknown[] = [];
+      const sub = obs.subscribe({ next: (v) => emitted.push(v) });
+
+      // Wait for async init
+      await new Promise((r) => setTimeout(r, 10));
+
+      const streamEvent: PollStreamEventDto = {
+        type: 'presence',
+        data: { count: 3 },
+      };
+      subject.next(streamEvent);
+
+      await new Promise((r) => setTimeout(r, 5));
+
+      // Should have initial events + the forwarded one
+      expect(emitted.length).toBeGreaterThanOrEqual(3);
+      sub.unsubscribe();
+      subject.complete();
     });
   });
 });

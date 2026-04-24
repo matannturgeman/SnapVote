@@ -15,14 +15,10 @@
   "files": [],
   "include": [],
   "references": [
-    {
-      "path": "../server-communication"
-    },
-    {
-      "path": "./tsconfig.lib.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
+    { "path": "../../shared/validation-schemas" },
+    { "path": "../../shared/dto" },
+    { "path": "../server-communication" },
+    { "path": "./tsconfig.lib.json" },
+    { "path": "./tsconfig.spec.json" }
   ]
 }
