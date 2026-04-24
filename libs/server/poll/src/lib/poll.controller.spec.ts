@@ -2,6 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 import { ZodError } from 'zod';
 import { PollController } from './poll.controller';
 import type { PollService } from './poll.service';
+import type { PollStreamService } from './poll-stream.service';
 
 const POLL_RESPONSE = {
   id: 'poll-1',
@@ -33,6 +34,7 @@ const SHARE_LINK_RESPONSE = {
 describe('PollController', () => {
   let controller: PollController;
   let pollService: jest.Mocked<PollService>;
+  let pollStreamService: jest.Mocked<PollStreamService>;
 
   beforeEach(() => {
     pollService = {
@@ -46,7 +48,12 @@ describe('PollController', () => {
       findByShareToken: jest.fn(),
     } as unknown as jest.Mocked<PollService>;
 
-    controller = new PollController(pollService);
+    pollStreamService = {
+      subscribe: jest.fn(),
+      publishResults: jest.fn(),
+    } as unknown as jest.Mocked<PollStreamService>;
+
+    controller = new PollController(pollService, pollStreamService);
   });
 
   // ---------------------------------------------------------------------------
