@@ -140,8 +140,10 @@
     "lodash": "4.17.23",
     "qs": "6.15.0",
     "yaml": "2.8.3",
-    "node-fetch": "2.7.0",
+    "node_fetch": "2.7.0",
     "chokidar": "4.0.3",
-    "readdirp": "4.1.2"
+    "readdirp": "4.1.2",
+    "babel-plugin-macros": "3.1.0",
+    "cosmiconfig": "7.1.0"
   }
 }
