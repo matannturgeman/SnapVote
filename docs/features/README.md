@@ -13,7 +13,7 @@ This folder defines feature slices for SnapVote development at `C:\Dev\SnapVote`
 | 04 Vote Casting + Idempotency            | Implemented           | Cast vote, one-vote policy                           |
 | 04.5 App Shell + Navbar + My Polls       | Implemented           | Navbar, AppShell, home poll list                     |
 | 04.6 Dark Mode                           | Implemented           | Theme toggle, dark variants                          |
-| 05 Live Results + Presence               | Not implemented       | SSE streaming                                        |
+| 05 Live Results + Presence               | Implemented           | SSE streaming                                        |
 | 06 Results History + Insights            | Not implemented       | Historical polls                                     |
 | 07 Moderation + Abuse Protection         | Not implemented       | Reporting                                            |
 | 08 Observability + Operability           | Partially Implemented | Request telemetry exists                             |
