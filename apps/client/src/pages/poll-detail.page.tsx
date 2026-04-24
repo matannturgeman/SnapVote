@@ -9,6 +9,7 @@ import {
   useGetPollQuery,
   useGetPollResultsQuery,
   useListShareLinksQuery,
+  usePollStream,
   useRevokeShareLinkMutation,
   useUpdatePollMutation,
 } from '@libs/client-server-communication';
@@ -57,9 +58,9 @@ export function PollDetailPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [castVote, { isLoading: isVoting }] = useCastVoteMutation();
   const [voteError, setVoteError] = useState(false);
-  const { data: results, refetch: refetchResults } = useGetPollResultsQuery(
-    id ?? '',
-    { skip: !id },
+  const { data: results } = useGetPollResultsQuery(id ?? '', { skip: !id });
+  const { presence, isConnected } = usePollStream(
+    poll?.status === 'OPEN' ? id : undefined,
   );
 
   useEffect(() => {
@@ -160,11 +161,19 @@ export function PollDetailPage() {
         <Card>
           <CardHeader className="space-y-3">
             <div className="flex items-center justify-between">
-              <span
-                className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${STATUS_COLORS[poll.status] ?? STATUS_COLORS['DRAFT']}`}
-              >
-                {poll.status}
-              </span>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${STATUS_COLORS[poll.status] ?? STATUS_COLORS['DRAFT']}`}
+                >
+                  {poll.status}
+                </span>
+                {poll.status === 'OPEN' && presence !== null && isConnected && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    {presence} viewing
+                  </span>
+                )}
+              </div>
               <Link
                 to="/"
                 className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
@@ -418,7 +427,6 @@ export function PollDetailPage() {
                                 id,
                                 body: { optionId: opt.id },
                               }).unwrap();
-                              refetchResults();
                             } catch {
                               setVoteError(true);
                             }

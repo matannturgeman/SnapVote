@@ -4,12 +4,16 @@ import {
   Controller,
   Get,
   HttpCode,
+  Logger,
+  MessageEvent,
   Param,
   Patch,
   Post,
-  Res,
+  Query,
+  Sse,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Observable } from 'rxjs';
 import {
   CastVoteDtoSchema,
   CreatePollDtoSchema,
@@ -26,7 +30,7 @@ import {
   type ShareLinkResponseDto,
 } from '@libs/shared-dto';
 import { CurrentUser, type LoggedInUser } from '@libs/server-user';
-import { Public } from '@libs/server-auth';
+import { AuthService, Public } from '@libs/server-auth';
 import { PollService } from './poll.service';
 import { PollStreamService } from './poll-stream.service';
 
@@ -47,9 +51,12 @@ function parsePollDto<T>(
 
 @Controller('polls')
 export class PollController {
+  private readonly logger = new Logger(PollController.name);
+
   constructor(
     private readonly pollService: PollService,
     private readonly pollStreamService: PollStreamService,
+    private readonly authService: AuthService,
   ) {}
 
   // Public: participants access poll via share token (declared first to avoid :id capture)
@@ -145,9 +152,7 @@ export class PollController {
   ): Promise<PollResultsDto> {
     const dto = parsePollDto(CastVoteDtoSchema, body);
     const result = await this.pollService.castVote(id, user.id, dto);
-    const parsed = parseDto(PollResultsDtoSchema, result);
-    this.pollStreamService.publishResults(id, parsed);
-    return parsed;
+    return parseDto(PollResultsDtoSchema, result);
   }
 
   @Get(':id/results')
@@ -159,27 +164,70 @@ export class PollController {
     return parseDto(PollResultsDtoSchema, result);
   }
 
-  @Get(':id/stream')
-  async streamResults(
-    @Param('id') id: string,
-    @CurrentUser() user: LoggedInUser,
-    @Res() res: Response,
-  ): Promise<void> {
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
+  /**
+   * SSE stream for live poll results and presence.
+   * Auth is done via ?token= query param because EventSource cannot set headers.
+   */
+  @Public()
+  @Sse(':id/stream')
+  streamPoll(
+    @Param('id') pollId: string,
+    @Query('token') token: string,
+  ): Observable<MessageEvent> {
+    return new Observable<MessageEvent>((observer) => {
+      let closed = false;
+      let streamUnsub: (() => void) | undefined;
 
-    const initialResults = await this.pollService.getResults(id, user.id);
-    res.write(
-      `data: ${JSON.stringify({ type: 'results', data: initialResults })}\n\n`,
-    );
+      (async () => {
+        try {
+          if (!token) throw new UnauthorizedException('No token provided');
+          const user = await this.authService.verifyToken(token);
+          if (closed) return;
 
-    const unsubscribe = this.pollStreamService.subscribe(id, (message) => {
-      res.write(`data: ${message}\n\n`);
-    });
+          // Send initial results snapshot
+          const results = await this.pollService.getResults(pollId, user.id);
+          if (closed) return;
+          observer.next({ data: { type: 'results', data: results } });
 
-    res.on('close', () => {
-      unsubscribe();
+          // Increment presence and broadcast the new count
+          const count = await this.pollStreamService.incrementPresence(pollId);
+          if (closed) return;
+          observer.next({ data: { type: 'presence', data: { count } } });
+          this.pollStreamService
+            .publish(pollId, { type: 'presence', data: { count } })
+            .catch((err) =>
+              this.logger.error(`Presence publish failed: ${err}`),
+            );
+
+          // Forward all subsequent stream events
+          const sub = this.pollStreamService.subscribe(pollId).subscribe({
+            next: (event) => {
+              if (!closed) observer.next({ data: event });
+            },
+            error: (err) => observer.error(err),
+          });
+          streamUnsub = () => sub.unsubscribe();
+        } catch (err) {
+          observer.error(err);
+        }
+      })();
+
+      // Teardown: runs when client disconnects
+      return () => {
+        closed = true;
+        streamUnsub?.();
+        this.pollStreamService
+          .decrementPresence(pollId)
+          .then((count) =>
+            this.pollStreamService.publish(pollId, {
+              type: 'presence',
+              data: { count },
+            }),
+          )
+          .catch((err) =>
+            this.logger.error(`Presence decrement failed: ${err}`),
+          );
+      };
     });
   }
 }

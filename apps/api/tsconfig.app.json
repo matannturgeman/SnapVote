@@ -15,20 +15,11 @@
     "src/**/*.test.ts"
   ],
   "references": [
-    {
-      "path": "../../libs/server/data-access/tsconfig.lib.json"
-    },
-    {
-      "path": "../../libs/server/user/tsconfig.lib.json"
-    },
-    {
-      "path": "../../libs/server/auth/tsconfig.lib.json"
-    },
-    {
-      "path": "../../libs/server/poll/tsconfig.lib.json"
-    },
-    {
-      "path": "../../libs/shared/dto/tsconfig.lib.json"
-    }
+    { "path": "../../libs/server/poll/tsconfig.lib.json" },
+    { "path": "../../libs/server/data-access/tsconfig.lib.json" },
+    { "path": "../../libs/server/user/tsconfig.lib.json" },
+    { "path": "../../libs/server/auth/tsconfig.lib.json" },
+    { "path": "../../libs/shared/validation-schemas/tsconfig.lib.json" },
+    { "path": "../../libs/shared/dto/tsconfig.lib.json" }
   ]
 }

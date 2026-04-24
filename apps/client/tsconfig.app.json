@@ -24,11 +24,9 @@
   ],
   "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"],
   "references": [
-    {
-      "path": "../../libs/client/server-communication/tsconfig.lib.json"
-    },
-    {
-      "path": "../../libs/client/store/tsconfig.lib.json"
-    }
+    { "path": "../../libs/shared/validation-schemas/tsconfig.lib.json" },
+    { "path": "../../libs/shared/dto/tsconfig.lib.json" },
+    { "path": "../../libs/client/server-communication/tsconfig.lib.json" },
+    { "path": "../../libs/client/store/tsconfig.lib.json" }
   ]
 }

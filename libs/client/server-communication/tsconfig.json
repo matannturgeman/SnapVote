@@ -14,14 +14,9 @@
   "files": [],
   "include": [],
   "references": [
-    {
-      "path": "../../shared/dto"
-    },
-    {
-      "path": "./tsconfig.lib.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
+    { "path": "../../shared/validation-schemas" },
+    { "path": "../../shared/dto" },
+    { "path": "./tsconfig.lib.json" },
+    { "path": "./tsconfig.spec.json" }
   ]
 }
