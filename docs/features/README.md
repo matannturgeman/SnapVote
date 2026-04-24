@@ -4,24 +4,26 @@ This folder defines feature slices for SnapVote development at `C:\Dev\SnapVote`
 
 ## Status Matrix
 
-| Feature | Status | Notes |
-| --- | --- | --- |
-| 00 Current State + Cross-Cutting Debt | Implemented (Doc) | Snapshot of repo reality and debt baseline |
-| 01 Auth Session + Account Recovery | Implemented (Baseline) | Login/register/forgot/reset/logout/session bootstrap already exist |
-| 02 Poll Creation + Management | Planned | No poll domain models/endpoints/UI yet |
-| 03 Poll Sharing + Access Control | Planned | Depends on poll domain and identity model |
-| 04 Vote Casting + Idempotency | Planned | Depends on poll + participant identity strategy |
-| 05 Live Results + Presence | Planned | Depends on vote events and stream delivery |
-| 06 Results History + Insights | Planned | Depends on poll/vote persistence and metadata |
-| 07 Moderation + Abuse Protection | Planned | Depends on sharing, voting, and reporting flows |
-| 08 Observability + Operability | Partially Implemented | Request telemetry exists; product metrics/alerts/runbooks are missing |
-| 09 Cleanup Technical Debt | Implemented (Doc) | Prioritized debt backlog for pre/post feature work |
-| 10 WhatsApp-Style Voting Mechanism | Planned | Transparent voter lists, vote change, multi-answer mode |
-| 11 User, Category, and Theme Vote Explorer | Planned | Filter polls by users/themes/categories; per-user vote exploration |
-| 12 User Alignment and Outstanding Users Insights | Planned | "Most aligned" and "outstanding" user analytics |
-| 13 User Statistics Page | Planned | Dedicated user profile page with stats + filters |
-| 14 Real-Time Vote Notifications | Planned | Live notifications when someone votes on my poll or a poll I voted on |
-| 15 LLM Poll Insights and Narrative Conclusions | Planned | AI-generated explanations from poll aggregates (regional/theme-aware) |
+| Feature                                  | Status                | Notes                                                |
+| ---------------------------------------- | --------------------- | ---------------------------------------------------- |
+| 00 Current State + Cross-Cutting Debt    | Implemented (Doc)     | Snapshot of repo reality and debt baseline           |
+| 01 Auth Session + Account Recovery       | Implemented           | Login/register/forgot/reset/logout/session bootstrap |
+| 02 Poll Creation + Management            | Implemented           | Create/update/close polls                            |
+| 03 Poll Sharing + Access Control         | Implemented           | Share links, join by token                           |
+| 04 Vote Casting + Idempotency            | Implemented           | Cast vote, one-vote policy                           |
+| 04.5 App Shell + Navbar + My Polls       | Implemented           | Navbar, AppShell, home poll list                     |
+| 04.6 Dark Mode                           | Implemented           | Theme toggle, dark variants                          |
+| 05 Live Results + Presence               | Not implemented       | SSE streaming                                        |
+| 06 Results History + Insights            | Not implemented       | Historical polls                                     |
+| 07 Moderation + Abuse Protection         | Not implemented       | Reporting                                            |
+| 08 Observability + Operability           | Partially Implemented | Request telemetry exists                             |
+| 09 Cleanup Technical Debt                | Document only         | Backlog                                              |
+| 10 WhatsApp-Style Voting Mechanism       | Not implemented       | Vote change, transparent lists                       |
+| 11 User + Category + Theme Vote Explorer | Not implemented       | Filters/explorer                                     |
+| 12 User Alignment + Outstanding Users    | Not implemented       | Analytics                                            |
+| 13 User Statistics Page                  | Not implemented       | Profile stats                                        |
+| 14 Real-Time Vote Notifications          | Not implemented       | Live notifications                                   |
+| 15 LLM Poll Insights                     | Not implemented       | AI insights                                          |
 
 ## Dependency Map
 

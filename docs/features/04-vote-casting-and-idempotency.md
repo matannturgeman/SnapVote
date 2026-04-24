@@ -6,7 +6,7 @@ Provide a fast and reliable vote-write path with clear deduplication rules.
 
 ## Status
 
-Planned.
+Implemented.
 
 ## Scope
 
