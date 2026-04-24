@@ -164,10 +164,7 @@ export class PollController {
     return parseDto(PollResultsDtoSchema, result);
   }
 
-  /**
-   * SSE stream for live poll results and presence.
-   * Auth is done via ?token= query param because EventSource cannot set headers.
-   */
+  // Auth via ?token= query param: EventSource cannot set custom headers.
   @Public()
   @Sse(':id/stream')
   streamPoll(
@@ -184,14 +181,13 @@ export class PollController {
           const user = await this.authService.verifyToken(token);
           if (closed) return;
 
-          // Send initial results snapshot
-          const results = await this.pollService.getResults(pollId, user.id);
+          const [results, count] = await Promise.all([
+            this.pollService.getResults(pollId, user.id),
+            this.pollStreamService.incrementPresence(pollId),
+          ]);
           if (closed) return;
-          observer.next({ data: { type: 'results', data: results } });
 
-          // Increment presence and broadcast the new count
-          const count = await this.pollStreamService.incrementPresence(pollId);
-          if (closed) return;
+          observer.next({ data: { type: 'results', data: results } });
           observer.next({ data: { type: 'presence', data: { count } } });
           this.pollStreamService
             .publish(pollId, { type: 'presence', data: { count } })
@@ -199,7 +195,6 @@ export class PollController {
               this.logger.error(`Presence publish failed: ${err}`),
             );
 
-          // Forward all subsequent stream events
           const sub = this.pollStreamService.subscribe(pollId).subscribe({
             next: (event) => {
               if (!closed) observer.next({ data: event });
@@ -212,7 +207,6 @@ export class PollController {
         }
       })();
 
-      // Teardown: runs when client disconnects
       return () => {
         closed = true;
         streamUnsub?.();

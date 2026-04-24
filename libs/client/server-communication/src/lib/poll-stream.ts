@@ -1,20 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import type { PollResultsDto } from '@libs/shared-dto';
-import { baseApi } from './base-api';
-
-const API_BASE_URL =
-  (typeof process !== 'undefined' && process.env['VITE_API_BASE_URL']) ||
-  (typeof process !== 'undefined' && process.env['API_BASE_URL']) ||
-  'http://localhost:3000/api';
-
-function getStoredToken(): string | null {
-  try {
-    return window.localStorage.getItem('accessToken');
-  } catch {
-    return null;
-  }
-}
+import { BASE_URL, baseApi, readPersistedToken } from './base-api';
 
 export function usePollStream(pollId: string | undefined): {
   presence: number | null;
@@ -23,18 +10,15 @@ export function usePollStream(pollId: string | undefined): {
   const dispatch = useDispatch();
   const [presence, setPresence] = useState<number | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  // Track the current pollId so the cleanup function closes the right source
-  const esRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
     if (!pollId) return;
 
-    const token = getStoredToken();
+    const token = readPersistedToken();
     if (!token) return;
 
-    const url = `${API_BASE_URL}/polls/${pollId}/stream?token=${encodeURIComponent(token)}`;
+    const url = `${BASE_URL}/polls/${pollId}/stream?token=${encodeURIComponent(token)}`;
     const es = new EventSource(url);
-    esRef.current = es;
 
     es.onopen = () => setIsConnected(true);
     es.onerror = () => setIsConnected(false);
@@ -57,7 +41,6 @@ export function usePollStream(pollId: string | undefined): {
         } else if (parsed.type === 'presence') {
           setPresence((parsed.data as { count: number }).count);
         } else if (parsed.type === 'closed') {
-          // Refetch the poll so the status badge updates
           dispatch(baseApi.util.invalidateTags([{ type: 'Poll', id: pollId }]));
         }
       } catch {
@@ -67,7 +50,6 @@ export function usePollStream(pollId: string | undefined): {
 
     return () => {
       es.close();
-      esRef.current = null;
       setIsConnected(false);
     };
   }, [pollId, dispatch]);
