@@ -175,6 +175,31 @@ export const pollResultsSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Poll stream event schemas (SSE)
+// ---------------------------------------------------------------------------
+
+export const pollStreamResultsEventSchema = z.object({
+  type: z.literal('results'),
+  data: pollResultsSchema,
+});
+
+export const pollStreamPresenceEventSchema = z.object({
+  type: z.literal('presence'),
+  data: z.object({ count: z.number().int().nonnegative() }),
+});
+
+export const pollStreamClosedEventSchema = z.object({
+  type: z.literal('closed'),
+  data: z.object({ pollId: z.string() }),
+});
+
+export const pollStreamEventSchema = z.discriminatedUnion('type', [
+  pollStreamResultsEventSchema,
+  pollStreamPresenceEventSchema,
+  pollStreamClosedEventSchema,
+]);
+
+// ---------------------------------------------------------------------------
 // Namespace exports for convenient grouped imports
 // ---------------------------------------------------------------------------
 
@@ -213,4 +238,8 @@ export const PollSchemas = {
   castVote: castVoteSchema,
   voteOptionResult: voteOptionResultSchema,
   pollResults: pollResultsSchema,
+  streamResultsEvent: pollStreamResultsEventSchema,
+  streamPresenceEvent: pollStreamPresenceEventSchema,
+  streamClosedEvent: pollStreamClosedEventSchema,
+  streamEvent: pollStreamEventSchema,
 } as const;

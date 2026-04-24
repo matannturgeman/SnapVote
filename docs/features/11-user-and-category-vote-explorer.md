@@ -6,7 +6,7 @@ Let users explore voting behavior by person and theme/category: see what a user 
 
 ## Status
 
-Planned.
+Not implemented.
 
 ## Scope
 

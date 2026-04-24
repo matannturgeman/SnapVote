@@ -9,7 +9,7 @@ Send aggregated poll data to an LLM (for example ChatGPT) and receive human-read
 
 ## Status
 
-Planned.
+Not implemented.
 
 ## Scope
 

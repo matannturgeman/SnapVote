@@ -18,6 +18,7 @@ import {
   joinPollResponseSchema,
   castVoteSchema,
   pollResultsSchema,
+  pollStreamEventSchema,
 } from '@libs/shared-validation-schemas';
 
 // ---------------------------------------------------------------------------
@@ -104,6 +105,7 @@ export const CreateShareLinkDtoSchema = createShareLinkSchema;
 export const JoinPollResponseDtoSchema = joinPollResponseSchema;
 export const CastVoteDtoSchema = castVoteSchema;
 export const PollResultsDtoSchema = pollResultsSchema;
+export const PollStreamEventDtoSchema = pollStreamEventSchema;
 
 export type PollOptionResponseDto = z.infer<typeof PollOptionResponseDtoSchema>;
 export type PollResponseDto = z.infer<typeof PollResponseDtoSchema>;
@@ -114,6 +116,7 @@ export type CreateShareLinkDto = z.infer<typeof CreateShareLinkDtoSchema>;
 export type JoinPollResponseDto = z.infer<typeof JoinPollResponseDtoSchema>;
 export type CastVoteDto = z.infer<typeof CastVoteDtoSchema>;
 export type PollResultsDto = z.infer<typeof PollResultsDtoSchema>;
+export type PollStreamEventDto = z.infer<typeof PollStreamEventDtoSchema>;
 
 // ---------------------------------------------------------------------------
 // Helpers
