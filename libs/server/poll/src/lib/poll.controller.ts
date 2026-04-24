@@ -7,7 +7,9 @@ import {
   Param,
   Patch,
   Post,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import {
   CastVoteDtoSchema,
   CreatePollDtoSchema,
@@ -26,6 +28,7 @@ import {
 import { CurrentUser, type LoggedInUser } from '@libs/server-user';
 import { Public } from '@libs/server-auth';
 import { PollService } from './poll.service';
+import { PollStreamService } from './poll-stream.service';
 
 function parsePollDto<T>(
   schema: { parse: (data: unknown) => T },
@@ -44,7 +47,10 @@ function parsePollDto<T>(
 
 @Controller('polls')
 export class PollController {
-  constructor(private readonly pollService: PollService) {}
+  constructor(
+    private readonly pollService: PollService,
+    private readonly pollStreamService: PollStreamService,
+  ) {}
 
   // Public: participants access poll via share token (declared first to avoid :id capture)
   @Public()
@@ -139,7 +145,9 @@ export class PollController {
   ): Promise<PollResultsDto> {
     const dto = parsePollDto(CastVoteDtoSchema, body);
     const result = await this.pollService.castVote(id, user.id, dto);
-    return parseDto(PollResultsDtoSchema, result);
+    const parsed = parseDto(PollResultsDtoSchema, result);
+    this.pollStreamService.publishResults(id, parsed);
+    return parsed;
   }
 
   @Get(':id/results')
@@ -149,5 +157,29 @@ export class PollController {
   ): Promise<PollResultsDto> {
     const result = await this.pollService.getResults(id, user.id);
     return parseDto(PollResultsDtoSchema, result);
+  }
+
+  @Get(':id/stream')
+  async streamResults(
+    @Param('id') id: string,
+    @CurrentUser() user: LoggedInUser,
+    @Res() res: Response,
+  ): Promise<void> {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const initialResults = await this.pollService.getResults(id, user.id);
+    res.write(
+      `data: ${JSON.stringify({ type: 'results', data: initialResults })}\n\n`,
+    );
+
+    const unsubscribe = this.pollStreamService.subscribe(id, (message) => {
+      res.write(`data: ${message}\n\n`);
+    });
+
+    res.on('close', () => {
+      unsubscribe();
+    });
   }
 }

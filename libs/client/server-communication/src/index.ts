@@ -42,6 +42,7 @@ export {
   useGetPollResultsQuery,
   useGetMyPollsQuery,
 } from './lib/poll.api';
+export { usePollStream } from './lib/poll-stream';
 
 // ---------------------------------------------------------------------------
 // Users endpoints & hooks
