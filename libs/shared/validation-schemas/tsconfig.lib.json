@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../../dist/libs/shared-validation-schemas",
+    "composite": true,
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": false,

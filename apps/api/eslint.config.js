@@ -38,7 +38,8 @@ module.exports = [
       'no-restricted-syntax': [
         'error',
         {
-          selector: "MemberExpression[object.name='process'][property.name='env']",
+          selector:
+            "MemberExpression[object.name='process'][property.name='env']",
           message:
             'Use NestJS ConfigService instead of process.env to access environment variables.',
         },

@@ -98,6 +98,9 @@
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
     },
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
     "test": {
       "options": {
         "passWithNoTests": true

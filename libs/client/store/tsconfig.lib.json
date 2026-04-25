@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../../dist/libs/client-store",
+    "composite": true,
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": false,
