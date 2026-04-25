@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   BarChart2,
+  Calendar,
   ChevronLeft,
   ChevronRight,
   Loader2,
@@ -13,6 +14,7 @@ import { useListMyPollsQuery } from '@libs/client-server-communication';
 import type { PollListQueryDto } from '@libs/shared-dto';
 import { POLL_STATUS_COLORS } from '../lib/poll-ui';
 import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 import {
   Card,
   CardContent,
@@ -34,20 +36,39 @@ const LIMIT = 10;
 
 export function HomePage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
   const [page, setPage] = useState(1);
 
   const { data, isLoading } = useListMyPollsQuery({
     ...(statusFilter !== 'ALL' ? { status: statusFilter } : {}),
+    ...(fromDate ? { from: new Date(fromDate) } : {}),
+    ...(toDate ? { to: new Date(toDate) } : {}),
     page,
     limit: LIMIT,
   });
 
   const polls = data?.data ?? [];
   const totalPages = data?.totalPages ?? 1;
+  const totalVotes = polls.reduce((sum, p) => sum + (p.totalVotes ?? 0), 0);
 
   function handleFilterChange(value: StatusFilter) {
     setStatusFilter(value);
     setPage(1);
+  }
+
+  function handleDateFilterChange() {
+    setPage(1);
+  }
+
+  function handleFromDateChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setFromDate(e.target.value);
+    handleDateFilterChange();
+  }
+
+  function handleToDateChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setToDate(e.target.value);
+    handleDateFilterChange();
   }
 
   return (
@@ -69,6 +90,50 @@ export function HomePage() {
         </Link>
       </div>
 
+      {/* Summary cards */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription className="text-xs">Total Polls</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+              {data?.total ?? 0}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription className="text-xs">Total Votes</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+              {totalVotes}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription className="text-xs">Open Polls</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              {polls.filter((p) => p.status === 'OPEN').length}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription className="text-xs">Closed Polls</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-slate-600 dark:text-slate-400">
+              {polls.filter((p) => p.status === 'CLOSED').length}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Status filter tabs */}
       <div className="flex gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-800/50">
         {FILTER_TABS.map((tab) => (
@@ -85,6 +150,26 @@ export function HomePage() {
             {tab.label}
           </button>
         ))}
+      </div>
+
+      {/* Date filter */}
+      <div className="flex flex-wrap gap-3">
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-slate-400 dark:text-slate-500" />
+          <Input
+            type="date"
+            value={fromDate}
+            onChange={handleFromDateChange}
+            className="w-36"
+          />
+        </div>
+        <span className="text-slate-400 dark:text-slate-500">to</span>
+        <Input
+          type="date"
+          value={toDate}
+          onChange={handleToDateChange}
+          className="w-36"
+        />
       </div>
 
       {isLoading ? (
