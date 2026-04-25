@@ -1,6 +1,6 @@
-import nx from '@nx/eslint-plugin';
+const nx = require('@nx/eslint-plugin');
 
-export default [
+module.exports = [
   ...nx.configs['flat/base'],
   ...nx.configs['flat/typescript'],
   ...nx.configs['flat/javascript'],
@@ -26,24 +26,14 @@ export default [
     },
   },
   {
-    files: [
-      '**/*.ts',
-      '**/*.tsx',
-      '**/*.cts',
-      '**/*.mts',
-      '**/*.js',
-      '**/*.jsx',
-      '**/*.cjs',
-      '**/*.mjs',
-    ],
-    // Override or add rules here
+    files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
     rules: {},
   },
   {
     // Server-side code must use NestJS ConfigService instead of process.env.
-    // Exceptions: main.ts (pre-DI bootstrap) and prisma.module.ts (module-level singleton).
-    files: ['libs/server/**/*.ts', 'apps/api/src/**/*.ts'],
-    ignores: ['**/*.spec.ts', '**/main.ts', '**/prisma.module.ts'],
+    // Exception: main.ts is pre-DI bootstrap code.
+    files: ['src/**/*.ts'],
+    ignores: ['**/*.spec.ts', 'src/main.ts'],
     rules: {
       'no-restricted-syntax': [
         'error',

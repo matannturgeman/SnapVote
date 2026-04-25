@@ -9,16 +9,16 @@
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noPropertyAccessFromIndexSignature": true,
+    "noPropertyAccessFromIndexSignature": true
   },
   "files": [],
   "include": [],
   "references": [
-    {
-      "path": "./tsconfig.lib.json",
-    },
-    {
-      "path": "./tsconfig.spec.json",
-    },
-  ],
+    { "path": "../data-access" },
+    { "path": "../user" },
+    { "path": "../../shared/validation-schemas" },
+    { "path": "../../shared/dto" },
+    { "path": "./tsconfig.lib.json" },
+    { "path": "./tsconfig.spec.json" }
+  ]
 }

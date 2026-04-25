@@ -8,8 +8,8 @@
       "react-dom",
       "@nx/react/typings/cssmodule.d.ts",
       "@nx/react/typings/image.d.ts",
-      "vite/client",
-    ],
+      "vite/client"
+    ]
   },
   "exclude": [
     "**/*.spec.ts",
@@ -21,9 +21,9 @@
     "**/*.spec.jsx",
     "**/*.test.jsx",
     "jest.config.ts",
-    "jest.config.cts",
+    "jest.config.js",
     "src/**/*.spec.ts",
-    "src/**/*.test.ts",
+    "src/**/*.test.ts"
   ],
-  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"],
+  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"]
 }

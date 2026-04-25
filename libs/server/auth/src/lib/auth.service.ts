@@ -4,6 +4,7 @@
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { prisma } from '@libs/server-data-access';
 import type {
   AuthResponseDto,
@@ -37,7 +38,10 @@ interface AuthUser {
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
-  constructor(private readonly passwordResetMailer: PasswordResetMailerService) {}
+  constructor(
+    private readonly passwordResetMailer: PasswordResetMailerService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async verifyToken(token: string): Promise<LoggedInUser> {
     const now = new Date();
@@ -67,7 +71,10 @@ export class AuthService {
     return this.toLoggedInUser(session.user);
   }
 
-  async signToken(user: LoggedInUser, metadata?: SessionMetadata): Promise<string> {
+  async signToken(
+    user: LoggedInUser,
+    metadata?: SessionMetadata,
+  ): Promise<string> {
     const rawToken = createOpaqueToken();
     const tokenHash = hashOpaqueToken(rawToken);
     const expiresAt = new Date(Date.now() + this.sessionTtlSeconds() * 1000);
@@ -341,7 +348,7 @@ export class AuthService {
   }
 
   private positiveIntEnv(key: string, fallback: number): number {
-    const raw = process.env[key];
+    const raw = this.configService.get<string>(key);
 
     if (!raw) {
       return fallback;
@@ -358,4 +365,3 @@ export class AuthService {
     return fallback;
   }
 }
-

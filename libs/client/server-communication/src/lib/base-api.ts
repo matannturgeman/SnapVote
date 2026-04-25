@@ -5,7 +5,7 @@ import type {
   FetchBaseQueryError,
 } from '@reduxjs/toolkit/query/react';
 
-const BASE_URL =
+export const BASE_URL =
   (typeof process !== 'undefined' && process.env['VITE_API_BASE_URL']) ||
   (typeof process !== 'undefined' && process.env['API_BASE_URL']) ||
   'http://localhost:3000/api';
@@ -24,7 +24,7 @@ function getLocalStorage(): StorageLike | null {
   return storage ?? null;
 }
 
-function readPersistedToken(): string | null {
+export function readPersistedToken(): string | null {
   return getLocalStorage()?.getItem('accessToken') ?? null;
 }
 
