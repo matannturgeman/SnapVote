@@ -62,7 +62,10 @@ jest.mock('@libs/client-server-communication', () => ({
     mockUseForgotPasswordMutation(...args),
   useResetPasswordMutation: (...args: unknown[]) =>
     mockUseResetPasswordMutation(...args),
-  useListMyPollsQuery: () => ({ data: { data: [], totalPages: 1 }, isLoading: false }),
+  useListMyPollsQuery: () => ({
+    data: { data: [], totalPages: 1 },
+    isLoading: false,
+  }),
 }));
 
 function renderAt(path: string) {
