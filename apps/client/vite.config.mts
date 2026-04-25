@@ -29,14 +29,5 @@ export default defineConfig(() => ({
     commonjsOptions: {
       transformMixedEsModules: true,
     },
-    lib: {
-      entry: 'src/main.tsx',
-      fileName: 'main',
-      formats: ['es'],
-    },
-  },
-  // Skip TypeScript checking during build
-  esbuild: {
-    logOverride: { 'cant-assign-property': 'silent' },
   },
 }));
