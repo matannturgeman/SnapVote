@@ -19,13 +19,12 @@ jobs:
           filter: tree:0
           fetch-depth: 0
 
-      # Cache node_modules
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: 'pnpm'
 
-      - run: npm ci
+      - run: corepack enable pnpm && pnpm install --lockfile-only
 
       - run: npx nx format:check --base="remotes/origin/main"
       - run: npx nx run-many -t lint test build typecheck
