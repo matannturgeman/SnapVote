@@ -3,6 +3,7 @@
   "files": [],
   "include": [],
   "references": [
+    { "path": "../../libs/server/shared" },
     { "path": "../../libs/server/poll" },
     { "path": "../../libs/server/data-access" },
     { "path": "../../libs/server/user" },

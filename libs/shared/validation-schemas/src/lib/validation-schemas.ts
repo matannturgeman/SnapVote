@@ -253,3 +253,38 @@ export const PollSchemas = {
   streamClosedEvent: pollStreamClosedEventSchema,
   streamEvent: pollStreamEventSchema,
 } as const;
+
+// ---------------------------------------------------------------------------
+// Moderation schemas
+// ---------------------------------------------------------------------------
+
+export const reportReasonSchema = z.enum([
+  'SPAM',
+  'HARASSMENT',
+  'INAPPROPRIATE',
+  'DUPLICATE',
+]);
+
+export const reportStatusSchema = z.enum([
+  'PENDING',
+  'REVIEWED',
+  'DISMISSED',
+  'ACTION_TAKEN',
+]);
+
+export const createReportSchema = z.object({
+  reason: reportReasonSchema,
+  details: z
+    .string()
+    .min(1)
+    .max(1000, 'Details must be at most 1000 characters')
+    .optional(),
+  voteId: z.string().optional(),
+});
+
+export const moderationActionSchema = z.enum([
+  'LOCK',
+  'UNLOCK',
+  'DELETE',
+  'REMOVE_REPORT',
+]);
