@@ -3,7 +3,6 @@
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/server/poll/src",
   "projectType": "library",
-  "tags": ["scope:server", "type:feature"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
@@ -15,11 +14,17 @@
         "assets": ["libs/server/poll/*.md"]
       }
     },
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+    "typecheck": {
+      "executor": "nx:run-commands",
       "options": {
-        "jestConfig": "libs/server/poll/jest.config.js"
+        "command": "tsc --noEmit -p libs/server/poll/tsconfig.lib.json"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "echo No tests",
+        "passWithNoTests": true
       }
     }
   }

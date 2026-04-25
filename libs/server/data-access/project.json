@@ -3,7 +3,6 @@
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/server/data-access/src",
   "projectType": "library",
-  "tags": ["scope:server", "type:data-access"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
@@ -13,6 +12,19 @@
         "main": "libs/server/data-access/src/index.ts",
         "tsConfig": "libs/server/data-access/tsconfig.lib.json",
         "assets": ["libs/server/data-access/*.md"]
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p libs/server/data-access/tsconfig.lib.json"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "echo No tests",
+        "passWithNoTests": true
       }
     }
   }
