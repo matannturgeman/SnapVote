@@ -1,6 +1,33 @@
-import { waitForPortOpen } from '@nx/node/utils';
+import * as net from 'net';
 
 /* eslint-disable */
+
+function waitForPortOpen(
+  port: number,
+  options: { host?: string; retries?: number; retryDelay?: number } = {},
+): Promise<void> {
+  const host = options.host ?? '127.0.0.1';
+  const retryDelay = options.retryDelay ?? 1000;
+  return new Promise((resolve, reject) => {
+    const check = (retries = options.retries ?? 30) => {
+      const client = new net.Socket();
+      client.once('connect', () => {
+        client.end();
+        resolve();
+      });
+      client.once('error', () => {
+        client.destroy();
+        if (retries <= 0) {
+          reject(new Error(`Port ${port} not open after retries`));
+        } else {
+          setTimeout(() => check(retries - 1), retryDelay);
+        }
+      });
+      client.connect(port, host);
+    };
+    check();
+  });
+}
 
 module.exports = async function () {
   // Start services that that the app needs to run (e.g. database, docker-compose, etc.).

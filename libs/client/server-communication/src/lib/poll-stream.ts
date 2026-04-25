@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import type { ThunkDispatch, UnknownAction } from '@reduxjs/toolkit';
 import type { PollResultsDto } from '@libs/shared-dto';
-import { BASE_URL, baseApi, readPersistedToken } from './base-api';
+import { BASE_URL, readPersistedToken } from './base-api';
+import { pollApi } from './poll.api';
 
 export function usePollStream(pollId: string | undefined): {
   presence: number | null;
   isConnected: boolean;
 } {
-  const dispatch = useDispatch();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dispatch = useDispatch<ThunkDispatch<any, unknown, UnknownAction>>();
   const [presence, setPresence] = useState<number | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
@@ -32,16 +35,17 @@ export function usePollStream(pollId: string | undefined): {
 
         if (parsed.type === 'results') {
           dispatch(
-            baseApi.util.updateQueryData(
+            pollApi.util.updateQueryData(
               'getPollResults',
               pollId,
               () => parsed.data as PollResultsDto,
             ),
           );
         } else if (parsed.type === 'presence') {
-          setPresence((parsed.data as { count: number }).count);
+          const count = (parsed.data as { count: number }).count;
+          setPresence((prev) => (prev === count ? prev : count));
         } else if (parsed.type === 'closed') {
-          dispatch(baseApi.util.invalidateTags([{ type: 'Poll', id: pollId }]));
+          dispatch(pollApi.util.invalidateTags([{ type: 'Poll', id: pollId }]));
         }
       } catch {
         // ignore malformed messages

@@ -20,7 +20,7 @@
     "src/**/*.spec.jsx",
     "src/**/*.test.jsx",
     "jest.config.ts",
-    "jest.config.cts"
+    "jest.config.js"
   ],
   "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"],
   "references": [
