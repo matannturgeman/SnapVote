@@ -8,7 +8,9 @@ import {
   Plus,
   Vote,
 } from 'lucide-react';
+import { formatDate } from '@libs/client-shared';
 import { useListMyPollsQuery } from '@libs/client-server-communication';
+import { POLL_STATUS_COLORS } from '../lib/poll-ui';
 import { Button } from '../components/ui/button';
 import {
   Card,
@@ -19,12 +21,6 @@ import {
 } from '../components/ui/card';
 
 type StatusFilter = 'ALL' | 'OPEN' | 'CLOSED' | 'DRAFT';
-
-const STATUS_COLORS: Record<string, string> = {
-  OPEN: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
-  DRAFT: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
-  CLOSED: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
-};
 
 const FILTER_TABS: { label: string; value: StatusFilter }[] = [
   { label: 'All', value: 'ALL' },
@@ -139,7 +135,7 @@ export function HomePage() {
                         </div>
                         <div className="flex shrink-0 items-center gap-2">
                           <span
-                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${STATUS_COLORS[poll.status] ?? STATUS_COLORS['DRAFT']}`}
+                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${POLL_STATUS_COLORS[poll.status] ?? POLL_STATUS_COLORS['DRAFT']}`}
                           >
                             {poll.status}
                           </span>
@@ -161,10 +157,7 @@ export function HomePage() {
                           </span>
                         )}
                         {poll.status === 'CLOSED' && poll.closedAt && (
-                          <span>
-                            Closed{' '}
-                            {new Date(poll.closedAt).toLocaleDateString()}
-                          </span>
+                          <span>Closed {formatDate(poll.closedAt)}</span>
                         )}
                       </div>
                     </CardContent>
