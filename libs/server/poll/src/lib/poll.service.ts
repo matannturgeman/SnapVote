@@ -9,6 +9,7 @@ import { prisma } from '@libs/server-data-access';
 import type {
   CastVoteDto,
   CreatePollDto,
+  CreateReportDto,
   CreateShareLinkDto,
   JoinPollResponseDto,
   PaginatedResponseDto,
@@ -381,5 +382,65 @@ export class PollService {
       })),
       totalVotes: poll._count?.votes,
     };
+  }
+
+  async reportPoll(
+    pollId: string,
+    voteId: string | undefined,
+    reporterId: number,
+    dto: { reason: string; details?: string },
+  ): Promise<void> {
+    await prisma.moderationReport.create({
+      data: {
+        pollId,
+        voteId: voteId ?? null,
+        reason: dto.reason as any,
+        details: dto.details ?? null,
+        reporterId,
+      },
+    });
+    this.logger.log(`Poll ${pollId} reported by user ${reporterId}`);
+  }
+
+  async lockPoll(pollId: string, actorId: number): Promise<PollResponseDto> {
+    const poll = await prisma.poll.findUnique({ where: { id: pollId } });
+    if (!poll) throw new NotFoundException('Poll not found');
+    if (poll.ownerId !== actorId) {
+      throw new ForbiddenException('Only owner can lock poll');
+    }
+
+    await prisma.poll.update({
+      where: { id: pollId },
+      data: { status: 'LOCKED' },
+    });
+    await prisma.moderationLog.create({
+      data: {
+        action: 'LOCK',
+        targetType: 'poll',
+        targetId: pollId,
+        actorId,
+      },
+    });
+    this.logger.log(`Poll ${pollId} locked by user ${actorId}`);
+    return this.findById(pollId);
+  }
+
+  async deletePoll(pollId: string, actorId: number): Promise<void> {
+    const poll = await prisma.poll.findUnique({ where: { id: pollId } });
+    if (!poll) throw new NotFoundException('Poll not found');
+    if (poll.ownerId !== actorId) {
+      throw new ForbiddenException('Only owner can delete poll');
+    }
+
+    await prisma.poll.delete({ where: { id: pollId } });
+    await prisma.moderationLog.create({
+      data: {
+        action: 'DELETE',
+        targetType: 'poll',
+        targetId: pollId,
+        actorId,
+      },
+    });
+    this.logger.log(`Poll ${pollId} deleted by user ${actorId}`);
   }
 }
