@@ -17,7 +17,7 @@ const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
  */
 export default defineConfig({
   ...nxE2EPreset(__filename, { testDir: './src' }),
-  outputDir: join(workspaceRoot, 'test-output-e2e/client'),
+  outputDir: join(workspaceRoot, 'test-output-e2e/client/artifacts'),
   reporter: [
     [
       'html',

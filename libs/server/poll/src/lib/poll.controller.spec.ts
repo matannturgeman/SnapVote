@@ -165,13 +165,25 @@ describe('PollController', () => {
 
   describe('listOwn', () => {
     it('returns polls for the current user', async () => {
-      pollService.listOwn.mockResolvedValue([POLL_RESPONSE]);
+      pollService.listOwn.mockResolvedValue({
+        data: [POLL_RESPONSE],
+        total: 1,
+        page: 1,
+        limit: 20,
+        totalPages: 1,
+      });
 
-      const result = await controller.listOwn(CURRENT_USER);
+      const result = await controller.listOwn(CURRENT_USER, {
+        page: 1,
+        limit: 20,
+      });
 
-      expect(pollService.listOwn).toHaveBeenCalledWith(1);
-      expect(result).toHaveLength(1);
-      expect(result[0].id).toBe('poll-1');
+      expect(pollService.listOwn).toHaveBeenCalledWith(1, {
+        page: 1,
+        limit: 20,
+      });
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].id).toBe('poll-1');
     });
   });
 
