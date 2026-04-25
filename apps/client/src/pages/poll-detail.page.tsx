@@ -1,15 +1,26 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Check, Copy, Loader2, Plus, X } from 'lucide-react';
+import {
+  AlertTriangle,
+  Check,
+  Copy,
+  Flag,
+  Loader2,
+  Plus,
+  X,
+} from 'lucide-react';
 import { selectCurrentUser, useAppSelector } from '@libs/client-store';
 import {
   useCastVoteMutation,
   useClosePollMutation,
   useCreateShareLinkMutation,
+  useDeletePollMutation,
   useGetPollQuery,
   useGetPollResultsQuery,
   useListShareLinksQuery,
+  useLockPollMutation,
   usePollStream,
+  useReportPollMutation,
   useRevokeShareLinkMutation,
   useUpdatePollMutation,
 } from '@libs/client-server-communication';
@@ -37,6 +48,10 @@ export function PollDetailPage() {
 
   const [updatePoll, { isLoading: isUpdating, error: updateError }] =
     useUpdatePollMutation();
+  const [lockPoll, { isLoading: isLocking }] = useLockPollMutation();
+  const [deletePoll, { isLoading: isDeleting }] = useDeletePollMutation();
+  const [reportPoll, { isLoading: isReporting }] = useReportPollMutation();
+
   const ownerCheck = user?.id === poll?.ownerId;
   const { data: shareLinks = [] } = useListShareLinksQuery(id ?? '', {
     skip: !id || !ownerCheck,
@@ -57,6 +72,12 @@ export function PollDetailPage() {
   const { presence, isConnected } = usePollStream(
     poll?.status === 'OPEN' ? id : undefined,
   );
+
+  const [reportReason, setReportReason] = useState('');
+  const [reportDetails, setReportDetails] = useState('');
+  const [showReport, setShowReport] = useState(false);
+  const [reportSuccess, setReportSuccess] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (poll && !isEditing) {
@@ -114,6 +135,33 @@ export function PollDetailPage() {
   const onRevoke = async (linkId: string) => {
     if (!id) return;
     await revokeShareLink({ id, linkId });
+  };
+
+  const onReport = async () => {
+    if (!id || !reportReason) return;
+    try {
+      await reportPoll({
+        id,
+        body: { reason: reportReason, details: reportDetails || undefined },
+      }).unwrap();
+      setReportSuccess(true);
+      setTimeout(() => {
+        setShowReport(false);
+        setReportSuccess(false);
+      }, 2000);
+    } catch {
+      // error state
+    }
+  };
+
+  const onDelete = async () => {
+    if (!id) return;
+    await deletePoll(id).unwrap();
+  };
+
+  const onLock = async () => {
+    if (!id) return;
+    await lockPoll(id).unwrap();
   };
 
   const activeLinks = shareLinks.filter((l) => l.status === 'ACTIVE');
@@ -175,6 +223,25 @@ export function PollDetailPage() {
               >
                 Back
               </Link>
+              {isOwner && !isEditing && poll.status !== 'LOCKED' && (
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="text-sm text-red-500 hover:text-red-600"
+                >
+                  Delete
+                </button>
+              )}
+              {!isOwner && !isEditing && poll.status !== 'LOCKED' && (
+                <button
+                  type="button"
+                  onClick={() => setShowReport(true)}
+                  className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                >
+                  <Flag className="h-3.5 w-3.5" />
+                  Report
+                </button>
+              )}
             </div>
             {!isEditing ? (
               <>
