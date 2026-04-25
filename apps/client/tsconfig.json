@@ -10,6 +10,7 @@
   "files": [],
   "include": [],
   "references": [
+    { "path": "../../libs/client/shared" },
     { "path": "../../libs/shared/validation-schemas" },
     { "path": "../../libs/shared/dto" },
     { "path": "../../libs/client/server-communication" },

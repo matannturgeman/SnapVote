@@ -22,6 +22,7 @@
     "src/**/*.d.ts"
   ],
   "references": [
+    { "path": "../../libs/client/shared/tsconfig.lib.json" },
     { "path": "../../libs/client/server-communication/tsconfig.lib.json" },
     { "path": "../../libs/client/store/tsconfig.lib.json" },
     { "path": "../../libs/shared/dto/tsconfig.lib.json" },

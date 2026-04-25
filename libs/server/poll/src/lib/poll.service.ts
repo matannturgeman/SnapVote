@@ -49,9 +49,20 @@ export class PollService {
     ownerId: number,
     query: PollListQueryDto = { page: 1, limit: 20 },
   ): Promise<PaginatedResponseDto<PollResponseDto>> {
-    const { page, limit, status } = query;
+    const { page, limit, status, from, to } = query;
     const skip = (page - 1) * limit;
-    const where = { ownerId, ...(status ? { status } : {}) };
+    const where: Record<string, unknown> = {
+      ownerId,
+      ...(status ? { status } : {}),
+      ...(from || to
+        ? {
+            createdAt: {
+              ...(from ? { gte: from } : {}),
+              ...(to ? { lte: to } : {}),
+            },
+          }
+        : {}),
+    };
 
     const [polls, total] = await Promise.all([
       prisma.poll.findMany({
