@@ -65,17 +65,12 @@ async function bootstrap() {
     console.log(`📚 Swagger Documentation: http://${host}:${port}/docs`);
     console.log('\n');
 
-    // Optional: Log database/redis connection status if available
-    try {
-      const dbHost = process.env.DATABASE_HOST || 'localhost';
-      const redisHost = process.env.REDIS_HOST || 'localhost';
-      console.log(`✓ Database configured to connect to: ${dbHost}`);
-      console.log(
-        `✓ Redis configured to connect to: ${redisHost}:${process.env.REDIS_PORT || 6379}`,
-      );
-    } catch (error) {
-      // Silent fail - database may not be connected yet or config is wrong
-    }
+    const dbHost = process.env.DATABASE_HOST || 'localhost';
+    const redisHost = process.env.REDIS_HOST || 'localhost';
+    console.log(`✓ Database configured to connect to: ${dbHost}`);
+    console.log(
+      `✓ Redis configured to connect to: ${redisHost}:${process.env.REDIS_PORT || 6379}`,
+    );
   } catch (error) {
     const err = error as Error;
     console.error('\n❌ Failed to start server:', err.message);
