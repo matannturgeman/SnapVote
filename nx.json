@@ -101,6 +101,10 @@
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
     },
+    "@nx/vite:build": {
+      "cache": true,
+      "inputs": ["production", "^production"]
+    },
     "typecheck": {
       "dependsOn": ["^build"]
     },

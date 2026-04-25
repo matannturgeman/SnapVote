@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
   ForbiddenException,
@@ -9,7 +10,6 @@ import { prisma } from '@libs/server-data-access';
 import type {
   CastVoteDto,
   CreatePollDto,
-  CreateReportDto,
   CreateShareLinkDto,
   JoinPollResponseDto,
   PaginatedResponseDto,
