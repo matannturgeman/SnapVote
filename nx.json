@@ -99,7 +99,11 @@
     "@nx/js:tsc": {
       "cache": true,
       "dependsOn": ["^build"],
-      "inputs": ["production", "^production"]
+      "inputs": ["production", "^production"],
+      "options": {
+        "declaration": false,
+        "declarationMap": false
+      }
     },
     "@nx/vite:build": {
       "cache": true,
