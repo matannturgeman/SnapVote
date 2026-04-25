@@ -96,7 +96,7 @@ export const errorResponseSchema = z.object({
 // Poll schemas
 // ---------------------------------------------------------------------------
 
-export const pollStatusSchema = z.enum(['DRAFT', 'OPEN', 'CLOSED']);
+export const pollStatusSchema = z.enum(['DRAFT', 'OPEN', 'CLOSED', 'LOCKED']);
 
 export const pollOptionSchema = z.object({
   id: z.string(),

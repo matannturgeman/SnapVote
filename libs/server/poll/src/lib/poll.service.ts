@@ -356,7 +356,7 @@ export class PollService {
     id: string;
     title: string;
     description: string | null;
-    status: 'DRAFT' | 'OPEN' | 'CLOSED';
+    status: 'DRAFT' | 'OPEN' | 'CLOSED' | 'LOCKED';
     ownerId: number;
     openedAt: Date | null;
     closedAt: Date | null;
@@ -388,7 +388,10 @@ export class PollService {
     pollId: string,
     voteId: string | undefined,
     reporterId: number,
-    dto: { reason: string; details?: string },
+    dto: {
+      reason: 'SPAM' | 'HARASSMENT' | 'INAPPROPRIATE' | 'DUPLICATE';
+      details?: string;
+    },
   ): Promise<void> {
     await prisma.moderationReport.create({
       data: {
