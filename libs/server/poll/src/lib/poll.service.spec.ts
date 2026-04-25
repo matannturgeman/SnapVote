@@ -203,6 +203,31 @@ describe('PollService', () => {
 
       expect(result.data).toEqual([]);
     });
+
+    it('passes status filter to prisma where clause', async () => {
+      prismaMock.poll.findMany.mockResolvedValue([]);
+      prismaMock.poll.count.mockResolvedValue(0);
+
+      await service.listOwn(1, { status: 'CLOSED', page: 1, limit: 20 });
+
+      expect(prismaMock.poll.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { ownerId: 1, status: 'CLOSED' },
+        }),
+      );
+    });
+
+    it('returns paginated metadata correctly', async () => {
+      prismaMock.poll.findMany.mockResolvedValue([POLL_WITH_OPTIONS]);
+      prismaMock.poll.count.mockResolvedValue(25);
+
+      const result = await service.listOwn(1, { page: 2, limit: 10 });
+
+      expect(result.page).toBe(2);
+      expect(result.limit).toBe(10);
+      expect(result.total).toBe(25);
+      expect(result.totalPages).toBe(3);
+    });
   });
 
   // ---------------------------------------------------------------------------
