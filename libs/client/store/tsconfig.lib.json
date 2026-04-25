@@ -7,7 +7,8 @@
     "declarationMap": true,
     "emitDeclarationOnly": false,
     "types": ["node"],
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noImplicitAny": false
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": [
