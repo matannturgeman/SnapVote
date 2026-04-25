@@ -10,6 +10,11 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/client"
+      },
+      "configurations": {
+        "serve": {
+          "mode": "serve"
+        }
       }
     },
     "lint": {
