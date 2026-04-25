@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { formatDate } from '@libs/client-shared';
 import { useListMyPollsQuery } from '@libs/client-server-communication';
+import type { PollListQueryDto } from '@libs/shared-dto';
 import { POLL_STATUS_COLORS } from '../lib/poll-ui';
 import { Button } from '../components/ui/button';
 import {
@@ -20,7 +21,7 @@ import {
   CardTitle,
 } from '../components/ui/card';
 
-type StatusFilter = 'ALL' | 'OPEN' | 'CLOSED' | 'DRAFT';
+type StatusFilter = NonNullable<PollListQueryDto['status']> | 'ALL';
 
 const FILTER_TABS: { label: string; value: StatusFilter }[] = [
   { label: 'All', value: 'ALL' },
