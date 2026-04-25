@@ -185,6 +185,33 @@ describe('PollController', () => {
       expect(result.data).toHaveLength(1);
       expect(result.data[0].id).toBe('poll-1');
     });
+
+    it('passes status filter through to service', async () => {
+      const closedPoll = {
+        ...POLL_RESPONSE,
+        status: 'CLOSED' as const,
+        closedAt: new Date('2026-03-01'),
+      };
+      pollService.listOwn.mockResolvedValue({
+        data: [closedPoll],
+        total: 1,
+        page: 1,
+        limit: 20,
+        totalPages: 1,
+      });
+
+      const result = await controller.listOwn(CURRENT_USER, {
+        status: 'CLOSED',
+        page: '1' as any,
+        limit: '20' as any,
+      });
+
+      expect(pollService.listOwn).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ status: 'CLOSED' }),
+      );
+      expect(result.data[0].status).toBe('CLOSED');
+    });
   });
 
   // ---------------------------------------------------------------------------

@@ -20,7 +20,7 @@ import {
   CreateShareLinkDtoSchema,
   JoinPollResponseDtoSchema,
   PaginatedResponseDtoSchema,
-  PaginationQueryDtoSchema,
+  PollListQueryDtoSchema,
   PollResponseDtoSchema,
   PollResultsDtoSchema,
   ShareLinkResponseDtoSchema,
@@ -77,7 +77,7 @@ export class PollController {
     @CurrentUser() user: LoggedInUser,
     @Query() query: any,
   ): Promise<PaginatedResponseDto<PollResponseDto>> {
-    const dto = parsePollDto(PaginationQueryDtoSchema, query);
+    const dto = parsePollDto(PollListQueryDtoSchema, query);
     const result = await this.pollService.listOwn(user.id, dto);
     return parseDto(PaginatedResponseDtoSchema(PollResponseDtoSchema), result);
   }
