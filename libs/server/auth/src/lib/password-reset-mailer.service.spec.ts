@@ -1,6 +1,13 @@
 ﻿import { Logger } from '@nestjs/common';
+import type { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { PasswordResetMailerService } from './password-reset-mailer.service';
+
+const makeConfigService = (): ConfigService =>
+  ({
+    get: <T>(key: string, defaultValue?: T): T | undefined =>
+      (process.env[key] as T | undefined) ?? defaultValue,
+  }) as unknown as ConfigService;
 
 jest.mock('nodemailer', () => ({
   createTransport: jest.fn(),
@@ -32,7 +39,7 @@ describe('PasswordResetMailerService', () => {
     process.env.AUTH_REQUIRE_EMAIL_TRANSPORT = 'false';
     const warnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
 
-    const service = new PasswordResetMailerService();
+    const service = new PasswordResetMailerService(makeConfigService());
 
     await service.sendPasswordResetEmail({
       to: 'user@example.com',
@@ -49,7 +56,7 @@ describe('PasswordResetMailerService', () => {
     delete process.env.SMTP_HOST;
     process.env.AUTH_REQUIRE_EMAIL_TRANSPORT = 'true';
 
-    const service = new PasswordResetMailerService();
+    const service = new PasswordResetMailerService(makeConfigService());
 
     await expect(
       service.sendPasswordResetEmail({
@@ -69,7 +76,7 @@ describe('PasswordResetMailerService', () => {
     process.env.AUTH_RESET_PASSWORD_URL_BASE =
       'https://client.example.com/reset-password';
 
-    const service = new PasswordResetMailerService();
+    const service = new PasswordResetMailerService(makeConfigService());
 
     await service.sendPasswordResetEmail({
       to: 'user@example.com',
@@ -104,7 +111,7 @@ describe('PasswordResetMailerService', () => {
     process.env.AUTH_RESET_PASSWORD_URL_BASE =
       'https://client.example.com/reset/{token}';
 
-    const service = new PasswordResetMailerService();
+    const service = new PasswordResetMailerService(makeConfigService());
 
     await service.sendPasswordResetEmail({
       to: 'user@example.com',
@@ -122,7 +129,7 @@ describe('PasswordResetMailerService', () => {
     delete process.env.AUTH_RESET_PASSWORD_URL_BASE;
     process.env.CLIENT_URL = 'https://client.example.com/reset-password';
 
-    const service = new PasswordResetMailerService();
+    const service = new PasswordResetMailerService(makeConfigService());
 
     await service.sendPasswordResetEmail({
       to: 'user@example.com',
@@ -140,7 +147,7 @@ describe('PasswordResetMailerService', () => {
     process.env.AUTH_RESET_PASSWORD_URL_BASE = 'ht!tp://bad::url';
     const warnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
 
-    const service = new PasswordResetMailerService();
+    const service = new PasswordResetMailerService(makeConfigService());
 
     await service.sendPasswordResetEmail({
       to: 'user@example.com',
@@ -148,7 +155,9 @@ describe('PasswordResetMailerService', () => {
     });
 
     expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Invalid AUTH_RESET_PASSWORD_URL_BASE/CLIENT_URL'),
+      expect.stringContaining(
+        'Invalid AUTH_RESET_PASSWORD_URL_BASE/CLIENT_URL',
+      ),
     );
 
     const sentPayload = sendMailMock.mock.calls[0][0] as { html: string };
@@ -161,7 +170,7 @@ describe('PasswordResetMailerService', () => {
     process.env.SMTP_HOST = 'smtp.example.com';
     process.env.SMTP_PORT = 'not-a-number';
 
-    new PasswordResetMailerService();
+    new PasswordResetMailerService(makeConfigService());
 
     expect(createTransportMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -175,7 +184,7 @@ describe('PasswordResetMailerService', () => {
     process.env.SMTP_PORT = '465';
     delete process.env.SMTP_SECURE;
 
-    new PasswordResetMailerService();
+    new PasswordResetMailerService(makeConfigService());
 
     expect(createTransportMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -189,7 +198,7 @@ describe('PasswordResetMailerService', () => {
     delete process.env.AUTH_RESET_PASSWORD_URL_BASE;
     delete process.env.CLIENT_URL;
 
-    const service = new PasswordResetMailerService();
+    const service = new PasswordResetMailerService(makeConfigService());
 
     await service.sendPasswordResetEmail({
       to: 'user@example.com',
