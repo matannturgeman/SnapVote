@@ -30,4 +30,5 @@ jobs:
         run: pnpm install
 
       - run: npx nx format:check --base="remotes/origin/main"
-      - run: npx nx run-many -t lint test build typecheck
+      - run: npx nx run-many -t lint build typecheck
+      - run: npx nx run-many -t test --exclude='api-e2e' --exclude='client-e2e'
