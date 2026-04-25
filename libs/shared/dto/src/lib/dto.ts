@@ -13,6 +13,7 @@ import {
   pollOptionSchema,
   createPollSchema,
   updatePollSchema,
+  pollListQuerySchema,
   shareLinkSchema,
   createShareLinkSchema,
   joinPollResponseSchema,
@@ -100,6 +101,7 @@ export const PollOptionResponseDtoSchema = pollOptionSchema;
 export const PollResponseDtoSchema = pollSchema;
 export const CreatePollDtoSchema = createPollSchema;
 export const UpdatePollDtoSchema = updatePollSchema;
+export const PollListQueryDtoSchema = pollListQuerySchema;
 export const ShareLinkResponseDtoSchema = shareLinkSchema;
 export const CreateShareLinkDtoSchema = createShareLinkSchema;
 export const JoinPollResponseDtoSchema = joinPollResponseSchema;
@@ -111,6 +113,7 @@ export type PollOptionResponseDto = z.infer<typeof PollOptionResponseDtoSchema>;
 export type PollResponseDto = z.infer<typeof PollResponseDtoSchema>;
 export type CreatePollDto = z.infer<typeof CreatePollDtoSchema>;
 export type UpdatePollDto = z.infer<typeof UpdatePollDtoSchema>;
+export type PollListQueryDto = z.infer<typeof PollListQueryDtoSchema>;
 export type ShareLinkResponseDto = z.infer<typeof ShareLinkResponseDtoSchema>;
 export type CreateShareLinkDto = z.infer<typeof CreateShareLinkDtoSchema>;
 export type JoinPollResponseDto = z.infer<typeof JoinPollResponseDtoSchema>;

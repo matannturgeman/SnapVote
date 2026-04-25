@@ -115,6 +115,13 @@ export const pollSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
   options: z.array(pollOptionSchema).min(1),
+  totalVotes: z.number().int().nonnegative().optional(),
+});
+
+export const pollListQuerySchema = z.object({
+  status: pollStatusSchema.optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
 });
 
 export const createPollSchema = z.object({
@@ -231,6 +238,7 @@ export const PollSchemas = {
   poll: pollSchema,
   create: createPollSchema,
   update: updatePollSchema,
+  pollListQuery: pollListQuerySchema,
   shareLinkStatus: shareLinkStatusSchema,
   shareLink: shareLinkSchema,
   createShareLink: createShareLinkSchema,
