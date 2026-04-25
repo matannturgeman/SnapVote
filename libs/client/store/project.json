@@ -12,9 +12,7 @@
         "outputPath": "dist/libs/client-store",
         "main": "libs/client/store/src/index.ts",
         "tsConfig": "libs/client/store/tsconfig.lib.json",
-        "assets": ["libs/client/store/*.md"],
-        "declaration": false,
-        "declarationMap": false
+        "assets": ["libs/client/store/*.md"]
       }
     },
     "test": {
