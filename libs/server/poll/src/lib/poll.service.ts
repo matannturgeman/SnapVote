@@ -11,6 +11,8 @@ import type {
   CreatePollDto,
   CreateShareLinkDto,
   JoinPollResponseDto,
+  PaginatedResponseDto,
+  PollListQueryDto,
   PollResponseDto,
   PollResultsDto,
   ShareLinkResponseDto,
@@ -43,14 +45,35 @@ export class PollService {
     return this.toDto(poll);
   }
 
-  async listOwn(ownerId: number): Promise<PollResponseDto[]> {
-    const polls = await prisma.poll.findMany({
-      where: { ownerId },
-      include: { options: { orderBy: { order: 'asc' } } },
-      orderBy: { createdAt: 'desc' },
-      take: 50,
-    });
-    return polls.map((p) => this.toDto(p));
+  async listOwn(
+    ownerId: number,
+    query: PollListQueryDto = { page: 1, limit: 20 },
+  ): Promise<PaginatedResponseDto<PollResponseDto>> {
+    const { page, limit, status } = query;
+    const skip = (page - 1) * limit;
+    const where = { ownerId, ...(status ? { status } : {}) };
+
+    const [polls, total] = await Promise.all([
+      prisma.poll.findMany({
+        where,
+        include: {
+          options: { orderBy: { order: 'asc' } },
+          _count: { select: { votes: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.poll.count({ where }),
+    ]);
+
+    return {
+      data: polls.map((p) => this.toDto(p)),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async findById(id: string): Promise<PollResponseDto> {
@@ -328,6 +351,7 @@ export class PollService {
     createdAt: Date;
     updatedAt: Date;
     options: { id: string; text: string; order: number; createdAt: Date }[];
+    _count?: { votes: number };
   }): PollResponseDto {
     return {
       id: poll.id,
@@ -344,6 +368,7 @@ export class PollService {
         text: o.text,
         order: o.order,
       })),
+      totalVotes: poll._count?.votes,
     };
   }
 }

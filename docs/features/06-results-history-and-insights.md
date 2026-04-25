@@ -6,7 +6,7 @@ Preserve finalized poll outcomes and expose useful historical insights for decis
 
 ## Status
 
-Not implemented.
+In progress (branch: `2026-04-25/feature/results-history-and-insights`).
 
 ## Scope
 

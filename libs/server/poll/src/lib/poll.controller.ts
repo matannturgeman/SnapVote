@@ -19,12 +19,15 @@ import {
   CreatePollDtoSchema,
   CreateShareLinkDtoSchema,
   JoinPollResponseDtoSchema,
+  PaginatedResponseDtoSchema,
+  PollListQueryDtoSchema,
   PollResponseDtoSchema,
   PollResultsDtoSchema,
   ShareLinkResponseDtoSchema,
   UpdatePollDtoSchema,
   parseDto,
   type JoinPollResponseDto,
+  type PaginatedResponseDto,
   type PollResponseDto,
   type PollResultsDto,
   type ShareLinkResponseDto,
@@ -70,8 +73,13 @@ export class PollController {
   }
 
   @Get()
-  async listOwn(@CurrentUser() user: LoggedInUser): Promise<PollResponseDto[]> {
-    return this.pollService.listOwn(user.id);
+  async listOwn(
+    @CurrentUser() user: LoggedInUser,
+    @Query() query: any,
+  ): Promise<PaginatedResponseDto<PollResponseDto>> {
+    const dto = parsePollDto(PollListQueryDtoSchema, query);
+    const result = await this.pollService.listOwn(user.id, dto);
+    return parseDto(PaginatedResponseDtoSchema(PollResponseDtoSchema), result);
   }
 
   @Post()

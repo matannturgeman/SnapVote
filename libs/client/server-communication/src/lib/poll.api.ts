@@ -4,6 +4,8 @@ import type {
   CreatePollDto,
   CreateShareLinkDto,
   JoinPollResponseDto,
+  PaginatedResponseDto,
+  PollListQueryDto,
   PollResponseDto,
   PollResultsDto,
   ShareLinkResponseDto,
@@ -96,8 +98,14 @@ export const pollApi = baseApi.injectEndpoints({
       providesTags: (_result, _error, id) => [{ type: 'Vote', id }],
     }),
 
-    getMyPolls: build.query<PollResponseDto[], void>({
-      query: () => '/polls',
+    listMyPolls: build.query<
+      PaginatedResponseDto<PollResponseDto>,
+      Partial<PollListQueryDto> | void
+    >({
+      query: (params) => ({
+        url: '/polls',
+        params: params ?? {},
+      }),
       providesTags: ['Poll'],
     }),
   }),
@@ -116,5 +124,5 @@ export const {
   useJoinPollByTokenQuery,
   useCastVoteMutation,
   useGetPollResultsQuery,
-  useGetMyPollsQuery,
+  useListMyPollsQuery,
 } = pollApi;
