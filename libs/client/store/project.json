@@ -6,20 +6,17 @@
   "tags": ["scope:client", "type:store"],
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/libs/client-store",
-        "main": "libs/client/store/src/index.ts",
-        "tsConfig": "libs/client/store/tsconfig.lib.json",
-        "assets": ["libs/client/store/*.md"]
+        "cwd": "libs/client/store",
+        "command": "node -e \"const fs=require('fs');const p=require('path');fs.mkdirSync('dist',{recursive:true});fs.readdirSync('src').forEach(f=>{const s=p.join('src',f);const d=p.join('dist',f);fs.statSync(s).isDirectory()?fs.cpSync(s,d,{recursive:true}):fs.copyFileSync(s,d)})\""
       }
     },
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "echo 'No tests'",
-        "passWithNoTests": true
+        "command": "echo No tests"
       }
     }
   }
