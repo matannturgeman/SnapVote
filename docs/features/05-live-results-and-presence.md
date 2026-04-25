@@ -6,7 +6,7 @@ Deliver real-time transparency by streaming poll result updates and participant 
 
 ## Status
 
-Not implemented.
+Implemented.
 
 ## Scope
 

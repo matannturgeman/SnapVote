@@ -3,12 +3,14 @@
   "files": [],
   "include": [],
   "references": [
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
+    { "path": "../../libs/server/poll" },
+    { "path": "../../libs/server/data-access" },
+    { "path": "../../libs/server/user" },
+    { "path": "../../libs/server/auth" },
+    { "path": "../../libs/shared/validation-schemas" },
+    { "path": "../../libs/shared/dto" },
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.spec.json" }
   ],
   "compilerOptions": {
     "esModuleInterop": true

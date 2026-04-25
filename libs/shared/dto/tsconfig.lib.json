@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../../dist/libs/shared-dto",
+    "composite": true,
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": false,
@@ -10,7 +11,7 @@
   "include": ["src/**/*.ts"],
   "exclude": [
     "jest.config.ts",
-    "jest.config.cts",
+    "jest.config.js",
     "src/**/*.spec.ts",
     "src/**/*.test.ts"
   ],

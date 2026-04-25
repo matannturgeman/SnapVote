@@ -8,16 +8,19 @@
     "importHelpers": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
+    "noFallthroughCasesInSwitch": true
   },
   "files": [],
   "include": [],
   "references": [
     {
-      "path": "./tsconfig.lib.json",
+      "path": "../validation-schemas"
     },
     {
-      "path": "./tsconfig.spec.json",
+      "path": "./tsconfig.lib.json"
     },
-  ],
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
 }

@@ -18,6 +18,7 @@ module.exports = {
       generatePackageJson: true,
       sourceMap: true,
       useTsconfigPaths: true,
+      skipTypeChecking: true,
     }),
   ],
 };

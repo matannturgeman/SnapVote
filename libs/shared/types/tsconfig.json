@@ -9,16 +9,19 @@
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noPropertyAccessFromIndexSignature": true,
+    "noPropertyAccessFromIndexSignature": true
   },
   "files": [],
   "include": [],
   "references": [
     {
-      "path": "./tsconfig.lib.json",
+      "path": "../validation-schemas"
     },
     {
-      "path": "./tsconfig.spec.json",
+      "path": "./tsconfig.lib.json"
     },
-  ],
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
 }

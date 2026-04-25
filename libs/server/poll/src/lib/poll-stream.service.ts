@@ -1,62 +1,97 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { RedisService } from '@nestjs-labs/nestjs-ioredis';
-import type Redis from 'ioredis';
-import type { PollResultsDto } from '@libs/shared-dto';
+import type { Redis } from 'ioredis';
+import { Observable } from 'rxjs';
+import type { PollStreamEventDto } from '@libs/shared-dto';
 
-const POLL_CHANNEL = (pollId: string) => `poll:${pollId}`;
+const PRESENCE_KEY_PREFIX = 'poll-presence';
+const CHANNEL_PREFIX = 'poll-results';
+const PRESENCE_TTL_SECONDS = 60;
 
 @Injectable()
-export class PollStreamService implements OnModuleInit, OnModuleDestroy {
-  private readonly redisClient: Redis | null;
-  private readonly subscribers = new Map<string, Set<(data: string) => void>>();
+export class PollStreamService implements OnModuleDestroy {
+  private readonly logger = new Logger(PollStreamService.name);
+  private readonly redis: Redis | null;
 
   constructor(private readonly redisService: RedisService) {
-    this.redisClient = this.redisService.getOrNil();
+    this.redis = this.redisService.getOrNil();
   }
 
-  async onModuleInit() {
-    if (this.redisClient) {
-      const client = this.redisClient.duplicate();
-      await client.subscribe('poll:announce');
-      client.on('message', (channel, message) => {
-        const pollId = channel
-          .replace('poll:announce:', '')
-          .replace('poll:', '');
-        if (pollId && this.subscribers.has(pollId)) {
-          this.subscribers.get(pollId)?.forEach((cb) => cb(message));
+  async publish(pollId: string, event: PollStreamEventDto): Promise<void> {
+    if (!this.redis) return;
+    try {
+      await this.redis.publish(
+        `${CHANNEL_PREFIX}:${pollId}`,
+        JSON.stringify(event),
+      );
+    } catch (err) {
+      this.logger.error(
+        `Failed to publish stream event for poll ${pollId}: ${err}`,
+      );
+    }
+  }
+
+  subscribe(pollId: string): Observable<PollStreamEventDto> {
+    return new Observable((observer) => {
+      if (!this.redis) {
+        observer.complete();
+        return;
+      }
+
+      const channel = `${CHANNEL_PREFIX}:${pollId}`;
+      const sub = this.redis.duplicate();
+
+      sub.subscribe(channel, (err) => {
+        if (err) {
+          this.logger.error(`Subscribe error for ${channel}: ${err.message}`);
+          observer.error(err);
         }
       });
+
+      const onMessage = (_chan: string, message: string) => {
+        try {
+          const event = JSON.parse(message) as PollStreamEventDto;
+          observer.next(event);
+        } catch {
+          // ignore malformed messages
+        }
+      };
+
+      sub.on('message', onMessage);
+
+      return () => {
+        sub.unsubscribe(channel).finally(() => sub.disconnect());
+      };
+    });
+  }
+
+  async incrementPresence(pollId: string): Promise<number> {
+    if (!this.redis) return 0;
+    const key = `${PRESENCE_KEY_PREFIX}:${pollId}`;
+    const count = await this.redis.incr(key);
+    await this.redis.expire(key, PRESENCE_TTL_SECONDS);
+    return count;
+  }
+
+  async decrementPresence(pollId: string): Promise<number> {
+    if (!this.redis) return 0;
+    const key = `${PRESENCE_KEY_PREFIX}:${pollId}`;
+    const count = await this.redis.decr(key);
+    if (count <= 0) {
+      await this.redis.del(key);
+      return 0;
     }
+    await this.redis.expire(key, PRESENCE_TTL_SECONDS);
+    return count;
   }
 
-  async onModuleDestroy() {
-    this.subscribers.clear();
+  async getPresence(pollId: string): Promise<number> {
+    if (!this.redis) return 0;
+    const val = await this.redis.get(`${PRESENCE_KEY_PREFIX}:${pollId}`);
+    return val ? Math.max(0, parseInt(val, 10)) : 0;
   }
 
-  subscribe(pollId: string, callback: (data: string) => void): () => void {
-    if (!this.subscribers.has(pollId)) {
-      this.subscribers.set(pollId, new Set());
-    }
-    this.subscribers.get(pollId)!.add(callback);
-
-    return () => {
-      this.subscribers.get(pollId)?.delete(callback);
-      if (this.subscribers.get(pollId)?.size === 0) {
-        this.subscribers.delete(pollId);
-      }
-    };
-  }
-
-  async publishResults(pollId: string, results: PollResultsDto): Promise<void> {
-    const message = JSON.stringify({ type: 'results', data: results });
-    if (this.redisClient) {
-      await this.redisClient.publish(POLL_CHANNEL(pollId), message);
-    }
-    this.subscribers.get(pollId)?.forEach((cb) => cb(message));
-  }
-
-  async publishPresence(pollId: string, count: number): Promise<void> {
-    const message = JSON.stringify({ type: 'presence', data: { count } });
-    this.subscribers.get(pollId)?.forEach((cb) => cb(message));
+  onModuleDestroy(): void {
+    // per-subscription duplicates disconnect themselves on teardown
   }
 }

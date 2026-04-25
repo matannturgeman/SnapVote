@@ -2,16 +2,17 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../../dist/libs/shared-validation-schemas",
+    "composite": true,
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": false,
-    "types": ["node"],
+    "types": ["node"]
   },
   "include": ["src/**/*.ts"],
   "exclude": [
     "jest.config.ts",
-    "jest.config.cts",
+    "jest.config.js",
     "src/**/*.spec.ts",
-    "src/**/*.test.ts",
-  ],
+    "src/**/*.test.ts"
+  ]
 }

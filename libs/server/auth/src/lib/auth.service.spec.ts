@@ -1,7 +1,18 @@
-﻿import { ConflictException, Logger, UnauthorizedException } from '@nestjs/common';
+﻿import {
+  ConflictException,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
+import type { ConfigService } from '@nestjs/config';
 import { prisma } from '@libs/server-data-access';
 import * as cryptoUtil from './crypto.util';
 import { AuthService } from './auth.service';
+
+const makeConfigService = (): ConfigService =>
+  ({
+    get: <T>(key: string, defaultValue?: T): T | undefined =>
+      (process.env[key] as T | undefined) ?? defaultValue,
+  }) as unknown as ConfigService;
 
 jest.mock('@libs/server-data-access', () => ({
   prisma: {
@@ -71,13 +82,18 @@ describe('AuthService', () => {
 
     service = new AuthService(
       mailer as unknown as ConstructorParameters<typeof AuthService>[0],
+      makeConfigService(),
     );
 
     jest.clearAllMocks();
 
     cryptoMock.createOpaqueToken.mockReturnValue('raw-token');
-    cryptoMock.hashOpaqueToken.mockImplementation((value: string) => `hash-${value}`);
-    cryptoMock.hashPassword.mockImplementation(async (value: string) => `hashed-${value}`);
+    cryptoMock.hashOpaqueToken.mockImplementation(
+      (value: string) => `hash-${value}`,
+    );
+    cryptoMock.hashPassword.mockImplementation(
+      async (value: string) => `hashed-${value}`,
+    );
     cryptoMock.verifyPassword.mockResolvedValue(true);
 
     prismaMock.$transaction.mockResolvedValue([]);
@@ -165,7 +181,11 @@ describe('AuthService', () => {
     });
 
     const response = await service.register(
-      { email: ' NEW@Example.com ', password: 'secret123', name: '  New User  ' },
+      {
+        email: ' NEW@Example.com ',
+        password: 'secret123',
+        name: '  New User  ',
+      },
       { ipAddress: '8.8.8.8' },
     );
 
@@ -196,7 +216,11 @@ describe('AuthService', () => {
     prismaMock.user.findUnique.mockResolvedValue({ id: 1 });
 
     await expect(
-      service.register({ email: 'used@example.com', password: 'secret123', name: 'Used' }),
+      service.register({
+        email: 'used@example.com',
+        password: 'secret123',
+        name: 'Used',
+      }),
     ).rejects.toThrow(ConflictException);
   });
 
@@ -213,7 +237,10 @@ describe('AuthService', () => {
     expect(prismaMock.user.findUnique).toHaveBeenCalledWith(
       expect.objectContaining({ where: { email: 'hello@example.com' } }),
     );
-    expect(cryptoMock.verifyPassword).toHaveBeenCalledWith('pw123456', 'stored');
+    expect(cryptoMock.verifyPassword).toHaveBeenCalledWith(
+      'pw123456',
+      'stored',
+    );
     expect(response.user.email).toBe('hello@example.com');
   });
 

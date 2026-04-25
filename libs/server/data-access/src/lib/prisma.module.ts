@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
+import { Pool } from 'pg';
 
 function isPostgresUrl(value: string): boolean {
   return value.startsWith('postgresql://') || value.startsWith('postgres://');
@@ -37,7 +38,13 @@ function resolveConnectionString(): string {
 }
 
 const connectionString = resolveConnectionString();
-const adapter = new PrismaPg({ connectionString });
+// When DATABASE_URL is a Prisma Accelerate URL, clear it so PrismaClient
+// doesn't activate Accelerate mode alongside the pg adapter.
+if (process.env['DATABASE_URL']?.startsWith('prisma+postgres://')) {
+  process.env['DATABASE_URL'] = connectionString;
+}
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 export { prisma };
