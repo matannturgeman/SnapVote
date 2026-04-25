@@ -13,6 +13,7 @@ import {
   useRevokeShareLinkMutation,
   useUpdatePollMutation,
 } from '@libs/client-server-communication';
+import { POLL_STATUS_COLORS } from '../lib/poll-ui';
 import { Button } from '../components/ui/button';
 import {
   Card,
@@ -23,12 +24,6 @@ import {
 } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-
-const STATUS_COLORS: Record<string, string> = {
-  OPEN: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
-  DRAFT: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
-  CLOSED: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
-};
 
 export function PollDetailPage() {
   const { id } = useParams<{ id?: string }>();
@@ -163,7 +158,7 @@ export function PollDetailPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span
-                  className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${STATUS_COLORS[poll.status] ?? STATUS_COLORS['DRAFT']}`}
+                  className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${POLL_STATUS_COLORS[poll.status] ?? POLL_STATUS_COLORS['DRAFT']}`}
                 >
                   {poll.status}
                 </span>

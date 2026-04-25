@@ -12,7 +12,7 @@
     "postinstall": "prisma generate",
     "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "test:unit": "nx run-many -t test --exclude=api-e2e",
-    "test:integration": "echo \"No integration tests yet\" && exit 0",
+    "test:integration": "nx run api-integration:test",
     "test:e2e": "nx run api-e2e:test && nx run client-e2e:e2e"
   },
   "private": true,
@@ -95,10 +95,8 @@
     "@nestjs/common": "11.1.17",
     "@nestjs/config": "4.0.3",
     "@nestjs/core": "11.1.17",
-    "@nestjs/mongoose": "11.0.4",
     "@nestjs/platform-express": "11.1.17",
     "@nestjs/swagger": "11.2.6",
-    "@nestjs/typeorm": "11.0.0",
     "@prisma/adapter-pg": "6.0.0",
     "@prisma/client": "6.0.0",
     "@radix-ui/react-label": "2.1.8",
@@ -109,7 +107,6 @@
     "dotenv": "17.0.1",
     "ioredis": "5.4.2",
     "lucide-react": "0.469.0",
-    "mongoose": "8.9.5",
     "nodemailer": "8.0.1",
     "pg": "8.13.1",
     "react": "19.2.5",
@@ -120,7 +117,6 @@
     "rxjs": "7.8.1",
     "swagger-ui-express": "5.0.1",
     "tailwind-merge": "2.6.0",
-    "typeorm": "0.3.20",
     "zod": "4.0.0"
   },
   "overrides": {

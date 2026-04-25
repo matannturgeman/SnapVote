@@ -40,7 +40,7 @@ export {
   useJoinPollByTokenQuery,
   useCastVoteMutation,
   useGetPollResultsQuery,
-  useGetMyPollsQuery,
+  useListMyPollsQuery,
 } from './lib/poll.api';
 export { usePollStream } from './lib/poll-stream';
 

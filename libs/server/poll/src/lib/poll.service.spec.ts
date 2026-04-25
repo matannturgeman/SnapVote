@@ -13,6 +13,7 @@ jest.mock('@libs/server-data-access', () => ({
       findUnique: jest.fn(),
       findMany: jest.fn(),
       update: jest.fn(),
+      count: jest.fn(),
     },
     pollShareLink: {
       create: jest.fn(),
@@ -33,6 +34,7 @@ type PrismaMock = {
     findUnique: jest.Mock;
     findMany: jest.Mock;
     update: jest.Mock;
+    count: jest.Mock;
   };
   pollShareLink: {
     create: jest.Mock;
@@ -178,6 +180,7 @@ describe('PollService', () => {
   describe('listOwn', () => {
     it('returns polls owned by the user ordered by createdAt desc', async () => {
       prismaMock.poll.findMany.mockResolvedValue([POLL_WITH_OPTIONS]);
+      prismaMock.poll.count.mockResolvedValue(1);
 
       const result = await service.listOwn(1);
 
@@ -185,19 +188,45 @@ describe('PollService', () => {
         expect.objectContaining({
           where: { ownerId: 1 },
           orderBy: { createdAt: 'desc' },
-          take: 50,
+          take: 20,
         }),
       );
-      expect(result).toHaveLength(1);
-      expect(result[0].id).toBe('poll-1');
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].id).toBe('poll-1');
     });
 
     it('returns empty array when user has no polls', async () => {
       prismaMock.poll.findMany.mockResolvedValue([]);
+      prismaMock.poll.count.mockResolvedValue(0);
 
       const result = await service.listOwn(1);
 
-      expect(result).toEqual([]);
+      expect(result.data).toEqual([]);
+    });
+
+    it('passes status filter to prisma where clause', async () => {
+      prismaMock.poll.findMany.mockResolvedValue([]);
+      prismaMock.poll.count.mockResolvedValue(0);
+
+      await service.listOwn(1, { status: 'CLOSED', page: 1, limit: 20 });
+
+      expect(prismaMock.poll.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { ownerId: 1, status: 'CLOSED' },
+        }),
+      );
+    });
+
+    it('returns paginated metadata correctly', async () => {
+      prismaMock.poll.findMany.mockResolvedValue([POLL_WITH_OPTIONS]);
+      prismaMock.poll.count.mockResolvedValue(25);
+
+      const result = await service.listOwn(1, { page: 2, limit: 10 });
+
+      expect(result.page).toBe(2);
+      expect(result.limit).toBe(10);
+      expect(result.total).toBe(25);
+      expect(result.totalPages).toBe(3);
     });
   });
 
