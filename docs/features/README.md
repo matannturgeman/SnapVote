@@ -15,7 +15,7 @@ This folder defines feature slices for SnapVote development at `C:\Dev\SnapVote`
 | 04.6 Dark Mode                           | Implemented           | Theme toggle, dark variants                           |
 | 05 Live Results + Presence               | Implemented           | SSE streaming                                         |
 | 06 Results History + Insights            | Implemented           | Status filter, date filter, pagination, summary cards |
-| 07 Moderation + Abuse Protection         | Not implemented       | Reporting                                             |
+| 07 Moderation + Abuse Protection         | Implemented           | Rate limiting, report, lock, delete                   |
 | 08 Observability + Operability           | Partially Implemented | Request telemetry exists                              |
 | 09 Cleanup Technical Debt                | Document only         | Backlog                                               |
 | 10 WhatsApp-Style Voting Mechanism       | Not implemented       | Vote change, transparent lists                        |
