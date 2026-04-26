@@ -5,7 +5,7 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "emitDeclarationOnly": false,
+    "emitDeclarationOnly": true,
     "types": ["node"],
     "skipLibCheck": true,
     "noImplicitAny": false
