@@ -29,6 +29,7 @@
     "typecheck": {
       "cache": true,
       "executor": "nx:run-commands",
+      "dependsOn": ["^build"],
       "options": {
         "cwd": "apps/client",
         "command": "npx tsc --noEmit -p tsconfig.app.json"
