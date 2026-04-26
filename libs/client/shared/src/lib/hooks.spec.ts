@@ -40,7 +40,9 @@ describe('useLocalStorage', () => {
     });
 
     expect(result.current[0]).toBe('updated');
-    expect(JSON.parse(window.localStorage.getItem('key') as string)).toBe('updated');
+    expect(JSON.parse(window.localStorage.getItem('key') as string)).toBe(
+      'updated',
+    );
   });
 
   it('reads an existing value from localStorage on mount', () => {
@@ -61,7 +63,7 @@ describe('useLocalStorage', () => {
 
   it('handles non-string types (object)', () => {
     const { result } = renderHook(() =>
-      useLocalStorage<{ name: string }>('obj', { name: 'Alice' })
+      useLocalStorage<{ name: string }>('obj', { name: 'Alice' }),
     );
 
     act(() => {
@@ -91,7 +93,7 @@ describe('useDebounce', () => {
   it('does not update the debounced value before the delay', () => {
     const { result, rerender } = renderHook(
       ({ value }) => useDebounce(value, 300),
-      { initialProps: { value: 'a' } }
+      { initialProps: { value: 'a' } },
     );
 
     rerender({ value: 'b' });
@@ -102,7 +104,7 @@ describe('useDebounce', () => {
   it('updates the debounced value after the delay', () => {
     const { result, rerender } = renderHook(
       ({ value }) => useDebounce(value, 300),
-      { initialProps: { value: 'a' } }
+      { initialProps: { value: 'a' } },
     );
 
     rerender({ value: 'b' });
@@ -115,7 +117,7 @@ describe('useDebounce', () => {
   it('resets the timer on rapid successive changes', () => {
     const { result, rerender } = renderHook(
       ({ value }) => useDebounce(value, 300),
-      { initialProps: { value: 'a' } }
+      { initialProps: { value: 'a' } },
     );
 
     rerender({ value: 'b' });
@@ -143,20 +145,18 @@ describe('usePrevious', () => {
   });
 
   it('returns the previous value after a re-render', () => {
-    const { result, rerender } = renderHook(
-      ({ value }) => usePrevious(value),
-      { initialProps: { value: 1 } }
-    );
+    const { result, rerender } = renderHook(({ value }) => usePrevious(value), {
+      initialProps: { value: 1 },
+    });
 
     rerender({ value: 2 });
     expect(result.current).toBe(1);
   });
 
   it('tracks multiple value changes', () => {
-    const { result, rerender } = renderHook(
-      ({ value }) => usePrevious(value),
-      { initialProps: { value: 'a' } }
-    );
+    const { result, rerender } = renderHook(({ value }) => usePrevious(value), {
+      initialProps: { value: 'a' },
+    });
 
     rerender({ value: 'b' });
     expect(result.current).toBe('a');
@@ -245,16 +245,22 @@ describe('useMediaQuery', () => {
 
     const mql = {
       matches,
-      addEventListener: jest.fn((_type: string, cb: (e: MediaQueryListEvent) => void) => {
-        listeners.push(cb);
-      }),
-      removeEventListener: jest.fn((_type: string, cb: (e: MediaQueryListEvent) => void) => {
-        const idx = listeners.indexOf(cb);
-        if (idx !== -1) listeners.splice(idx, 1);
-      }),
+      addEventListener: jest.fn(
+        (_type: string, cb: (e: MediaQueryListEvent) => void) => {
+          listeners.push(cb);
+        },
+      ),
+      removeEventListener: jest.fn(
+        (_type: string, cb: (e: MediaQueryListEvent) => void) => {
+          const idx = listeners.indexOf(cb);
+          if (idx !== -1) listeners.splice(idx, 1);
+        },
+      ),
       // Helper to fire a change event in tests
       _fireChange: (nextMatches: boolean) => {
-        listeners.forEach((cb) => cb({ matches: nextMatches } as MediaQueryListEvent));
+        listeners.forEach((cb) =>
+          cb({ matches: nextMatches } as MediaQueryListEvent),
+        );
       },
     };
 
@@ -390,13 +396,13 @@ describe('useOnClickOutside', () => {
     });
 
     const addCount = addSpy.mock.calls.filter(
-      ([type]) => type === 'mousedown' || type === 'touchstart'
+      ([type]) => type === 'mousedown' || type === 'touchstart',
     ).length;
 
     unmount();
 
     const removeCount = removeSpy.mock.calls.filter(
-      ([type]) => type === 'mousedown' || type === 'touchstart'
+      ([type]) => type === 'mousedown' || type === 'touchstart',
     ).length;
 
     expect(addCount).toBe(2);

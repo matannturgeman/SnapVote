@@ -142,7 +142,9 @@ describe('pick', () => {
   });
 
   it('ignores keys not present in the object', () => {
-    expect(pick({ a: 1 } as Record<string, unknown>, ['a', 'z' as 'a'])).toEqual({ a: 1 });
+    expect(
+      pick({ a: 1 } as Record<string, unknown>, ['a', 'z' as 'a']),
+    ).toEqual({ a: 1 });
   });
 
   it('returns an empty object when keys array is empty', () => {
@@ -172,7 +174,9 @@ describe('omit', () => {
   });
 
   it('handles keys that do not exist in the object gracefully', () => {
-    expect(omit({ a: 1 } as Record<string, unknown>, ['z' as 'a'])).toEqual({ a: 1 });
+    expect(omit({ a: 1 } as Record<string, unknown>, ['z' as 'a'])).toEqual({
+      a: 1,
+    });
   });
 });
 

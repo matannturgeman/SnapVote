@@ -13,10 +13,17 @@ import {
 // Helpers
 // ---------------------------------------------------------------------------
 
-const mockUser: LoggedInUser = { id: 1, email: 'alice@example.com', name: 'Alice' };
+const mockUser: LoggedInUser = {
+  id: 1,
+  email: 'alice@example.com',
+  name: 'Alice',
+};
 
 function makeWrapper(
-  props: Omit<React.ComponentProps<typeof LoggedInUserProvider>, 'children'> = {},
+  props: Omit<
+    React.ComponentProps<typeof LoggedInUserProvider>,
+    'children'
+  > = {},
 ) {
   return ({ children }: { children: ReactNode }) =>
     createElement(LoggedInUserProvider, props, children);
@@ -82,7 +89,9 @@ describe('useLoggedInUser', () => {
 
   it('throws when used outside of a provider', () => {
     // Suppress the expected console.error from React
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
 
     expect(() => renderHook(() => useLoggedInUser())).toThrow(
       'useLoggedInUser() must be used inside a <LoggedInUserProvider>.',
@@ -114,7 +123,9 @@ describe('useCurrentUser', () => {
   });
 
   it('throws when used outside of a provider', () => {
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
 
     expect(() => renderHook(() => useCurrentUser())).toThrow(
       'useLoggedInUser() must be used inside a <LoggedInUserProvider>.',
@@ -146,7 +157,9 @@ describe('useIsAuthenticated', () => {
   });
 
   it('throws when used outside of a provider', () => {
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
 
     expect(() => renderHook(() => useIsAuthenticated())).toThrow(
       'useLoggedInUser() must be used inside a <LoggedInUserProvider>.',
@@ -202,7 +215,9 @@ describe('useSetLoggedInUser', () => {
   });
 
   it('throws when used outside of a provider', () => {
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
 
     expect(() => renderHook(() => useSetLoggedInUser())).toThrow(
       'useLoggedInUser() must be used inside a <LoggedInUserProvider>.',
@@ -265,7 +280,9 @@ describe('resolveUser callback', () => {
   });
 
   it('handles resolveUser errors gracefully and sets user to null', async () => {
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
     const resolveUser = jest.fn().mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useLoggedInUser(), {

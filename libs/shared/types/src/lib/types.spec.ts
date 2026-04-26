@@ -49,7 +49,10 @@ describe('User type (via userSchema)', () => {
   });
 
   it('accepts a user object with optional createdAt', () => {
-    const result = userSchema.safeParse({ ...validUser, createdAt: new Date() });
+    const result = userSchema.safeParse({
+      ...validUser,
+      createdAt: new Date(),
+    });
     expect(result.success).toBe(true);
   });
 
@@ -60,7 +63,10 @@ describe('User type (via userSchema)', () => {
   });
 
   it('rejects a user with an invalid email', () => {
-    const result = userSchema.safeParse({ ...validUser, email: 'not-an-email' });
+    const result = userSchema.safeParse({
+      ...validUser,
+      email: 'not-an-email',
+    });
     expect(result.success).toBe(false);
   });
 
@@ -88,12 +94,18 @@ describe('CreateUserInput type (via createUserSchema)', () => {
   });
 
   it('rejects when password is shorter than 8 characters', () => {
-    const result = createUserSchema.safeParse({ ...validInput, password: 'short' });
+    const result = createUserSchema.safeParse({
+      ...validInput,
+      password: 'short',
+    });
     expect(result.success).toBe(false);
   });
 
   it('rejects when password is longer than 100 characters', () => {
-    const result = createUserSchema.safeParse({ ...validInput, password: 'p'.repeat(101) });
+    const result = createUserSchema.safeParse({
+      ...validInput,
+      password: 'p'.repeat(101),
+    });
     expect(result.success).toBe(false);
   });
 
@@ -122,7 +134,10 @@ describe('LoginInput type (via loginSchema)', () => {
   });
 
   it('rejects when password is too short', () => {
-    const result = loginSchema.safeParse({ ...validLogin, password: '1234567' });
+    const result = loginSchema.safeParse({
+      ...validLogin,
+      password: '1234567',
+    });
     expect(result.success).toBe(false);
   });
 
@@ -145,7 +160,10 @@ describe('RegisterInput type (via registerSchema)', () => {
   });
 
   it('accepts a register payload with optional phone', () => {
-    const result = registerSchema.safeParse({ ...validRegister, phone: '+1234567890' });
+    const result = registerSchema.safeParse({
+      ...validRegister,
+      phone: '+1234567890',
+    });
     expect(result.success).toBe(true);
   });
 
@@ -155,7 +173,10 @@ describe('RegisterInput type (via registerSchema)', () => {
   });
 
   it('rejects when email is invalid', () => {
-    const result = registerSchema.safeParse({ ...validRegister, email: 'invalid' });
+    const result = registerSchema.safeParse({
+      ...validRegister,
+      email: 'invalid',
+    });
     expect(result.success).toBe(false);
   });
 });

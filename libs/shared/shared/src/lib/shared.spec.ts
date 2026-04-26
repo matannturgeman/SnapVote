@@ -179,7 +179,13 @@ describe('isDefined', () => {
   });
 
   it('works as a type guard in array filter', () => {
-    const values: (string | null | undefined)[] = ['a', null, 'b', undefined, 'c'];
+    const values: (string | null | undefined)[] = [
+      'a',
+      null,
+      'b',
+      undefined,
+      'c',
+    ];
     const defined: string[] = values.filter(isDefined);
     expect(defined).toEqual(['a', 'b', 'c']);
   });
