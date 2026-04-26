@@ -7,4 +7,4 @@ RUN npm install -g pnpm
 RUN pnpm install
 RUN pnpm nx build api
 
-CMD ["node", "dist/apps/api/main.js"]
+CMD ["node", "dist/api/main.js"]
