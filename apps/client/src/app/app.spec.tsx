@@ -30,6 +30,11 @@ const mockUseForgotPasswordMutation = jest.fn();
 const mockUseResetPasswordMutation = jest.fn();
 
 jest.mock('@libs/client-store', () => ({
+  doClearCredentials: () => ({ type: 'auth/clearCredentials' }),
+  doSetCredentials: (payload: unknown) => ({
+    type: 'auth/setCredentials',
+    payload,
+  }),
   clearCredentials: () => ({ type: 'auth/clearCredentials' }),
   setCredentials: (payload: unknown) => ({
     type: 'auth/setCredentials',
