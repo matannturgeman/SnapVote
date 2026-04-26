@@ -22,6 +22,9 @@ export {
   useLogoutMutation,
   useGetMeQuery,
   useLazyGetMeQuery,
+  useUpdateProfileMutation,
+  useChangePasswordMutation,
+  useDeleteAccountMutation,
 } from './lib/auth.api';
 
 // ---------------------------------------------------------------------------

@@ -8,6 +8,8 @@ import type {
   MessageResponseDto,
   SuccessResponseDto,
   UserResponseDto,
+  UpdateProfileDto,
+  ChangePasswordDto,
 } from '@libs/shared-dto';
 
 export const authApi = baseApi.injectEndpoints({
@@ -30,7 +32,10 @@ export const authApi = baseApi.injectEndpoints({
       invalidatesTags: ['Auth'],
     }),
 
-    forgotPassword: build.mutation<MessageResponseDto, ForgotPasswordRequestDto>({
+    forgotPassword: build.mutation<
+      MessageResponseDto,
+      ForgotPasswordRequestDto
+    >({
       query: (body) => ({
         url: '/auth/forgot-password',
         method: 'POST',
@@ -59,6 +64,32 @@ export const authApi = baseApi.injectEndpoints({
       query: () => '/auth/me',
       providesTags: ['Auth'],
     }),
+
+    updateProfile: build.mutation<UserResponseDto, UpdateProfileDto>({
+      query: (body) => ({
+        url: '/auth/profile',
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: ['Auth'],
+    }),
+
+    changePassword: build.mutation<MessageResponseDto, ChangePasswordDto>({
+      query: (body) => ({
+        url: '/auth/change-password',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Auth'],
+    }),
+
+    deleteAccount: build.mutation<SuccessResponseDto, void>({
+      query: () => ({
+        url: '/auth/account',
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Auth'],
+    }),
   }),
   overrideExisting: false,
 });
@@ -71,4 +102,7 @@ export const {
   useLogoutMutation,
   useGetMeQuery,
   useLazyGetMeQuery,
+  useUpdateProfileMutation,
+  useChangePasswordMutation,
+  useDeleteAccountMutation,
 } = authApi;

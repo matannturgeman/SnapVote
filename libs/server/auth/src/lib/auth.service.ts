@@ -1,4 +1,4 @@
-﻿import {
+import {
   ConflictException,
   Injectable,
   Logger,
@@ -8,7 +8,9 @@ import { ConfigService } from '@nestjs/config';
 import { prisma } from '@libs/server-data-access';
 import type {
   AuthResponseDto,
+  ChangePasswordDto,
   RegisterDto,
+  UpdateProfileDto,
   UserResponseDto,
 } from '@libs/shared-dto';
 import type { LoggedInUser } from '@libs/server-user';
@@ -32,6 +34,7 @@ interface AuthUser {
   id: number;
   email: string;
   name: string | null;
+  avatarUrl?: string | null;
 }
 
 @Injectable()
@@ -277,6 +280,7 @@ export class AuthService {
         id: true,
         email: true,
         name: true,
+        avatarUrl: true,
       },
     });
 
@@ -285,6 +289,127 @@ export class AuthService {
     }
 
     return this.toUserResponse(user);
+  }
+
+  async updateProfile(
+    userId: number,
+    dto: UpdateProfileDto,
+  ): Promise<UserResponseDto> {
+    const existing = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true },
+    });
+
+    if (!existing) {
+      throw new UnauthorizedException('Authenticated user no longer exists');
+    }
+
+    if (dto.email && dto.email !== existing.email) {
+      const emailTaken = await prisma.user.findUnique({
+        where: { email: dto.email },
+        select: { id: true },
+      });
+
+      if (emailTaken) {
+        throw new ConflictException('Email already in use');
+      }
+    }
+
+    const updateData: Parameters<typeof prisma.user.update>[0]['data'] = {};
+
+    if (dto.name !== undefined) {
+      updateData.name = dto.name;
+    }
+    if (dto.email !== undefined) {
+      updateData.email = dto.email;
+    }
+    if (dto.avatarUrl !== undefined) {
+      updateData.avatarUrl = dto.avatarUrl;
+    }
+
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatarUrl: true,
+      },
+    });
+
+    return this.toUserResponse(user);
+  }
+
+  async changePassword(userId: number, dto: ChangePasswordDto): Promise<void> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        passwordHash: true,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Authenticated user no longer exists');
+    }
+
+    const isPasswordValid = await verifyPassword(
+      dto.currentPassword,
+      user.passwordHash,
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    const newPasswordHash = await hashPassword(dto.newPassword);
+    const now = new Date();
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: userId },
+        data: { passwordHash: newPasswordHash },
+      }),
+      prisma.session.updateMany({
+        where: {
+          userId,
+          revokedAt: null,
+        },
+        data: { revokedAt: now },
+      }),
+    ]);
+  }
+
+  async deleteAccount(userId: number): Promise<void> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Authenticated user no longer exists');
+    }
+
+    const now = new Date();
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: userId },
+        data: {
+          deleted: true,
+          deletedAt: now,
+          email: `${userId}-deleted-${now.toISOString()}@deleted.local`,
+        },
+      }),
+      prisma.session.updateMany({
+        where: {
+          userId,
+          revokedAt: null,
+        },
+        data: { revokedAt: now },
+      }),
+    ]);
   }
 
   private async issueAuthResponse(
@@ -319,6 +444,7 @@ export class AuthService {
       id: user.id,
       email: user.email,
       name: this.displayName(user.name, user.email),
+      avatarUrl: user.avatarUrl ?? null,
     };
   }
 

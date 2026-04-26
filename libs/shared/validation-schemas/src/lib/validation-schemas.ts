@@ -11,6 +11,7 @@ export const userSchema = z.object({
     .string()
     .min(2, 'Name must be at least 2 characters')
     .max(50, 'Name must be at most 50 characters'),
+  avatarUrl: z.string().url('Invalid URL').nullable().optional(),
   createdAt: z.date().optional(),
 });
 
@@ -24,6 +25,24 @@ export const createUserSchema = z.object({
 });
 
 export const updateUserSchema = createUserSchema.partial();
+
+export const updateProfileSchema = z.object({
+  email: z.string().email('Invalid email address').optional(),
+  name: z
+    .string()
+    .min(2, 'Name must be at least 2 characters')
+    .max(50, 'Name must be at most 50 characters')
+    .optional(),
+  avatarUrl: z.string().url('Invalid URL').optional().nullable(),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(8, 'Password must be at least 8 characters'),
+  newPassword: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(100, 'Password must be at most 100 characters'),
+});
 
 // ---------------------------------------------------------------------------
 // Auth schemas
