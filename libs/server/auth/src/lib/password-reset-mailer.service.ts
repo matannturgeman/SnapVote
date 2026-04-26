@@ -1,6 +1,6 @@
-﻿import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 interface PasswordResetEmailPayload {
   to: string;
@@ -13,16 +13,16 @@ const DEFAULT_RESET_URL = 'http://localhost:4200/reset-password';
 @Injectable()
 export class PasswordResetMailerService {
   private readonly logger = new Logger(PasswordResetMailerService.name);
-  private readonly transporter: nodemailer.Transporter | null;
+  private readonly resend: Resend | null;
 
   constructor(private readonly configService: ConfigService) {
-    this.transporter = this.createTransporter();
+    this.resend = this.createResendClient();
   }
 
   async sendPasswordResetEmail(
     payload: PasswordResetEmailPayload,
   ): Promise<void> {
-    if (!this.transporter) {
+    if (!this.resend) {
       const message =
         'SMTP is not configured. Password reset email was not sent.';
 
@@ -42,7 +42,7 @@ export class PasswordResetMailerService {
     const recipientName = payload.name?.trim() || 'there';
     const escapedRecipientName = this.escapeHtml(recipientName);
 
-    const info = await this.transporter.sendMail({
+    const { data, error } = await this.resend.emails.send({
       from,
       to: payload.to,
       subject: 'Reset your password',
@@ -62,33 +62,26 @@ export class PasswordResetMailerService {
       ].join(''),
     });
 
+    if (error) {
+      this.logger.error(
+        `Failed to send password reset email to ${payload.to}: ${error.message}`,
+      );
+      throw new Error(`Failed to send email: ${error.message}`);
+    }
+
     this.logger.log(
-      `Password reset email queued for ${payload.to}. messageId=${info.messageId}`,
+      `Password reset email queued for ${payload.to}. id=${data?.id}`,
     );
   }
 
-  private createTransporter(): nodemailer.Transporter | null {
-    const host = this.configService.get<string>('SMTP_HOST');
+  private createResendClient(): Resend | null {
+    const apiKey = this.configService.get<string>('SMTP_PASS');
 
-    if (!host) {
+    if (!apiKey) {
       return null;
     }
 
-    const port = this.parseIntEnv('SMTP_PORT', 587);
-    const smtpSecure = this.configService.get<string>('SMTP_SECURE');
-    const secure =
-      smtpSecure === 'true' || (smtpSecure == null && port === 465);
-    const user = this.configService.get<string>('SMTP_USER');
-    const pass = this.configService.get<string>('SMTP_PASS');
-
-    const auth = user && pass ? { user, pass } : undefined;
-
-    return nodemailer.createTransport({
-      host,
-      port,
-      secure,
-      auth,
-    });
+    return new Resend(apiKey);
   }
 
   private buildResetPasswordLink(token: string): string {
@@ -120,17 +113,6 @@ export class PasswordResetMailerService {
     return (
       this.configService.get<string>('AUTH_REQUIRE_EMAIL_TRANSPORT') === 'true'
     );
-  }
-
-  private parseIntEnv(key: string, fallback: number): number {
-    const raw = this.configService.get<string>(key);
-
-    if (!raw) {
-      return fallback;
-    }
-
-    const parsed = Number.parseInt(raw, 10);
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
   }
 
   private escapeHtml(value: string): string {

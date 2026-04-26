@@ -121,6 +121,16 @@ export const pollApi = baseApi.injectEndpoints({
       },
     ),
 
+    deleteVote: build.mutation<PollResultsDto, { id: string; optionId: string }>(
+      {
+        query: ({ id, optionId }) => ({
+          url: `/polls/${id}/votes/my/${optionId}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: (_result, _error, { id }) => [{ type: 'Vote', id }],
+      },
+    ),
+
     getPollResults: build.query<PollResultsDto, string>({
       query: (id) => `/polls/${id}/results`,
       providesTags: (_result, _error, id) => [{ type: 'Vote', id }],
@@ -154,6 +164,7 @@ export const {
   useReportPollMutation,
   useJoinPollByTokenQuery,
   useCastVoteMutation,
+  useDeleteVoteMutation,
   useGetPollResultsQuery,
   useListMyPollsQuery,
 } = pollApi;

@@ -1,7 +1,8 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Loader2, Plus, Sparkles, X } from 'lucide-react';
+import { Eye, Loader2, Plus, Sparkles, X } from 'lucide-react';
 import { useCreatePollMutation } from '@libs/client-server-communication';
+import type { PollVisibilityMode } from '@libs/shared-dto';
 import { Button } from '../components/ui/button';
 import {
   Card,
@@ -20,6 +21,9 @@ export function CreatePollPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [options, setOptions] = useState<string[]>(['', '']);
+  const [visibilityMode, setVisibilityMode] =
+    useState<PollVisibilityMode>('PRIVATE');
+  const [allowMultipleAnswers, setAllowMultipleAnswers] = useState(false);
 
   const setOption = (index: number, value: string) => {
     setOptions((prev) => prev.map((o, i) => (i === index ? value : o)));
@@ -45,6 +49,8 @@ export function CreatePollPage() {
         title: title.trim(),
         description: description.trim() || undefined,
         options: nonEmptyOptions,
+        visibilityMode,
+        allowMultipleAnswers,
       }).unwrap();
       navigate(`/polls/${poll.id}`);
     } catch {
@@ -125,6 +131,46 @@ export function CreatePollPage() {
                     Fill in at least 2 options to continue.
                   </p>
                 )}
+              </div>
+              <div className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setVisibilityMode((v) =>
+                      v === 'PRIVATE' ? 'TRANSPARENT' : 'PRIVATE',
+                    )
+                  }
+                  className="flex w-full items-center justify-between text-sm"
+                >
+                  <span className="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-300">
+                    <Eye className="h-4 w-4 text-slate-400" />
+                    Show who voted
+                  </span>
+                  <span
+                    className={`inline-flex h-5 w-9 items-center rounded-full transition-colors ${visibilityMode === 'TRANSPARENT' ? 'bg-cyan-600' : 'bg-slate-200 dark:bg-slate-600'}`}
+                  >
+                    <span
+                      className={`h-4 w-4 rounded-full bg-white shadow transition-transform ${visibilityMode === 'TRANSPARENT' ? 'translate-x-4' : 'translate-x-0.5'}`}
+                    />
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAllowMultipleAnswers((v) => !v)}
+                  className="flex w-full items-center justify-between text-sm"
+                >
+                  <span className="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-300">
+                    <Plus className="h-4 w-4 text-slate-400" />
+                    Allow multiple answers
+                  </span>
+                  <span
+                    className={`inline-flex h-5 w-9 items-center rounded-full transition-colors ${allowMultipleAnswers ? 'bg-cyan-600' : 'bg-slate-200 dark:bg-slate-600'}`}
+                  >
+                    <span
+                      className={`h-4 w-4 rounded-full bg-white shadow transition-transform ${allowMultipleAnswers ? 'translate-x-4' : 'translate-x-0.5'}`}
+                    />
+                  </span>
+                </button>
               </div>
               <div className="flex gap-2 pt-2">
                 <Button

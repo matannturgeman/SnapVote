@@ -42,6 +42,7 @@ export {
   useReportPollMutation,
   useJoinPollByTokenQuery,
   useCastVoteMutation,
+  useDeleteVoteMutation,
   useGetPollResultsQuery,
   useListMyPollsQuery,
 } from './lib/poll.api';

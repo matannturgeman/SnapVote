@@ -4,6 +4,7 @@ import { Check, Copy, Loader2, Plus, X } from 'lucide-react';
 import { selectCurrentUser, useAppSelector } from '@libs/client-store';
 import {
   useCastVoteMutation,
+  useDeleteVoteMutation,
   useClosePollMutation,
   useCreateShareLinkMutation,
   useGetPollQuery,
@@ -62,6 +63,7 @@ export function PollDetailPage() {
   const [showShare, setShowShare] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [castVote, { isLoading: isVoting }] = useCastVoteMutation();
+  const [deleteVote, { isLoading: isDeletingVote }] = useDeleteVoteMutation();
   const [voteError, setVoteError] = useState<string | null>(null);
   const { data: results } = useGetPollResultsQuery(id ?? '', { skip: !id });
   const { presence, isConnected } = usePollStream(
@@ -132,6 +134,17 @@ export function PollDetailPage() {
     setVoteError(null);
     try {
       await castVote({ id, body: { optionId } }).unwrap();
+    } catch (err) {
+      const requestId = extractRequestId(err);
+      setVoteError(requestId ?? '');
+    }
+  };
+
+  const onDeselect = async (optionId: string) => {
+    if (!id) return;
+    setVoteError(null);
+    try {
+      await deleteVote({ id, optionId }).unwrap();
     } catch (err) {
       const requestId = extractRequestId(err);
       setVoteError(requestId ?? '');
@@ -433,7 +446,13 @@ export function PollDetailPage() {
             {poll.status === 'OPEN' && !ownerCheck && (
               <div className="border-t border-slate-100 pt-4 space-y-3 dark:border-slate-700/50">
                 <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  {results?.myVote ? 'Your vote' : 'Cast your vote'}
+                  {(results?.myVotes?.length ?? 0) > 0
+                    ? poll.allowMultipleAnswers
+                      ? 'Your votes'
+                      : 'Your vote'
+                    : poll.allowMultipleAnswers
+                      ? 'Cast your votes'
+                      : 'Cast your vote'}
                 </p>
                 {voteError !== null && (
                   <p className="rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-800 dark:border-orange-800/40 dark:bg-orange-900/20 dark:text-orange-300">
@@ -447,36 +466,57 @@ export function PollDetailPage() {
                 )}
                 <ul className="space-y-2">
                   {poll.options.map((opt) => {
-                    const voted = results?.myVote?.optionId === opt.id;
-                    const count =
-                      results?.options.find((o) => o.id === opt.id)
-                        ?.voteCount ?? 0;
+                    const myVotedIds = results?.myVotes?.map((v) => v.optionId) ?? [];
+                    const voted = myVotedIds.includes(opt.id);
+                    const hasAnyVote = myVotedIds.length > 0;
+                    const resultOpt = results?.options.find((o) => o.id === opt.id);
+                    const count = resultOpt?.voteCount ?? 0;
                     const total = results?.totalVotes ?? 0;
-                    const pct =
-                      total > 0 ? Math.round((count / total) * 100) : 0;
+                    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                    const isTransparent = results?.visibilityMode === 'TRANSPARENT';
+                    const canVote = poll.allowMultipleAnswers
+                      ? !voted
+                      : !hasAnyVote;
                     return (
                       <li key={opt.id}>
-                        <button
-                          type="button"
-                          disabled={!!results?.myVote || isVoting}
-                          onClick={() => onVote(opt.id)}
-                          className={`w-full text-left rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                        <div
+                          className={`w-full rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
                             voted
                               ? 'border-cyan-400 bg-cyan-50 text-cyan-800 dark:border-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300'
-                              : results?.myVote
-                                ? 'border-slate-200 bg-slate-50 text-slate-500 cursor-default dark:border-slate-700 dark:bg-slate-700/50 dark:text-slate-400'
-                                : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-cyan-300 hover:bg-cyan-50 dark:border-slate-700 dark:bg-slate-700/50 dark:text-slate-300 dark:hover:border-cyan-700 dark:hover:bg-cyan-900/20'
+                              : !canVote
+                                ? 'border-slate-200 bg-slate-50 text-slate-500 dark:border-slate-700 dark:bg-slate-700/50 dark:text-slate-400'
+                                : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-700/50 dark:text-slate-300'
                           }`}
                         >
                           <div className="flex items-center justify-between">
-                            <span>{opt.text}</span>
-                            {results?.myVote && (
-                              <span className="ml-2 text-xs text-slate-400 dark:text-slate-500">
-                                {pct}% ({count})
-                              </span>
-                            )}
+                            <button
+                              type="button"
+                              disabled={!canVote || isVoting || isDeletingVote}
+                              onClick={() => canVote && onVote(opt.id)}
+                              className={`flex-1 text-left ${canVote && !isVoting ? 'hover:text-cyan-700 dark:hover:text-cyan-300' : ''}`}
+                            >
+                              {opt.text}
+                            </button>
+                            <div className="ml-2 flex items-center gap-2">
+                              {hasAnyVote && (
+                                <span className="text-xs text-slate-400 dark:text-slate-500">
+                                  {pct}% ({count})
+                                </span>
+                              )}
+                              {voted && (
+                                <button
+                                  type="button"
+                                  disabled={isDeletingVote || isVoting}
+                                  onClick={() => onDeselect(opt.id)}
+                                  className="rounded p-0.5 text-cyan-600 hover:text-red-500 dark:text-cyan-400 dark:hover:text-red-400"
+                                  title="Remove vote"
+                                >
+                                  <X className="h-3.5 w-3.5" />
+                                </button>
+                              )}
+                            </div>
                           </div>
-                          {results?.myVote && (
+                          {hasAnyVote && (
                             <div className="mt-1 h-1 w-full rounded-full bg-slate-200 dark:bg-slate-600">
                               <div
                                 className={`h-1 rounded-full ${voted ? 'bg-cyan-500' : 'bg-slate-300 dark:bg-slate-500'}`}
@@ -484,15 +524,20 @@ export function PollDetailPage() {
                               />
                             </div>
                           )}
-                        </button>
+                          {isTransparent && resultOpt?.voters && resultOpt.voters.length > 0 && (
+                            <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                              {resultOpt.voters.map((v) => v.name ?? `User ${v.id}`).join(', ')}
+                            </p>
+                          )}
+                        </div>
                       </li>
                     );
                   })}
                 </ul>
-                {results?.myVote && (
+                {(results?.myVotes?.length ?? 0) > 0 && (
                   <p className="text-xs text-slate-400 text-center dark:text-slate-500">
-                    {results.totalVotes} vote
-                    {results.totalVotes !== 1 ? 's' : ''} total
+                    {results!.totalVotes} vote
+                    {results!.totalVotes !== 1 ? 's' : ''} total
                   </p>
                 )}
               </div>
@@ -523,6 +568,15 @@ export function PollDetailPage() {
                               style={{ width: `${pct}%` }}
                             />
                           </div>
+                          {results.visibilityMode === 'TRANSPARENT' &&
+                            opt.voters &&
+                            opt.voters.length > 0 && (
+                              <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                                {opt.voters
+                                  .map((v) => v.name ?? `User ${v.id}`)
+                                  .join(', ')}
+                              </p>
+                            )}
                         </div>
                       </li>
                     );

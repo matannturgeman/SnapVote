@@ -15,6 +15,11 @@ enum PollStatus {
   LOCKED
 }
 
+enum PollVisibilityMode {
+  PRIVATE
+  TRANSPARENT
+}
+
 enum ShareLinkStatus {
   ACTIVE
   REVOKED
@@ -59,19 +64,21 @@ model User {
 }
 
 model Poll {
-  id          String      @id @default(cuid())
-  title       String
-  description String?
-  status      PollStatus  @default(DRAFT)
-  ownerId     Int
-  openedAt    DateTime?
-  closedAt    DateTime?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  owner       User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  options     PollOption[]
-  shareLinks  PollShareLink[]
-  votes       Vote[]
+  id                   String             @id @default(cuid())
+  title                String
+  description          String?
+  status               PollStatus         @default(DRAFT)
+  visibilityMode       PollVisibilityMode @default(PRIVATE)
+  allowMultipleAnswers Boolean            @default(false)
+  ownerId              Int
+  openedAt             DateTime?
+  closedAt             DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  owner                User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  options              PollOption[]
+  shareLinks           PollShareLink[]
+  votes                Vote[]
 
   @@index([ownerId])
   @@index([status])
@@ -108,11 +115,12 @@ model Vote {
   optionId      String
   participantId Int
   createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
   poll          Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
   option        PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
   voter         User       @relation(fields: [participantId], references: [id], onDelete: Cascade)
 
-  @@unique([pollId, participantId])
+  @@unique([pollId, participantId, optionId])
   @@index([pollId])
   @@index([optionId])
 }

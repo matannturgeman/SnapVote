@@ -11,6 +11,7 @@ import {
   successResponseSchema,
   pollSchema,
   pollOptionSchema,
+  pollVisibilityModeSchema,
   createPollSchema,
   updatePollSchema,
   pollListQuerySchema,
@@ -102,6 +103,7 @@ export type PaginatedResponseDto<T> = {
 // ---------------------------------------------------------------------------
 
 export const PollOptionResponseDtoSchema = pollOptionSchema;
+export const PollVisibilityModeDtoSchema = pollVisibilityModeSchema;
 export const PollResponseDtoSchema = pollSchema;
 export const CreatePollDtoSchema = createPollSchema;
 export const UpdatePollDtoSchema = updatePollSchema;
@@ -119,6 +121,7 @@ export const ReportStatusDtoSchema = reportStatusSchema;
 export const ModerationActionDtoSchema = moderationActionSchema;
 
 export type PollOptionResponseDto = z.infer<typeof PollOptionResponseDtoSchema>;
+export type PollVisibilityMode = z.infer<typeof PollVisibilityModeDtoSchema>;
 export type PollResponseDto = z.infer<typeof PollResponseDtoSchema>;
 export type CreatePollDto = z.infer<typeof CreatePollDtoSchema>;
 export type UpdatePollDto = z.infer<typeof UpdatePollDtoSchema>;
