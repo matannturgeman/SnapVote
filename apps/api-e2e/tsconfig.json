@@ -3,14 +3,14 @@
   "files": [],
   "include": [],
   "references": [
-    { "path": "../../libs/server/shared" },
-    { "path": "../../libs/server/poll" },
-    { "path": "../../libs/server/data-access" },
-    { "path": "../../libs/server/user" },
-    { "path": "../../libs/server/auth" },
-    { "path": "../../libs/shared/validation-schemas" },
-    { "path": "../../libs/shared/dto" },
-    { "path": "../api" },
+    { "path": "../../libs/server/shared/tsconfig.lib.json" },
+    { "path": "../../libs/server/poll/tsconfig.lib.json" },
+    { "path": "../../libs/server/data-access/tsconfig.lib.json" },
+    { "path": "../../libs/server/user/tsconfig.lib.json" },
+    { "path": "../../libs/server/auth/tsconfig.lib.json" },
+    { "path": "../../libs/shared/validation-schemas/tsconfig.lib.json" },
+    { "path": "../../libs/shared/dto/tsconfig.lib.json" },
+    { "path": "../api/tsconfig.app.json" },
     { "path": "./tsconfig.spec.json" }
   ],
   "compilerOptions": {
