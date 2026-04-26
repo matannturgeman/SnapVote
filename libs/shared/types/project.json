@@ -21,9 +21,10 @@
       }
     },
     "test": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "command": "echo No tests",
+        "jestConfig": "libs/shared/types/jest.config.js",
         "passWithNoTests": true
       }
     }

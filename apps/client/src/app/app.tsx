@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import {
-  clearCredentials,
-  setCredentials,
+  doClearCredentials,
+  doSetCredentials,
   useAppDispatch,
 } from '@libs/client-store';
 import { useGetMeQuery } from '@libs/client-server-communication';
@@ -34,15 +34,15 @@ export function App() {
 
   useEffect(() => {
     if (!token) {
-      dispatch(clearCredentials());
+      dispatch(doClearCredentials());
       return;
     }
     if (isSuccess && me) {
-      dispatch(setCredentials({ user: me, token }));
+      dispatch(doSetCredentials({ user: me, token }));
     }
     if (isError) {
       clearPersistedToken();
-      dispatch(clearCredentials());
+      dispatch(doClearCredentials());
     }
   }, [dispatch, isError, isSuccess, me, token]);
 

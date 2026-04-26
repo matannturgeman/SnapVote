@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { LogOut, Plus, Vote } from 'lucide-react';
 import {
-  clearCredentials,
+  doClearCredentials,
   selectCurrentUser,
   useAppDispatch,
   useAppSelector,
@@ -23,7 +23,7 @@ export function Navbar() {
       // Keep logout resilient even if server request fails.
     }
     clearPersistedToken();
-    dispatch(clearCredentials());
+    dispatch(doClearCredentials());
     navigate('/login', { replace: true });
   };
 

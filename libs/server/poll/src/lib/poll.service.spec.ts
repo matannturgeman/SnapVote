@@ -695,7 +695,7 @@ describe('PollService', () => {
 
   describe('reportPoll', () => {
     it('creates a moderation report', async () => {
-      const dto = { reason: 'SPAM', details: 'Test details' };
+      const dto = { reason: 'SPAM' as const, details: 'Test details' };
 
       await service.reportPoll('poll-1', undefined, 2, dto);
 
