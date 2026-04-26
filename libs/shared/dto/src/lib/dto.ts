@@ -2,6 +2,8 @@ import { z } from 'zod';
 import {
   userSchema,
   createUserSchema,
+  updateProfileSchema,
+  changePasswordSchema,
   loginSchema,
   registerSchema,
   forgotPasswordRequestSchema,
@@ -50,6 +52,8 @@ export const RegisterDtoSchema = registerSchema;
 export const ForgotPasswordRequestDtoSchema = forgotPasswordRequestSchema;
 export const ResetPasswordDtoSchema = resetPasswordSchema;
 export const AuthResponseDtoSchema = authResponseSchema;
+export const UpdateProfileDtoSchema = updateProfileSchema;
+export const ChangePasswordDtoSchema = changePasswordSchema;
 
 export type LoginDto = z.infer<typeof LoginDtoSchema>;
 export type RegisterDto = z.infer<typeof RegisterDtoSchema>;
@@ -58,6 +62,8 @@ export type ForgotPasswordRequestDto = z.infer<
 >;
 export type ResetPasswordDto = z.infer<typeof ResetPasswordDtoSchema>;
 export type AuthResponseDto = z.infer<typeof AuthResponseDtoSchema>;
+export type UpdateProfileDto = z.infer<typeof UpdateProfileDtoSchema>;
+export type ChangePasswordDto = z.infer<typeof ChangePasswordDtoSchema>;
 
 // ---------------------------------------------------------------------------
 // Common response DTOs

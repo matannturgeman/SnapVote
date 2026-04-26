@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, Plus, Vote } from 'lucide-react';
+import { LogOut, Plus, User, Vote } from 'lucide-react';
 import {
   clearCredentials,
   selectCurrentUser,
@@ -48,10 +48,21 @@ export function Navbar() {
           </Link>
 
           {user?.name && (
-            <span className="hidden text-sm text-slate-500 dark:text-slate-400 sm:block">
+            <Link
+              to="/profile"
+              className="hidden text-sm text-slate-500 hover:text-cyan-700 dark:text-slate-400 dark:hover:text-cyan-400 sm:block"
+            >
               {user.name}
-            </span>
+            </Link>
           )}
+
+          <Link
+            to="/profile"
+            className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-slate-500 hover:text-cyan-700 dark:text-slate-400 dark:hover:text-cyan-400"
+            title="Profile"
+          >
+            <User className="h-4 w-4" />
+          </Link>
 
           <ThemeToggle />
 

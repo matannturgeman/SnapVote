@@ -10,6 +10,7 @@ import { AppShell } from '../components/app-shell';
 import { SessionGate } from '../components/session-gate';
 import { HomePage } from '../pages/home.page';
 import { LoginPage } from '../pages/login.page';
+import { ProfilePage } from '../pages/profile.page';
 import { RegisterPage } from '../pages/register.page';
 import { ForgotPasswordPage } from '../pages/forgot-password.page';
 import { ResetPasswordPage } from '../pages/reset-password.page';
@@ -85,6 +86,16 @@ export function App() {
         }
       />
       <Route path="/polls/join/:token" element={<PollJoinPage />} />
+      <Route
+        path="/profile"
+        element={
+          <SessionGate isBootstrapping={isBootstrapping}>
+            <AppShell>
+              <ProfilePage />
+            </AppShell>
+          </SessionGate>
+        }
+      />
       <Route
         path="*"
         element={<Navigate to={token ? '/' : '/login'} replace />}
