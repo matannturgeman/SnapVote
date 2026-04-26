@@ -13,6 +13,7 @@ import {
   useRevokeShareLinkMutation,
   useUpdatePollMutation,
 } from '@libs/client-server-communication';
+import { POLL_STATUS_COLORS } from '../lib/poll-ui';
 import { Button } from '../components/ui/button';
 import {
   Card,
@@ -24,11 +25,6 @@ import {
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 
-const STATUS_COLORS: Record<string, string> = {
-  OPEN: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
-  DRAFT: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
-  CLOSED: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
-};
 
 export function PollDetailPage() {
   const { id } = useParams<{ id?: string }>();
@@ -51,7 +47,7 @@ export function PollDetailPage() {
   const [revokeShareLink] = useRevokeShareLinkMutation();
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
-  const [editOptions, setEditOptions] = useState<string[]>([]);
+  const [editOptions, setEditOptions] = useState<{ key: string; text: string }[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [closeError, setCloseError] = useState(false);
   const [showShare, setShowShare] = useState(false);
@@ -67,7 +63,7 @@ export function PollDetailPage() {
     if (poll && !isEditing) {
       setEditTitle(poll.title);
       setEditDescription(poll.description ?? '');
-      setEditOptions(poll.options.map((o) => o.text));
+      setEditOptions(poll.options.map((o) => ({ key: o.id, text: o.text })));
     }
   }, [poll, isEditing]);
 
@@ -99,8 +95,7 @@ export function PollDetailPage() {
     );
   }
 
-  const isOwner = user?.id === poll.ownerId;
-  const canEdit = isOwner && poll.status !== 'CLOSED';
+  const canEdit = ownerCheck && poll.status !== 'CLOSED';
 
   const onCopyLink = (token: string, linkId: string) => {
     const url = `${window.location.origin}/polls/join/${token}`;
@@ -123,6 +118,16 @@ export function PollDetailPage() {
 
   const activeLinks = shareLinks.filter((l) => l.status === 'ACTIVE');
 
+  const onVote = async (optionId: string) => {
+    if (!id) return;
+    setVoteError(false);
+    try {
+      await castVote({ id, body: { optionId } }).unwrap();
+    } catch {
+      setVoteError(true);
+    }
+  };
+
   const onClose = async () => {
     if (!id) return;
     setCloseError(false);
@@ -133,7 +138,7 @@ export function PollDetailPage() {
     }
   };
 
-  const nonEmptyEditOptions = editOptions.filter((o) => o.trim().length > 0);
+  const nonEmptyEditOptions = editOptions.filter((o) => o.text.trim().length > 0);
   const canSaveEdit =
     editTitle.trim().length > 0 && nonEmptyEditOptions.length >= 2;
 
@@ -146,7 +151,7 @@ export function PollDetailPage() {
         body: {
           title: editTitle.trim(),
           description: editDescription.trim() || undefined,
-          options: nonEmptyEditOptions,
+          options: nonEmptyEditOptions.map((o) => o.text),
         },
       }).unwrap();
       setIsEditing(false);
@@ -163,7 +168,7 @@ export function PollDetailPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span
-                  className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${STATUS_COLORS[poll.status] ?? STATUS_COLORS['DRAFT']}`}
+                  className={`inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${POLL_STATUS_COLORS[poll.status] ?? POLL_STATUS_COLORS['DRAFT']}`}
                 >
                   {poll.status}
                 </span>
@@ -254,13 +259,13 @@ export function PollDetailPage() {
                 <div className="space-y-2">
                   <Label>Options</Label>
                   {editOptions.map((opt, i) => (
-                    <div key={i} className="flex items-center gap-2">
+                    <div key={opt.key} className="flex items-center gap-2">
                       <Input
-                        value={opt}
+                        value={opt.text}
                         onChange={(e) =>
                           setEditOptions((prev) =>
-                            prev.map((o, idx) =>
-                              idx === i ? e.target.value : o,
+                            prev.map((o) =>
+                              o.key === opt.key ? { ...o, text: e.target.value } : o,
                             ),
                           )
                         }
@@ -272,7 +277,7 @@ export function PollDetailPage() {
                           type="button"
                           onClick={() =>
                             setEditOptions((prev) =>
-                              prev.filter((_, idx) => idx !== i),
+                              prev.filter((o) => o.key !== opt.key),
                             )
                           }
                           className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
@@ -285,7 +290,7 @@ export function PollDetailPage() {
                   {editOptions.length < 10 && (
                     <button
                       type="button"
-                      onClick={() => setEditOptions((prev) => [...prev, ''])}
+                      onClick={() => setEditOptions((prev) => [...prev, { key: crypto.randomUUID(), text: '' }])}
                       className="flex items-center gap-1 text-sm font-medium text-cyan-700 hover:text-cyan-600 dark:text-cyan-400 dark:hover:text-cyan-300"
                     >
                       <Plus className="h-3.5 w-3.5" />
@@ -325,7 +330,7 @@ export function PollDetailPage() {
                 </div>
               </form>
             )}
-            {isOwner && !isEditing && (
+            {ownerCheck && !isEditing && (
               <div className="border-t border-slate-100 pt-4 dark:border-slate-700/50">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -395,7 +400,7 @@ export function PollDetailPage() {
                 )}
               </div>
             )}
-            {poll.status === 'OPEN' && !isOwner && (
+            {poll.status === 'OPEN' && !ownerCheck && (
               <div className="border-t border-slate-100 pt-4 space-y-3 dark:border-slate-700/50">
                 <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   {results?.myVote ? 'Your vote' : 'Cast your vote'}
@@ -419,18 +424,7 @@ export function PollDetailPage() {
                         <button
                           type="button"
                           disabled={!!results?.myVote || isVoting}
-                          onClick={async () => {
-                            if (!id) return;
-                            setVoteError(false);
-                            try {
-                              await castVote({
-                                id,
-                                body: { optionId: opt.id },
-                              }).unwrap();
-                            } catch {
-                              setVoteError(true);
-                            }
-                          }}
+                          onClick={() => onVote(opt.id)}
                           className={`w-full text-left rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
                             voted
                               ? 'border-cyan-400 bg-cyan-50 text-cyan-800 dark:border-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300'
@@ -468,7 +462,7 @@ export function PollDetailPage() {
                 )}
               </div>
             )}
-            {(isOwner || poll.status === 'CLOSED') && results && (
+            {(ownerCheck || poll.status === 'CLOSED') && results && (
               <div className="border-t border-slate-100 pt-4 space-y-3 dark:border-slate-700/50">
                 <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   Results

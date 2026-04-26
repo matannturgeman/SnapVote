@@ -71,6 +71,8 @@ export function HomePage() {
     handleDateFilterChange();
   }
 
+  const filterLabel = statusFilter !== 'ALL' ? statusFilter.toLowerCase() : '';
+
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-4 sm:p-6">
       <div className="flex items-center justify-between">
@@ -183,12 +185,12 @@ export function HomePage() {
             <CardTitle className="text-base text-slate-600 dark:text-slate-300">
               {statusFilter === 'ALL'
                 ? 'No polls yet'
-                : `No ${statusFilter.toLowerCase()} polls`}
+                : `No ${filterLabel} polls`}
             </CardTitle>
             <CardDescription>
               {statusFilter === 'ALL'
                 ? 'Create your first poll to get started.'
-                : `You have no ${statusFilter.toLowerCase()} polls.`}
+                : `You have no ${filterLabel} polls.`}
             </CardDescription>
             {statusFilter === 'ALL' && (
               <Link to="/polls/new" className="mt-2">

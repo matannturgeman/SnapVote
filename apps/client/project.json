@@ -33,6 +33,13 @@
         "cwd": "apps/client",
         "command": "npx tsc --noEmit -p tsconfig.app.json"
       }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/client/jest.config.js"
+      }
     }
   }
 }
