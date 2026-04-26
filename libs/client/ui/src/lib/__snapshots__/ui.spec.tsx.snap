@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Ui matches snapshot 1`] = `
+<div
+  class="container"
+>
+  <h1>
+    Welcome to Ui!
+  </h1>
+</div>
+`;

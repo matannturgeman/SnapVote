@@ -33,6 +33,8 @@ export class PollService {
         title: dto.title,
         description: dto.description ?? null,
         status: 'OPEN',
+        visibilityMode: dto.visibilityMode ?? 'PRIVATE',
+        allowMultipleAnswers: dto.allowMultipleAnswers ?? false,
         ownerId,
         openedAt: new Date(),
         options: {
@@ -259,16 +261,27 @@ export class PollService {
       throw new BadRequestException('Invalid option for this poll');
     }
 
-    const existing = await prisma.vote.findUnique({
-      where: {
-        pollId_participantId: { pollId, participantId },
-      },
-    });
-
-    if (!existing) {
-      await prisma.vote.create({
-        data: { pollId, optionId: dto.optionId, participantId },
+    if (poll.allowMultipleAnswers) {
+      // Multi-select: idempotent create — one vote per option per participant
+      await prisma.vote.upsert({
+        where: {
+          pollId_participantId_optionId: {
+            pollId,
+            participantId,
+            optionId: dto.optionId,
+          },
+        },
+        create: { pollId, optionId: dto.optionId, participantId },
+        update: {},
       });
+    } else {
+      // Single-select: replace any existing vote with the new selection
+      await prisma.$transaction([
+        prisma.vote.deleteMany({ where: { pollId, participantId } }),
+        prisma.vote.create({
+          data: { pollId, optionId: dto.optionId, participantId },
+        }),
+      ]);
     }
 
     const results = await this.getResults(pollId, participantId);
@@ -281,16 +294,57 @@ export class PollService {
     return results;
   }
 
+  async deleteVote(
+    pollId: string,
+    participantId: number,
+    optionId: string,
+  ): Promise<PollResultsDto> {
+    const poll = await prisma.poll.findUnique({ where: { id: pollId } });
+
+    if (!poll) {
+      throw new NotFoundException(`Poll ${pollId} not found`);
+    }
+
+    if (poll.status !== 'OPEN') {
+      throw new ForbiddenException('Poll is not open for voting');
+    }
+
+    const deleted = await prisma.vote.deleteMany({
+      where: { pollId, participantId, optionId },
+    });
+
+    if (deleted.count === 0) {
+      throw new BadRequestException('No vote found for this option');
+    }
+
+    const results = await this.getResults(pollId, participantId);
+
+    this.pollStreamService
+      .publish(pollId, { type: 'results', data: results })
+      .catch((err) => this.logger.error(`Stream publish failed: ${err}`));
+
+    return results;
+  }
+
   async getResults(
     pollId: string,
     requesterId: number,
   ): Promise<PollResultsDto> {
+    const isTransparent = await prisma.poll
+      .findUnique({ where: { id: pollId }, select: { visibilityMode: true } })
+      .then((p) => p?.visibilityMode === 'TRANSPARENT');
+
     const poll = await prisma.poll.findUnique({
       where: { id: pollId },
       include: {
         options: {
           orderBy: { order: 'asc' },
-          include: { _count: { select: { votes: true } } },
+          include: {
+            _count: { select: { votes: true } },
+            ...(isTransparent
+              ? { votes: { include: { voter: { select: { id: true, name: true } } } } }
+              : {}),
+          },
         },
       },
     });
@@ -299,8 +353,9 @@ export class PollService {
       throw new NotFoundException(`Poll ${pollId} not found`);
     }
 
-    const myVote = await prisma.vote.findUnique({
-      where: { pollId_participantId: { pollId, participantId: requesterId } },
+    const myVotes = await prisma.vote.findMany({
+      where: { pollId, participantId: requesterId },
+      select: { optionId: true },
     });
 
     const totalVotes = poll.options.reduce((sum, o) => sum + o._count.votes, 0);
@@ -308,13 +363,23 @@ export class PollService {
     return {
       pollId,
       totalVotes,
+      visibilityMode: poll.visibilityMode as 'PRIVATE' | 'TRANSPARENT',
       options: poll.options.map((o) => ({
         id: o.id,
         text: o.text,
         order: o.order,
         voteCount: o._count.votes,
+        ...(isTransparent && 'votes' in o
+          ? {
+              voters: (
+                o.votes as unknown as {
+                  voter: { id: number; name: string | null };
+                }[]
+              ).map((v) => ({ id: v.voter.id, name: v.voter.name })),
+            }
+          : {}),
       })),
-      myVote: myVote ? { optionId: myVote.optionId } : null,
+      myVotes: myVotes.map((v) => ({ optionId: v.optionId })),
     };
   }
 
@@ -357,6 +422,8 @@ export class PollService {
     title: string;
     description: string | null;
     status: 'DRAFT' | 'OPEN' | 'CLOSED' | 'LOCKED';
+    visibilityMode: 'PRIVATE' | 'TRANSPARENT';
+    allowMultipleAnswers: boolean;
     ownerId: number;
     openedAt: Date | null;
     closedAt: Date | null;
@@ -370,6 +437,8 @@ export class PollService {
       title: poll.title,
       description: poll.description ?? undefined,
       status: poll.status,
+      visibilityMode: poll.visibilityMode,
+      allowMultipleAnswers: poll.allowMultipleAnswers,
       ownerId: poll.ownerId,
       openedAt: poll.openedAt,
       closedAt: poll.closedAt,

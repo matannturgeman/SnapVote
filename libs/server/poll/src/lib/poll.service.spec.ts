@@ -24,8 +24,12 @@ jest.mock('@libs/server-data-access', () => ({
     },
     vote: {
       findUnique: jest.fn(),
+      findMany: jest.fn(),
       create: jest.fn(),
+      upsert: jest.fn(),
+      deleteMany: jest.fn(),
     },
+    $transaction: jest.fn(),
     moderationReport: {
       create: jest.fn(),
     },
@@ -52,8 +56,12 @@ type PrismaMock = {
   };
   vote: {
     findUnique: jest.Mock;
+    findMany: jest.Mock;
     create: jest.Mock;
+    upsert: jest.Mock;
+    deleteMany: jest.Mock;
   };
+  $transaction: jest.Mock;
   moderationReport: {
     create: jest.Mock;
   };
@@ -67,6 +75,8 @@ const POLL_WITH_OPTIONS = {
   title: 'Favourite framework?',
   description: null,
   status: 'OPEN' as const,
+  visibilityMode: 'PRIVATE' as const,
+  allowMultipleAnswers: false,
   ownerId: 1,
   openedAt: new Date('2026-01-01'),
   closedAt: null,
@@ -106,6 +116,16 @@ const POLL_WITH_VOTE_COUNTS = {
     },
   ],
 };
+
+// Shorthand: mock getResults' two findUnique calls (visibility check + full poll)
+function mockGetResults(prismaMock: PrismaMock, pollWithVoteCounts = POLL_WITH_VOTE_COUNTS, myVoteOptionIds: string[] = []) {
+  prismaMock.poll.findUnique
+    .mockResolvedValueOnce({ visibilityMode: pollWithVoteCounts.visibilityMode })
+    .mockResolvedValueOnce(pollWithVoteCounts);
+  prismaMock.vote.findMany.mockResolvedValueOnce(
+    myVoteOptionIds.map((optionId) => ({ optionId })),
+  );
+}
 
 const mockPollStreamService = {
   publish: jest.fn().mockResolvedValue(undefined),
@@ -531,44 +551,37 @@ describe('PollService', () => {
   // ---------------------------------------------------------------------------
 
   describe('castVote', () => {
-    it('creates a vote and returns results for a valid open poll', async () => {
-      prismaMock.poll.findUnique
-        .mockResolvedValueOnce(POLL_WITH_OPTIONS)
-        .mockResolvedValueOnce(POLL_WITH_VOTE_COUNTS);
-      prismaMock.vote.findUnique.mockResolvedValue(null);
-      prismaMock.vote.create.mockResolvedValue({
-        id: 'vote-1',
-        pollId: 'poll-1',
-        optionId: 'opt-1',
-        participantId: 2,
-        createdAt: new Date('2026-01-01'),
-      });
+    it('replaces existing vote via transaction for single-select poll', async () => {
+      prismaMock.poll.findUnique.mockResolvedValueOnce(POLL_WITH_OPTIONS);
+      prismaMock.$transaction.mockResolvedValue([{ count: 1 }, { id: 'vote-new' }]);
+      mockGetResults(prismaMock, POLL_WITH_VOTE_COUNTS, ['opt-1']);
 
       const result = await service.castVote('poll-1', 2, { optionId: 'opt-1' });
 
-      expect(prismaMock.vote.create).toHaveBeenCalledWith({
-        data: { pollId: 'poll-1', optionId: 'opt-1', participantId: 2 },
-      });
+      expect(prismaMock.$transaction).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.anything(), expect.anything()]),
+      );
       expect(result.pollId).toBe('poll-1');
       expect(result.totalVotes).toBe(4);
-      expect(result.options[0].voteCount).toBe(3);
+      expect(result.myVotes).toEqual([{ optionId: 'opt-1' }]);
     });
 
-    it('is idempotent: skips create when vote already exists', async () => {
-      prismaMock.poll.findUnique
-        .mockResolvedValueOnce(POLL_WITH_OPTIONS)
-        .mockResolvedValueOnce(POLL_WITH_VOTE_COUNTS);
-      prismaMock.vote.findUnique.mockResolvedValue({
-        id: 'vote-1',
-        pollId: 'poll-1',
-        optionId: 'opt-1',
-        participantId: 2,
-        createdAt: new Date('2026-01-01'),
+    it('uses upsert for multi-select poll', async () => {
+      prismaMock.poll.findUnique.mockResolvedValueOnce({
+        ...POLL_WITH_OPTIONS,
+        allowMultipleAnswers: true,
       });
+      prismaMock.vote.upsert.mockResolvedValue({ id: 'vote-1' });
+      mockGetResults(prismaMock, POLL_WITH_VOTE_COUNTS, ['opt-1', 'opt-2']);
 
-      await service.castVote('poll-1', 2, { optionId: 'opt-1' });
+      const result = await service.castVote('poll-1', 2, { optionId: 'opt-2' });
 
-      expect(prismaMock.vote.create).not.toHaveBeenCalled();
+      expect(prismaMock.vote.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { pollId_participantId_optionId: { pollId: 'poll-1', participantId: 2, optionId: 'opt-2' } },
+        }),
+      );
+      expect(result.myVotes).toHaveLength(2);
     });
 
     it('throws NotFoundException when poll does not exist', async () => {
@@ -604,38 +617,79 @@ describe('PollService', () => {
   // ---------------------------------------------------------------------------
 
   describe('getResults', () => {
-    it('returns vote counts and myVote for the requesting user', async () => {
-      prismaMock.poll.findUnique.mockResolvedValue(POLL_WITH_VOTE_COUNTS);
-      prismaMock.vote.findUnique.mockResolvedValue({
-        id: 'vote-1',
-        pollId: 'poll-1',
-        optionId: 'opt-1',
-        participantId: 2,
-        createdAt: new Date('2026-01-01'),
-      });
+    it('returns vote counts and myVotes for the requesting user', async () => {
+      mockGetResults(prismaMock, POLL_WITH_VOTE_COUNTS, ['opt-1']);
 
       const result = await service.getResults('poll-1', 2);
 
       expect(result.pollId).toBe('poll-1');
       expect(result.totalVotes).toBe(4);
       expect(result.options).toHaveLength(2);
-      expect(result.myVote).toEqual({ optionId: 'opt-1' });
+      expect(result.myVotes).toEqual([{ optionId: 'opt-1' }]);
     });
 
-    it('returns myVote: null when user has not voted', async () => {
-      prismaMock.poll.findUnique.mockResolvedValue(POLL_WITH_VOTE_COUNTS);
-      prismaMock.vote.findUnique.mockResolvedValue(null);
+    it('returns empty myVotes when user has not voted', async () => {
+      mockGetResults(prismaMock, POLL_WITH_VOTE_COUNTS, []);
 
       const result = await service.getResults('poll-1', 2);
 
-      expect(result.myVote).toBeNull();
+      expect(result.myVotes).toEqual([]);
+    });
+
+    it('returns visibilityMode in results', async () => {
+      mockGetResults(prismaMock, POLL_WITH_VOTE_COUNTS, []);
+
+      const result = await service.getResults('poll-1', 2);
+
+      expect(result.visibilityMode).toBe('PRIVATE');
     });
 
     it('throws NotFoundException when poll does not exist', async () => {
-      prismaMock.poll.findUnique.mockResolvedValue(null);
+      prismaMock.poll.findUnique
+        .mockResolvedValueOnce({ visibilityMode: 'PRIVATE' })
+        .mockResolvedValueOnce(null);
 
       await expect(service.getResults('missing', 2)).rejects.toThrow(
         NotFoundException,
+      );
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // deleteVote
+  // ---------------------------------------------------------------------------
+
+  describe('deleteVote', () => {
+    it('deletes a vote and returns updated results', async () => {
+      prismaMock.poll.findUnique.mockResolvedValueOnce(POLL_WITH_OPTIONS);
+      prismaMock.vote.deleteMany.mockResolvedValue({ count: 1 });
+      mockGetResults(prismaMock, POLL_WITH_VOTE_COUNTS, []);
+
+      const result = await service.deleteVote('poll-1', 2, 'opt-1');
+
+      expect(prismaMock.vote.deleteMany).toHaveBeenCalledWith({
+        where: { pollId: 'poll-1', participantId: 2, optionId: 'opt-1' },
+      });
+      expect(result.myVotes).toEqual([]);
+    });
+
+    it('throws BadRequestException when no vote found to delete', async () => {
+      prismaMock.poll.findUnique.mockResolvedValueOnce(POLL_WITH_OPTIONS);
+      prismaMock.vote.deleteMany.mockResolvedValue({ count: 0 });
+
+      await expect(service.deleteVote('poll-1', 2, 'opt-1')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('throws ForbiddenException when poll is not OPEN', async () => {
+      prismaMock.poll.findUnique.mockResolvedValueOnce({
+        ...POLL_WITH_OPTIONS,
+        status: 'CLOSED',
+      });
+
+      await expect(service.deleteVote('poll-1', 2, 'opt-1')).rejects.toThrow(
+        ForbiddenException,
       );
     });
   });

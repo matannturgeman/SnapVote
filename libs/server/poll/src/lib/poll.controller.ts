@@ -202,6 +202,17 @@ export class PollController {
     return parseDto(PollResultsDtoSchema, result);
   }
 
+  @HttpCode(200)
+  @Delete(':id/votes/my/:optionId')
+  async deleteVote(
+    @Param('id') id: string,
+    @Param('optionId') optionId: string,
+    @CurrentUser() user: LoggedInUser,
+  ): Promise<PollResultsDto> {
+    const result = await this.pollService.deleteVote(id, user.id, optionId);
+    return parseDto(PollResultsDtoSchema, result);
+  }
+
   @Get(':id/results')
   async getResults(
     @Param('id') id: string,

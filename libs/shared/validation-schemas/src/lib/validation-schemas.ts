@@ -98,6 +98,8 @@ export const errorResponseSchema = z.object({
 
 export const pollStatusSchema = z.enum(['DRAFT', 'OPEN', 'CLOSED', 'LOCKED']);
 
+export const pollVisibilityModeSchema = z.enum(['PRIVATE', 'TRANSPARENT']);
+
 export const pollOptionSchema = z.object({
   id: z.string(),
   text: z.string().min(1).max(200),
@@ -109,6 +111,8 @@ export const pollSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200),
   description: z.string().max(1000).optional(),
   status: pollStatusSchema,
+  visibilityMode: pollVisibilityModeSchema,
+  allowMultipleAnswers: z.boolean(),
   ownerId: z.number().int(),
   openedAt: z.date().nullable().optional(),
   closedAt: z.date().nullable().optional(),
@@ -133,6 +137,8 @@ export const createPollSchema = z.object({
     .array(z.string().min(1, 'Option text is required').max(200))
     .min(2, 'At least 2 options are required')
     .max(10, 'At most 10 options are allowed'),
+  visibilityMode: pollVisibilityModeSchema.default('PRIVATE'),
+  allowMultipleAnswers: z.boolean().default(false),
 });
 
 export const updatePollSchema = z.object({
@@ -174,13 +180,17 @@ export const voteOptionResultSchema = z.object({
   text: z.string(),
   order: z.number().int().nonnegative(),
   voteCount: z.number().int().nonnegative(),
+  voters: z
+    .array(z.object({ id: z.number(), name: z.string().nullable() }))
+    .optional(),
 });
 
 export const pollResultsSchema = z.object({
   pollId: z.string(),
   totalVotes: z.number().int().nonnegative(),
+  visibilityMode: pollVisibilityModeSchema,
   options: z.array(voteOptionResultSchema),
-  myVote: z.object({ optionId: z.string() }).nullable(),
+  myVotes: z.array(z.object({ optionId: z.string() })),
 });
 
 // ---------------------------------------------------------------------------
@@ -236,6 +246,7 @@ export const CommonSchemas = {
 
 export const PollSchemas = {
   pollStatus: pollStatusSchema,
+  pollVisibilityMode: pollVisibilityModeSchema,
   pollOption: pollOptionSchema,
   poll: pollSchema,
   create: createPollSchema,
