@@ -53,7 +53,12 @@ export class TelemetryService {
         return;
       }
 
-      await this.redisClient.set(key, serializedPayload, 'EX', TELEMETRY_TTL_SECONDS);
+      await this.redisClient.set(
+        key,
+        serializedPayload,
+        'EX',
+        TELEMETRY_TTL_SECONDS,
+      );
     } catch (error) {
       if (this.isJsonSetUnsupportedError(error)) {
         this.redisJsonUnsupported = true;

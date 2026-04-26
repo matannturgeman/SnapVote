@@ -87,8 +87,10 @@ export class TelemetryInterceptor implements NestInterceptor {
     startedAt: number,
   ): Omit<TelemetryRecord, 'statusCode' | 'success' | 'response'> {
     const method = request.method ?? 'UNKNOWN';
-    const route = request.originalUrl ?? request.url ?? request.route?.path ?? 'unknown';
+    const route =
+      request.originalUrl ?? request.url ?? request.route?.path ?? 'unknown';
     const headers = request.headers;
+    const params = request.params as Record<string, string> | null | undefined;
 
     return {
       backendRequestId,
@@ -106,12 +108,13 @@ export class TelemetryInterceptor implements NestInterceptor {
         email: request.user?.email ?? null,
         name: request.user?.name ?? null,
       },
+      domain: {
+        pollId: params?.['id'] ?? null,
+      },
       metadata: {
         timestamp: new Date().toISOString(),
         ip:
-          request.ip ??
-          this.getHeaderValue(headers, 'x-forwarded-for') ??
-          null,
+          request.ip ?? this.getHeaderValue(headers, 'x-forwarded-for') ?? null,
         userAgent: this.getHeaderValue(headers, 'user-agent') ?? null,
         requestId: this.getHeaderValue(headers, 'x-request-id') ?? null,
         referer: this.getHeaderValue(headers, 'referer') ?? null,
@@ -183,4 +186,3 @@ export class TelemetryInterceptor implements NestInterceptor {
     return null;
   }
 }
-
