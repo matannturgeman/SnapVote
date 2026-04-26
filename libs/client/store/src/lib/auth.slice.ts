@@ -61,10 +61,6 @@ export const { setCredentials, clearCredentials, updateUser } =
 
 export type SetCredentialsPayload = { user: AuthenticatedUser; token: string };
 export type UpdateUserPayload = Partial<AuthenticatedUser>;
-export const doSetCredentials = (payload: SetCredentialsPayload) =>
-  setCredentials(payload);
-export const doClearCredentials = () => clearCredentials(void 0);
-export const doUpdateUser = (payload: UpdateUserPayload) => updateUser(payload);
 
 export const authReducer = authSlice.reducer;
 

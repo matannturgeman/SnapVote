@@ -25,7 +25,6 @@ import {
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 
-
 export function PollDetailPage() {
   const { id } = useParams<{ id?: string }>();
   const {
@@ -47,7 +46,9 @@ export function PollDetailPage() {
   const [revokeShareLink] = useRevokeShareLinkMutation();
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
-  const [editOptions, setEditOptions] = useState<{ key: string; text: string }[]>([]);
+  const [editOptions, setEditOptions] = useState<
+    { key: string; text: string }[]
+  >([]);
   const [isEditing, setIsEditing] = useState(false);
   const [closeError, setCloseError] = useState(false);
   const [showShare, setShowShare] = useState(false);
@@ -138,7 +139,9 @@ export function PollDetailPage() {
     }
   };
 
-  const nonEmptyEditOptions = editOptions.filter((o) => o.text.trim().length > 0);
+  const nonEmptyEditOptions = editOptions.filter(
+    (o) => o.text.trim().length > 0,
+  );
   const canSaveEdit =
     editTitle.trim().length > 0 && nonEmptyEditOptions.length >= 2;
 
@@ -265,7 +268,9 @@ export function PollDetailPage() {
                         onChange={(e) =>
                           setEditOptions((prev) =>
                             prev.map((o) =>
-                              o.key === opt.key ? { ...o, text: e.target.value } : o,
+                              o.key === opt.key
+                                ? { ...o, text: e.target.value }
+                                : o,
                             ),
                           )
                         }
@@ -290,7 +295,12 @@ export function PollDetailPage() {
                   {editOptions.length < 10 && (
                     <button
                       type="button"
-                      onClick={() => setEditOptions((prev) => [...prev, { key: crypto.randomUUID(), text: '' }])}
+                      onClick={() =>
+                        setEditOptions((prev) => [
+                          ...prev,
+                          { key: crypto.randomUUID(), text: '' },
+                        ])
+                      }
                       className="flex items-center gap-1 text-sm font-medium text-cyan-700 hover:text-cyan-600 dark:text-cyan-400 dark:hover:text-cyan-300"
                     >
                       <Plus className="h-3.5 w-3.5" />
