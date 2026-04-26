@@ -88,14 +88,20 @@ export class PasswordResetMailerService {
     const configuredBase =
       this.configService.get<string>('AUTH_RESET_PASSWORD_URL_BASE') ??
       this.configService.get<string>('CLIENT_URL') ??
+      this.configService.get<string>('FRONTEND_URL') ??
       DEFAULT_RESET_URL;
 
     try {
-      if (configuredBase.includes('{token}')) {
-        return configuredBase.replace('{token}', encodeURIComponent(token));
+      let baseUrl = configuredBase;
+      if (configuredBase === this.configService.get<string>('FRONTEND_URL')) {
+        baseUrl = configuredBase + '/reset-password';
       }
 
-      const url = new URL(configuredBase);
+      if (baseUrl.includes('{token}')) {
+        return baseUrl.replace('{token}', encodeURIComponent(token));
+      }
+
+      const url = new URL(baseUrl);
       url.searchParams.set('token', token);
       return url.toString();
     } catch {
