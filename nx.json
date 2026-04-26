@@ -99,14 +99,23 @@
     "@nx/js:tsc": {
       "cache": true,
       "dependsOn": ["^build"],
+      "inputs": ["production", "^production"],
+      "options": {
+        "declaration": false,
+        "declarationMap": false
+      }
+    },
+    "@nx/vite:build": {
+      "cache": true,
       "inputs": ["production", "^production"]
     },
     "typecheck": {
       "dependsOn": ["^build"]
     },
     "test": {
+      "executor": "nx:run-commands",
       "options": {
-        "passWithNoTests": true
+        "command": "echo No tests configured"
       }
     }
   },

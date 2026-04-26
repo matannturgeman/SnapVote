@@ -23,7 +23,7 @@ export function Navbar() {
       // Keep logout resilient even if server request fails.
     }
     clearPersistedToken();
-    dispatch(clearCredentials());
+    dispatch(clearCredentials(undefined));
     navigate('/login', { replace: true });
   };
 

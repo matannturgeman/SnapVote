@@ -1,15 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import type { Slice } from '@reduxjs/toolkit';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-/**
- * The shape of the authenticated user stored in the Redux auth slice.
- * Mirrors the LoggedInUser interface from @libs/server-user so the
- * client and server share the same user shape without creating a
- * cross-boundary dependency.
- */
 export interface AuthenticatedUser {
   id: number;
   email: string;
@@ -17,11 +12,8 @@ export interface AuthenticatedUser {
 }
 
 export interface AuthState {
-  /** The currently authenticated user, or null when logged out. */
   user: AuthenticatedUser | null;
-  /** The raw JWT access token, or null when logged out. */
   token: string | null;
-  /** Convenience flag – true when both user and token are present. */
   isAuthenticated: boolean;
 }
 
@@ -39,17 +31,10 @@ const initialState: AuthState = {
 // Slice
 // ---------------------------------------------------------------------------
 
-export const authSlice = createSlice({
+const authSlice: Slice<AuthState> = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    /**
-     * Called after a successful login / token refresh.
-     * Stores the user payload and token in state.
-     *
-     * @example
-     * dispatch(setCredentials({ user: { id: 1, email: 'a@b.com', name: 'Alice' }, token: 'jwt...' }));
-     */
     setCredentials: (
       state,
       action: PayloadAction<{ user: AuthenticatedUser; token: string }>,
@@ -58,27 +43,7 @@ export const authSlice = createSlice({
       state.token = action.payload.token;
       state.isAuthenticated = true;
     },
-
-    /**
-     * Called on logout or when the token is found to be invalid / expired.
-     * Wipes all auth state.
-     *
-     * @example
-     * dispatch(clearCredentials());
-     */
-    clearCredentials: (state) => {
-      state.user = null;
-      state.token = null;
-      state.isAuthenticated = false;
-    },
-
-    /**
-     * Allows patching individual user fields without replacing the full user
-     * object (e.g. after a profile update).
-     *
-     * @example
-     * dispatch(updateUser({ name: 'Bob' }));
-     */
+    clearCredentials: () => initialState,
     updateUser: (state, action: PayloadAction<Partial<AuthenticatedUser>>) => {
       if (state.user) {
         state.user = { ...state.user, ...action.payload };
@@ -93,6 +58,9 @@ export const authSlice = createSlice({
 
 export const { setCredentials, clearCredentials, updateUser } =
   authSlice.actions;
+
+export type SetCredentialsPayload = { user: AuthenticatedUser; token: string };
+export type UpdateUserPayload = Partial<AuthenticatedUser>;
 
 export const authReducer = authSlice.reducer;
 

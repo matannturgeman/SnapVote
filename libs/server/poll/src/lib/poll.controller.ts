@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Logger,
@@ -13,10 +14,13 @@ import {
   Sse,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { UseGuards } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import {
   CastVoteDtoSchema,
   CreatePollDtoSchema,
+  CreateReportDtoSchema,
   CreateShareLinkDtoSchema,
   JoinPollResponseDtoSchema,
   PaginatedResponseDtoSchema,
@@ -53,6 +57,7 @@ function parsePollDto<T>(
 }
 
 @Controller('polls')
+@UseGuards(ThrottlerGuard)
 export class PollController {
   private readonly logger = new Logger(PollController.name);
 
@@ -83,6 +88,7 @@ export class PollController {
   }
 
   @Post()
+  @Throttle({ poll_create: { ttl: 60000, limit: 10 } })
   async create(
     @Body() body: unknown,
     @CurrentUser() user: LoggedInUser,
@@ -149,6 +155,39 @@ export class PollController {
   ): Promise<ShareLinkResponseDto> {
     const result = await this.pollService.revokeShareLink(id, linkId, user.id);
     return parseDto(ShareLinkResponseDtoSchema, result);
+  }
+
+  @HttpCode(200)
+  @Post(':id/report')
+  @Throttle({ report_create: { ttl: 60000, limit: 5 } })
+  async reportPoll(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @CurrentUser() user: LoggedInUser,
+  ): Promise<{ success: boolean }> {
+    const dto = parsePollDto(CreateReportDtoSchema, body);
+    await this.pollService.reportPoll(id, dto.voteId, user.id, dto);
+    return { success: true };
+  }
+
+  @HttpCode(200)
+  @Post(':id/lock')
+  async lockPoll(
+    @Param('id') id: string,
+    @CurrentUser() user: LoggedInUser,
+  ): Promise<PollResponseDto> {
+    const result = await this.pollService.lockPoll(id, user.id);
+    return parseDto(PollResponseDtoSchema, result);
+  }
+
+  @HttpCode(200)
+  @Delete(':id')
+  async deletePoll(
+    @Param('id') id: string,
+    @CurrentUser() user: LoggedInUser,
+  ): Promise<{ success: boolean }> {
+    await this.pollService.deletePoll(id, user.id);
+    return { success: true };
   }
 
   @HttpCode(200)

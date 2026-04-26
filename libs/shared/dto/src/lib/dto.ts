@@ -1,4 +1,4 @@
-﻿import { z } from 'zod';
+import { z } from 'zod';
 import {
   userSchema,
   createUserSchema,
@@ -20,6 +20,10 @@ import {
   castVoteSchema,
   pollResultsSchema,
   pollStreamEventSchema,
+  createReportSchema,
+  reportReasonSchema,
+  reportStatusSchema,
+  moderationActionSchema,
 } from '@libs/shared-validation-schemas';
 
 // ---------------------------------------------------------------------------
@@ -109,6 +113,11 @@ export const CastVoteDtoSchema = castVoteSchema;
 export const PollResultsDtoSchema = pollResultsSchema;
 export const PollStreamEventDtoSchema = pollStreamEventSchema;
 
+export const CreateReportDtoSchema = createReportSchema;
+export const ReportReasonDtoSchema = reportReasonSchema;
+export const ReportStatusDtoSchema = reportStatusSchema;
+export const ModerationActionDtoSchema = moderationActionSchema;
+
 export type PollOptionResponseDto = z.infer<typeof PollOptionResponseDtoSchema>;
 export type PollResponseDto = z.infer<typeof PollResponseDtoSchema>;
 export type CreatePollDto = z.infer<typeof CreatePollDtoSchema>;
@@ -120,6 +129,7 @@ export type JoinPollResponseDto = z.infer<typeof JoinPollResponseDtoSchema>;
 export type CastVoteDto = z.infer<typeof CastVoteDtoSchema>;
 export type PollResultsDto = z.infer<typeof PollResultsDtoSchema>;
 export type PollStreamEventDto = z.infer<typeof PollStreamEventDtoSchema>;
+export type CreateReportDto = z.infer<typeof CreateReportDtoSchema>;
 
 // ---------------------------------------------------------------------------
 // Helpers

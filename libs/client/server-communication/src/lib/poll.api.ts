@@ -2,6 +2,7 @@ import { baseApi } from './base-api';
 import type {
   CastVoteDto,
   CreatePollDto,
+  CreateReportDto,
   CreateShareLinkDto,
   JoinPollResponseDto,
   PaginatedResponseDto,
@@ -48,6 +49,22 @@ export const pollApi = baseApi.injectEndpoints({
       invalidatesTags: (_result, _error, id) => [{ type: 'Poll', id }],
     }),
 
+    lockPoll: build.mutation<PollResponseDto, string>({
+      query: (id) => ({
+        url: `/polls/${id}/lock`,
+        method: 'POST',
+      }),
+      invalidatesTags: (_result, _error, id) => [{ type: 'Poll', id }],
+    }),
+
+    deletePoll: build.mutation<{ success: boolean }, string>({
+      query: (id) => ({
+        url: `/polls/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Poll'],
+    }),
+
     listShareLinks: build.query<ShareLinkResponseDto[], string>({
       query: (pollId) => `/polls/${pollId}/share-links`,
       providesTags: (_result, _error, pollId) => [
@@ -76,6 +93,17 @@ export const pollApi = baseApi.injectEndpoints({
         method: 'POST',
       }),
       invalidatesTags: (_result, _error, { id }) => [{ type: 'ShareLink', id }],
+    }),
+
+    reportPoll: build.mutation<
+      { success: boolean },
+      { id: string; body: CreateReportDto }
+    >({
+      query: ({ id, body }) => ({
+        url: `/polls/${id}/report`,
+        method: 'POST',
+        body,
+      }),
     }),
 
     joinPollByToken: build.query<JoinPollResponseDto, string>({
@@ -118,9 +146,12 @@ export const {
   useLazyGetPollQuery,
   useUpdatePollMutation,
   useClosePollMutation,
+  useLockPollMutation,
+  useDeletePollMutation,
   useListShareLinksQuery,
   useCreateShareLinkMutation,
   useRevokeShareLinkMutation,
+  useReportPollMutation,
   useJoinPollByTokenQuery,
   useCastVoteMutation,
   useGetPollResultsQuery,

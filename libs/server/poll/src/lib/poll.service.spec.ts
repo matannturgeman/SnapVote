@@ -13,6 +13,7 @@ jest.mock('@libs/server-data-access', () => ({
       findUnique: jest.fn(),
       findMany: jest.fn(),
       update: jest.fn(),
+      delete: jest.fn(),
       count: jest.fn(),
     },
     pollShareLink: {
@@ -25,6 +26,12 @@ jest.mock('@libs/server-data-access', () => ({
       findUnique: jest.fn(),
       create: jest.fn(),
     },
+    moderationReport: {
+      create: jest.fn(),
+    },
+    moderationLog: {
+      create: jest.fn(),
+    },
   },
 }));
 
@@ -34,6 +41,7 @@ type PrismaMock = {
     findUnique: jest.Mock;
     findMany: jest.Mock;
     update: jest.Mock;
+    delete: jest.Mock;
     count: jest.Mock;
   };
   pollShareLink: {
@@ -44,6 +52,12 @@ type PrismaMock = {
   };
   vote: {
     findUnique: jest.Mock;
+    create: jest.Mock;
+  };
+  moderationReport: {
+    create: jest.Mock;
+  };
+  moderationLog: {
     create: jest.Mock;
   };
 };
@@ -675,6 +689,113 @@ describe('PollService', () => {
 
       await expect(service.findByShareToken('token-abc')).rejects.toThrow(
         ForbiddenException,
+      );
+    });
+  });
+
+  describe('reportPoll', () => {
+    it('creates a moderation report', async () => {
+      const dto = { reason: 'SPAM' as const, details: 'Test details' };
+
+      await service.reportPoll('poll-1', undefined, 2, dto);
+
+      expect(prismaMock.moderationReport.create).toHaveBeenCalledWith({
+        data: {
+          pollId: 'poll-1',
+          voteId: null,
+          reason: 'SPAM',
+          details: 'Test details',
+          reporterId: 2,
+        },
+      });
+    });
+
+    it('creates a report with voteId', async () => {
+      const dto = { reason: 'HARASSMENT' as const };
+
+      await service.reportPoll('poll-1', 'vote-1', 2, dto);
+
+      expect(prismaMock.moderationReport.create).toHaveBeenCalledWith({
+        data: {
+          pollId: 'poll-1',
+          voteId: 'vote-1',
+          reason: 'HARASSMENT',
+          details: null,
+          reporterId: 2,
+        },
+      });
+    });
+  });
+
+  describe('lockPoll', () => {
+    it('locks poll when owner calls', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue(POLL_WITH_OPTIONS);
+
+      await service.lockPoll('poll-1', 1);
+
+      expect(prismaMock.poll.update).toHaveBeenCalledWith({
+        where: { id: 'poll-1' },
+        data: { status: 'LOCKED' },
+      });
+      expect(prismaMock.moderationLog.create).toHaveBeenCalledWith({
+        data: {
+          action: 'LOCK',
+          targetType: 'poll',
+          targetId: 'poll-1',
+          actorId: 1,
+        },
+      });
+    });
+
+    it('throws when non-owner tries to lock', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue(POLL_WITH_OPTIONS);
+
+      await expect(service.lockPoll('poll-1', 999)).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+
+    it('throws when poll not found', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue(null);
+
+      await expect(service.lockPoll('poll-1', 1)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('deletePoll', () => {
+    it('deletes poll when owner calls', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue(POLL_WITH_OPTIONS);
+
+      await service.deletePoll('poll-1', 1);
+
+      expect(prismaMock.poll.delete).toHaveBeenCalledWith({
+        where: { id: 'poll-1' },
+      });
+      expect(prismaMock.moderationLog.create).toHaveBeenCalledWith({
+        data: {
+          action: 'DELETE',
+          targetType: 'poll',
+          targetId: 'poll-1',
+          actorId: 1,
+        },
+      });
+    });
+
+    it('throws when non-owner tries to delete', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue(POLL_WITH_OPTIONS);
+
+      await expect(service.deletePoll('poll-1', 999)).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+
+    it('throws when poll not found', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue(null);
+
+      await expect(service.deletePoll('poll-1', 1)).rejects.toThrow(
+        NotFoundException,
       );
     });
   });

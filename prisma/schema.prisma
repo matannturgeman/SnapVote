@@ -12,11 +12,33 @@ enum PollStatus {
   DRAFT
   OPEN
   CLOSED
+  LOCKED
 }
 
 enum ShareLinkStatus {
   ACTIVE
   REVOKED
+}
+
+enum ReportReason {
+  SPAM
+  HARASSMENT
+  INAPPROPRIATE
+  DUPLICATE
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  DISMISSED
+  ACTION_TAKEN
+}
+
+enum ModerationAction {
+  LOCK
+  UNLOCK
+  DELETE
+  REMOVE_REPORT
 }
 
 model User {
@@ -31,6 +53,7 @@ model User {
   passwordResetTokens PasswordResetToken[]
   polls               Poll[]
   votes               Vote[]
+  reports             ModerationReport[]
 
   @@index([email])
 }
@@ -120,4 +143,33 @@ model PasswordResetToken {
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+model ModerationReport {
+  id          String       @id @default(cuid())
+  pollId      String
+  voteId      String?
+  reason      ReportReason
+  details     String?
+  status      ReportStatus @default(PENDING)
+  reporterId Int
+  reporter    User         @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  createdAt   DateTime     @default(now())
+
+  @@index([pollId])
+  @@index([reporterId])
+  @@index([status])
+}
+
+model ModerationLog {
+  id          String           @id @default(cuid())
+  action      ModerationAction
+  targetType  String
+  targetId   String
+  actorId    Int
+  reason     String?
+  createdAt  DateTime        @default(now())
+
+  @@index([targetType, targetId])
+  @@index([actorId])
 }

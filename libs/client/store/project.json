@@ -10,9 +10,24 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/client-store",
-        "main": "libs/client/store/src/index.ts",
         "tsConfig": "libs/client/store/tsconfig.lib.json",
-        "assets": ["libs/client/store/*.md"]
+        "packageJson": "libs/client/store/package.json",
+        "main": "libs/client/store/src/index.ts",
+        "assets": []
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/client/store/tsconfig.lib.json --noEmit"
+      },
+      "dependsOn": ["build"]
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/client/store/jest.config.js"
       }
     }
   }

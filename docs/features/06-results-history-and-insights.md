@@ -29,24 +29,26 @@ Out of scope:
 
 ## Acceptance Criteria
 
-- Closed poll results remain queryable and immutable by default.
-- History list supports pagination/filtering by status/date.
-- Insights calculations are reproducible from stored vote data.
+[-] Closed poll results remain queryable and immutable by default.
+[x] History list supports pagination/filtering by status/date.
+[x] Insights calculations are reproducible from stored vote data.
 
-## API Touchpoints (Planned)
+## API Touchpoints (Complete)
 
 - `GET /polls/:id/results` (finalized + live contexts)
 - `GET /polls?owner=me&status=closed&page=&limit=` (or dedicated history endpoint)
 
-## Data Touchpoints (Planned)
+## Data Touchpoints (Complete)
 
 - `Poll` closure timestamp and final-state metadata.
 - Aggregated result shape (`Result*Dto`) standardized for client rendering.
 
-## Frontend Touchpoints (Planned)
+## Frontend Touchpoints (Complete)
 
-- Poll history screen with filters and summary cards.
-- Poll detail results visualization.
+[x] Poll list with status filter tabs (All/Open/Closed/Draft)
+[x] Date range filter (from/to)
+[x] Summary cards showing Total Polls, Total Votes, Open, Closed counts
+[x] Poll detail results visualization with percentages
 
 ## Testing
 
@@ -54,17 +56,8 @@ Out of scope:
 - API tests for paginated history and access rules.
 - E2E tests for create -> vote -> close -> history retrieval flow.
 
-## Technical Debt
+## Implementation Notes
 
-Current debt:
-
-- No historical result model/API exists yet.
-
-Planned debt risk:
-
-- Recomputing heavy aggregations on every read can degrade performance.
-
-Mitigation:
-
-- Start with deterministic query + cache strategy.
-- Introduce materialized summaries only after usage thresholds are observed.
+- Filters: `status`, `from`, `to` dates applied server-side in `PollService.listOwn()`
+- Pagination: Native Prisma skip/take with total count
+- Results: Computed from stored vote data on demand (no materialized views)

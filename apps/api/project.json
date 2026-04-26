@@ -58,11 +58,18 @@
         "command": "eslint src --config ../../eslint.config.mjs"
       }
     },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["^build"],
+      "options": {
+        "cwd": "apps/api",
+        "command": "npx tsc --noEmit -p tsconfig.app.json"
+      }
+    },
     "test": {
       "executor": "@nx/jest:jest",
       "options": {
-        "jestConfig": "apps/api/jest.config.js",
-        "passWithNoTests": true
+        "jestConfig": "apps/api/jest.config.js"
       }
     }
   }
