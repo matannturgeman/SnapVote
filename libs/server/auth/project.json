@@ -21,10 +21,10 @@
       }
     },
     "test": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "command": "echo No tests",
-        "passWithNoTests": true
+        "jestConfig": "libs/server/auth/jest.config.js"
       }
     }
   }

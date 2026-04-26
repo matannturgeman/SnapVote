@@ -113,8 +113,10 @@
       "dependsOn": ["^build"]
     },
     "test": {
+      "executor": "nx:run-commands",
       "options": {
-        "passWithNoTests": true
+        "passWithNoTests": true,
+        "command": "echo No tests configured"
       }
     }
   },

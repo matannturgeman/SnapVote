@@ -97,7 +97,7 @@
     "@nestjs/core": "11.1.17",
     "@nestjs/platform-express": "11.1.17",
     "@nestjs/swagger": "11.2.6",
-    "@nestjs/throttler": "^6.5.0",
+    "@nestjs/throttler": "6.5.0",
     "@prisma/adapter-pg": "6.0.0",
     "@prisma/client": "6.0.0",
     "@radix-ui/react-label": "2.1.8",
