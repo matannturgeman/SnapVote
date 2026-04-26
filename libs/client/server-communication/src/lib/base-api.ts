@@ -6,8 +6,8 @@ import type {
 } from '@reduxjs/toolkit/query/react';
 
 export const BASE_URL =
-  (typeof process !== 'undefined' && process.env['VITE_API_BASE_URL']) ||
-  (typeof process !== 'undefined' && process.env['API_BASE_URL']) ||
+  import.meta.env['VITE_API_BASE_URL'] ||
+  import.meta.env['API_BASE_URL'] ||
   'http://localhost:3000/api';
 
 interface AuthTokenState {
