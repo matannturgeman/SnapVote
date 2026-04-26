@@ -16,6 +16,13 @@
         "assets": []
       }
     },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/client/store/tsconfig.lib.json --noEmit"
+      },
+      "dependsOn": ["build"]
+    },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
