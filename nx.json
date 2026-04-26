@@ -115,7 +115,6 @@
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "passWithNoTests": true,
         "command": "echo No tests configured"
       }
     }

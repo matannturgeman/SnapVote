@@ -68,8 +68,7 @@
     "test": {
       "executor": "@nx/jest:jest",
       "options": {
-        "jestConfig": "apps/api/jest.config.js",
-        "passWithNoTests": true
+        "jestConfig": "apps/api/jest.config.js"
       }
     }
   }
