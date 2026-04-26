@@ -178,6 +178,7 @@ describe('AuthService', () => {
       id: 10,
       email: 'new@example.com',
       name: '  New User  ',
+      avatarUrl: null,
     });
 
     const response = await service.register(
@@ -203,11 +204,11 @@ describe('AuthService', () => {
       expect.objectContaining({
         accessToken: 'raw-token',
         tokenType: 'Bearer',
-        user: {
+        user: expect.objectContaining({
           id: 10,
           email: 'new@example.com',
           name: 'New User',
-        },
+        }),
       }),
     );
   });
@@ -398,6 +399,7 @@ describe('AuthService', () => {
       id: 101,
       email: 'fallback@example.com',
       name: null,
+      avatarUrl: null,
     });
 
     const profile = await service.getUserProfile(101);
@@ -406,6 +408,7 @@ describe('AuthService', () => {
       id: 101,
       email: 'fallback@example.com',
       name: 'fallback',
+      avatarUrl: null,
     });
   });
 
@@ -427,5 +430,128 @@ describe('AuthService', () => {
     await expect(service.getUserProfile(101)).rejects.toThrow(
       UnauthorizedException,
     );
+  });
+
+  describe('updateProfile', () => {
+    it('updates user profile and returns updated user', async () => {
+      prismaMock.user.findUnique
+        .mockResolvedValueOnce({ id: 1, email: 'old@example.com' })
+        .mockResolvedValueOnce(null);
+      prismaMock.user.update.mockResolvedValue({
+        id: 1,
+        email: 'new@example.com',
+        name: 'New Name',
+        avatarUrl: 'https://example.com/avatar.png',
+      });
+
+      const result = await service.updateProfile(1, {
+        name: 'New Name',
+        email: 'new@example.com',
+        avatarUrl: 'https://example.com/avatar.png',
+      });
+
+      expect(result).toEqual({
+        id: 1,
+        email: 'new@example.com',
+        name: 'New Name',
+        avatarUrl: 'https://example.com/avatar.png',
+      });
+      expect(prismaMock.user.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 1 },
+          data: expect.objectContaining({
+            name: 'New Name',
+            email: 'new@example.com',
+            avatarUrl: 'https://example.com/avatar.png',
+          }),
+        }),
+      );
+    });
+
+    it('throws ConflictException when new email is already taken', async () => {
+      prismaMock.user.findUnique
+        .mockResolvedValueOnce({ id: 1, email: 'old@example.com' })
+        .mockResolvedValueOnce({ id: 2, email: 'taken@example.com' });
+
+      await expect(
+        service.updateProfile(1, { email: 'taken@example.com' }),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('allows setting avatarUrl to null', async () => {
+      prismaMock.user.findUnique.mockResolvedValueOnce({
+        id: 1,
+        email: 'a@b.com',
+      });
+      prismaMock.user.update.mockResolvedValue({
+        id: 1,
+        email: 'a@b.com',
+        name: 'Test',
+        avatarUrl: null,
+      });
+
+      const result = await service.updateProfile(1, { avatarUrl: null });
+
+      expect(result.avatarUrl).toBeNull();
+    });
+  });
+
+  describe('changePassword', () => {
+    it('changes password and revokes all sessions', async () => {
+      prismaMock.user.findUnique.mockResolvedValue({
+        id: 1,
+        passwordHash: 'old-hash',
+      });
+      cryptoMock.verifyPassword.mockResolvedValue(true);
+
+      await service.changePassword(1, {
+        currentPassword: 'old-pass',
+        newPassword: 'new-secret',
+      });
+
+      expect(cryptoMock.hashPassword).toHaveBeenCalledWith('new-secret');
+      expect(prismaMock.$transaction).toHaveBeenCalled();
+    });
+
+    it('throws when current password is incorrect', async () => {
+      prismaMock.user.findUnique.mockResolvedValue({
+        id: 1,
+        passwordHash: 'old-hash',
+      });
+      cryptoMock.verifyPassword.mockResolvedValue(false);
+
+      await expect(
+        service.changePassword(1, {
+          currentPassword: 'wrong-pass',
+          newPassword: 'new-secret',
+        }),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('deleteAccount', () => {
+    it('soft deletes account and revokes all sessions', async () => {
+      prismaMock.user.findUnique.mockResolvedValue({ id: 1 });
+
+      await service.deleteAccount(1);
+
+      expect(prismaMock.user.update).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: {
+          deleted: true,
+          deletedAt: expect.any(Date),
+          email: expect.stringContaining('@deleted.local'),
+        },
+      });
+      expect(prismaMock.$transaction).toHaveBeenCalled();
+    });
+
+    it('throws when user does not exist', async () => {
+      prismaMock.user.findUnique.mockResolvedValue(null);
+
+      await expect(service.deleteAccount(999)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
   });
 });

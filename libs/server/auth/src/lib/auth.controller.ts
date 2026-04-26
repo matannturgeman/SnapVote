@@ -1,13 +1,24 @@
-﻿import { Body, Controller, Get, HttpCode, Post, Req } from '@nestjs/common';
+﻿import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Patch,
+  Post,
+  Req,
+} from '@nestjs/common';
 import type { Request } from 'express';
 import {
   AuthResponseDtoSchema,
+  ChangePasswordDtoSchema,
   ForgotPasswordRequestDtoSchema,
   LoginDtoSchema,
   MessageResponseDtoSchema,
   RegisterDtoSchema,
   ResetPasswordDtoSchema,
   SuccessResponseDtoSchema,
+  UpdateProfileDtoSchema,
   UserResponseDtoSchema,
   parseDto,
   type AuthResponseDto,
@@ -69,6 +80,45 @@ export class AuthController {
   async getMe(@CurrentUser() user: LoggedInUser): Promise<UserResponseDto> {
     const response = await this.authService.getUserProfile(user.id);
     return parseDto(UserResponseDtoSchema, response);
+  }
+
+  @Patch('profile')
+  async updateProfile(
+    @CurrentUser() user: LoggedInUser,
+    @Body() body: unknown,
+  ): Promise<UserResponseDto> {
+    const dto = parseDto(UpdateProfileDtoSchema, body);
+    const response = await this.authService.updateProfile(user.id, dto);
+    return parseDto(UserResponseDtoSchema, response);
+  }
+
+  @HttpCode(200)
+  @Post('change-password')
+  async changePassword(
+    @CurrentUser() user: LoggedInUser,
+    @Body() body: unknown,
+  ): Promise<MessageResponseDto> {
+    const dto = parseDto(ChangePasswordDtoSchema, body);
+    await this.authService.changePassword(user.id, dto);
+
+    return parseDto(MessageResponseDtoSchema, {
+      message: 'Password changed successfully.',
+    });
+  }
+
+  @Delete('account')
+  async deleteAccount(
+    @CurrentUser() user: LoggedInUser,
+    @Req() request: Request,
+  ): Promise<SuccessResponseDto> {
+    await this.authService.deleteAccount(user.id);
+    const token = this.extractBearerToken(request);
+
+    if (token) {
+      await this.authService.revokeToken(token);
+    }
+
+    return parseDto(SuccessResponseDtoSchema, { success: true });
   }
 
   @Public()
