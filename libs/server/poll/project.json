@@ -3,7 +3,6 @@
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/server/poll/src",
   "projectType": "library",
-  "tags": ["scope:server", "type:feature"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
@@ -13,6 +12,12 @@
         "main": "libs/server/poll/src/index.ts",
         "tsConfig": "libs/server/poll/tsconfig.lib.json",
         "assets": ["libs/server/poll/*.md"]
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p libs/server/poll/tsconfig.lib.json"
       }
     },
     "test": {

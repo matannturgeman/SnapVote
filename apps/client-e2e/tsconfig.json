@@ -18,11 +18,11 @@
     "src/**/*.d.ts"
   ],
   "references": [
-    { "path": "../../libs/client/shared" },
-    { "path": "../../libs/shared/validation-schemas" },
-    { "path": "../../libs/shared/dto" },
-    { "path": "../../libs/client/server-communication" },
-    { "path": "../../libs/client/store" },
-    { "path": "../client" }
+    { "path": "../../libs/client/shared/tsconfig.lib.json" },
+    { "path": "../../libs/shared/validation-schemas/tsconfig.lib.json" },
+    { "path": "../../libs/shared/dto/tsconfig.lib.json" },
+    { "path": "../../libs/client/server-communication/tsconfig.lib.json" },
+    { "path": "../../libs/client/store/tsconfig.lib.json" },
+    { "path": "../client/tsconfig.app.json" }
   ]
 }

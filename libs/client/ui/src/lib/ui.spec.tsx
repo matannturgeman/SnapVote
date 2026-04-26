@@ -1,10 +1,18 @@
-import { render } from '@testing-library/react';
-
+import { render, screen } from '@testing-library/react';
 import Ui from './ui';
 
 describe('Ui', () => {
-  it('should render successfully', () => {
-    const { baseElement } = render(<Ui />);
-    expect(baseElement).toBeTruthy();
+  it('renders without crashing', () => {
+    expect(() => render(<Ui />)).not.toThrow();
+  });
+
+  it('renders the "Welcome to Ui!" text', () => {
+    render(<Ui />);
+    expect(screen.getByText('Welcome to Ui!')).toBeInTheDocument();
+  });
+
+  it('matches snapshot', () => {
+    const { container } = render(<Ui />);
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

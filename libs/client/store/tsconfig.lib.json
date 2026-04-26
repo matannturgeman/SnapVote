@@ -5,8 +5,10 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "emitDeclarationOnly": false,
-    "types": ["node"]
+    "emitDeclarationOnly": true,
+    "types": ["node"],
+    "skipLibCheck": true,
+    "noImplicitAny": false
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": [

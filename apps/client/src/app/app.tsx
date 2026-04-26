@@ -34,7 +34,7 @@ export function App() {
 
   useEffect(() => {
     if (!token) {
-      dispatch(clearCredentials());
+      dispatch(clearCredentials(undefined));
       return;
     }
     if (isSuccess && me) {
@@ -42,7 +42,7 @@ export function App() {
     }
     if (isError) {
       clearPersistedToken();
-      dispatch(clearCredentials());
+      dispatch(clearCredentials(undefined));
     }
   }, [dispatch, isError, isSuccess, me, token]);
 

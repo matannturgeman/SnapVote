@@ -7,6 +7,14 @@
   "implicitDependencies": ["client"],
   "// targets": "to see all targets run: nx show project client-e2e --web",
   "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/client-e2e",
+        "command": "npx tsc --noEmit -p tsconfig.json"
+      },
+      "dependsOn": ["^build"]
+    },
     "e2e": {
       "outputs": [
         "{workspaceRoot}/test-output-e2e/client/artifacts",

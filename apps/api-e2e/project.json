@@ -8,10 +8,16 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{e2eProjectRoot}"],
       "options": {
-        "jestConfig": "apps/api-e2e/jest.e2e.config.cts",
-        "passWithNoTests": true
+        "jestConfig": "apps/api-e2e/jest.e2e.config.cts"
       },
       "dependsOn": ["api:build", "api:serve"]
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/api-e2e",
+        "command": "npx tsc --noEmit -p tsconfig.json"
+      }
     }
   }
 }

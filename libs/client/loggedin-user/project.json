@@ -3,13 +3,28 @@
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/client/loggedin-user/src",
   "projectType": "library",
-  "tags": ["scope:client", "type:util"],
   "targets": {
     "build": {
-      "executor": "@nx/vite:build",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/libs/client-loggedin-user"
+        "outputPath": "dist/libs/client-loggedin-user",
+        "main": "libs/client/loggedin-user/src/index.ts",
+        "tsConfig": "libs/client/loggedin-user/tsconfig.lib.json",
+        "assets": ["libs/client/loggedin-user/*.md"]
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p libs/client/loggedin-user/tsconfig.lib.json"
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/client/loggedin-user/jest.config.js"
       }
     }
   }

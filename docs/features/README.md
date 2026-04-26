@@ -4,26 +4,26 @@ This folder defines feature slices for SnapVote development at `C:\Dev\SnapVote`
 
 ## Status Matrix
 
-| Feature                                  | Status                | Notes                                                |
-| ---------------------------------------- | --------------------- | ---------------------------------------------------- |
-| 00 Current State + Cross-Cutting Debt    | Implemented (Doc)     | Snapshot of repo reality and debt baseline           |
-| 01 Auth Session + Account Recovery       | Implemented           | Login/register/forgot/reset/logout/session bootstrap |
-| 02 Poll Creation + Management            | Implemented           | Create/update/close polls                            |
-| 03 Poll Sharing + Access Control         | Implemented           | Share links, join by token                           |
-| 04 Vote Casting + Idempotency            | Implemented           | Cast vote, one-vote policy                           |
-| 04.5 App Shell + Navbar + My Polls       | Implemented           | Navbar, AppShell, home poll list                     |
-| 04.6 Dark Mode                           | Implemented           | Theme toggle, dark variants                          |
-| 05 Live Results + Presence               | Implemented           | SSE streaming                                        |
-| 06 Results History + Insights            | In progress           | Status filter, pagination, vote counts on home       |
-| 07 Moderation + Abuse Protection         | Not implemented       | Reporting                                            |
-| 08 Observability + Operability           | Partially Implemented | Request telemetry exists                             |
-| 09 Cleanup Technical Debt                | Document only         | Backlog                                              |
-| 10 WhatsApp-Style Voting Mechanism       | Not implemented       | Vote change, transparent lists                       |
-| 11 User + Category + Theme Vote Explorer | Not implemented       | Filters/explorer                                     |
-| 12 User Alignment + Outstanding Users    | Not implemented       | Analytics                                            |
-| 13 User Statistics Page                  | Not implemented       | Profile stats                                        |
-| 14 Real-Time Vote Notifications          | Not implemented       | Live notifications                                   |
-| 15 LLM Poll Insights                     | Not implemented       | AI insights                                          |
+| Feature                                  | Status                | Notes                                                 |
+| ---------------------------------------- | --------------------- | ----------------------------------------------------- |
+| 00 Current State + Cross-Cutting Debt    | Implemented (Doc)     | Snapshot of repo reality and debt baseline            |
+| 01 Auth Session + Account Recovery       | Implemented           | Login/register/forgot/reset/logout/session bootstrap  |
+| 02 Poll Creation + Management            | Implemented           | Create/update/close polls                             |
+| 03 Poll Sharing + Access Control         | Implemented           | Share links, join by token                            |
+| 04 Vote Casting + Idempotency            | Implemented           | Cast vote, one-vote policy                            |
+| 04.5 App Shell + Navbar + My Polls       | Implemented           | Navbar, AppShell, home poll list                      |
+| 04.6 Dark Mode                           | Implemented           | Theme toggle, dark variants                           |
+| 05 Live Results + Presence               | Implemented           | SSE streaming                                         |
+| 06 Results History + Insights            | Implemented           | Status filter, date filter, pagination, summary cards |
+| 07 Moderation + Abuse Protection         | Implemented           | Rate limiting, report, lock, delete                   |
+| 08 Observability + Operability           | Partially Implemented | Request telemetry exists                              |
+| 09 Cleanup Technical Debt                | Document only         | Backlog                                               |
+| 10 WhatsApp-Style Voting Mechanism       | Not implemented       | Vote change, transparent lists                        |
+| 11 User + Category + Theme Vote Explorer | Not implemented       | Filters/explorer                                      |
+| 12 User Alignment + Outstanding Users    | Not implemented       | Analytics                                             |
+| 13 User Statistics Page                  | Not implemented       | Profile stats                                         |
+| 14 Real-Time Vote Notifications          | Not implemented       | Live notifications                                    |
+| 15 LLM Poll Insights                     | Not implemented       | AI insights                                           |
 
 ## Dependency Map
 
