@@ -17,6 +17,9 @@ export interface TelemetryRecord {
     email: string | null;
     name: string | null;
   };
+  domain: {
+    pollId: string | null;
+  };
   metadata: {
     timestamp: string;
     ip: string | null;
