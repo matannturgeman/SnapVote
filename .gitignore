@@ -45,6 +45,9 @@ testem.log
 .env
 .env.local
 .env.production
+*.env
+.env.*
+apps/api/.env.production
 
 # System Files
 .DS_Store
