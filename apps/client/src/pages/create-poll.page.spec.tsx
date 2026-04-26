@@ -183,6 +183,8 @@ describe('CreatePollPage', () => {
         title: 'Best framework?',
         description: undefined,
         options: ['React', 'Vue'],
+        allowMultipleAnswers: false,
+        visibilityMode: 'PRIVATE',
       });
     });
 

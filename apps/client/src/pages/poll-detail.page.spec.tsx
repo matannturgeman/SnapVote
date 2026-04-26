@@ -10,6 +10,7 @@ const mockUseListShareLinksQuery = jest.fn();
 const mockUseCreateShareLinkMutation = jest.fn();
 const mockUseRevokeShareLinkMutation = jest.fn();
 const mockUseCastVoteMutation = jest.fn();
+const mockUseDeleteVoteMutation = jest.fn();
 const mockUseGetPollResultsQuery = jest.fn();
 const mockUpdatePoll = jest.fn();
 const mockClosePoll = jest.fn();
@@ -42,6 +43,8 @@ jest.mock('@libs/client-server-communication', () => ({
   useRevokeShareLinkMutation: (...args: unknown[]) =>
     mockUseRevokeShareLinkMutation(...args),
   useCastVoteMutation: (...args: unknown[]) => mockUseCastVoteMutation(...args),
+  useDeleteVoteMutation: (...args: unknown[]) =>
+    mockUseDeleteVoteMutation(...args),
   useGetPollResultsQuery: (...args: unknown[]) =>
     mockUseGetPollResultsQuery(...args),
   usePollStream: () => ({ presence: null, isConnected: false }),
@@ -102,6 +105,10 @@ describe('PollDetailPage', () => {
     ]);
     mockUseRevokeShareLinkMutation.mockReturnValue([jest.fn()]);
     mockUseCastVoteMutation.mockReturnValue([jest.fn(), { isLoading: false }]);
+    mockUseDeleteVoteMutation.mockReturnValue([
+      jest.fn(),
+      { isLoading: false },
+    ]);
     mockUseGetPollResultsQuery.mockReturnValue({
       data: undefined,
       refetch: jest.fn(),
