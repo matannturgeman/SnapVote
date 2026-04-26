@@ -17,7 +17,7 @@ const buildContext = (request: Record<string, unknown>): ExecutionContext =>
     switchToHttp: () => ({
       getRequest: () => request,
     }),
-  } as unknown as ExecutionContext);
+  }) as unknown as ExecutionContext;
 
 /**
  * createParamDecorator returns a factory function. NestJS internally calls the
@@ -62,8 +62,15 @@ function extractDecoratorFactory(
   decoratorFactory(data)(Target.prototype, 'handler', 0);
 
   const ROUTE_ARGS_METADATA = '__routeArguments__';
-  const meta: Record<string, { factory: (d: unknown, ctx: ExecutionContext) => unknown }> =
-    Reflect.getMetadata(ROUTE_ARGS_METADATA, Target.prototype.constructor, 'handler') ?? {};
+  const meta: Record<
+    string,
+    { factory: (d: unknown, ctx: ExecutionContext) => unknown }
+  > =
+    Reflect.getMetadata(
+      ROUTE_ARGS_METADATA,
+      Target.prototype.constructor,
+      'handler',
+    ) ?? {};
 
   // The metadata key is `${type}:${index}`. We want the first (and only) entry.
   const entry = Object.values(meta)[0];
@@ -75,7 +82,9 @@ describe('CurrentUser decorator', () => {
 
   beforeAll(() => {
     // Extract the factory once — it is the same function regardless of `data`.
-    factory = extractDecoratorFactory(CurrentUser as (...args: unknown[]) => ParameterDecorator);
+    factory = extractDecoratorFactory(
+      CurrentUser as (...args: unknown[]) => ParameterDecorator,
+    );
   });
 
   it('returns the full user object when no field is specified', () => {

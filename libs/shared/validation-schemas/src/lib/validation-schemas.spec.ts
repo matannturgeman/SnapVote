@@ -385,9 +385,7 @@ describe('refreshTokenSchema', () => {
   });
 
   it('accepts an empty string (no min constraint)', () => {
-    expect(() =>
-      refreshTokenSchema.parse({ refreshToken: '' }),
-    ).not.toThrow();
+    expect(() => refreshTokenSchema.parse({ refreshToken: '' })).not.toThrow();
   });
 
   it('rejects missing refreshToken field', () => {
@@ -779,9 +777,7 @@ describe('updatePollSchema', () => {
   });
 
   it('accepts partial update with only title', () => {
-    expect(() =>
-      updatePollSchema.parse({ title: 'New title' }),
-    ).not.toThrow();
+    expect(() => updatePollSchema.parse({ title: 'New title' })).not.toThrow();
   });
 
   it('accepts partial update with options array', () => {
@@ -1018,7 +1014,10 @@ describe('pollStreamResultsEventSchema', () => {
 
   it('accepts a valid results event', () => {
     expect(() =>
-      pollStreamResultsEventSchema.parse({ type: 'results', data: validData() }),
+      pollStreamResultsEventSchema.parse({
+        type: 'results',
+        data: validData(),
+      }),
     ).not.toThrow();
   });
 

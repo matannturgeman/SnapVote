@@ -8,22 +8,22 @@ This document is the canonical reference for all libraries in the `libs/` folder
 
 ## Summary Table
 
-| Library | Type | Framework | Purpose | Test File(s) | Status |
-|---|---|---|---|---|---|
-| `client/loggedin-user` | Client | React | Auth state context and hooks | `use-logged-in-user.hook.spec.ts` | Added |
-| `client/ui` | Client | React | Shared UI component library | `ui.spec.tsx` | Added |
-| `client/shared` | Client | React | Client utilities, hooks, helpers | `utils.spec.ts`, `helpers.spec.ts`, `hooks.spec.ts` | Added |
-| `client/server-communication` | Client | RTK Query | API layer — auth endpoints and base config | `auth.api.spec.ts`, `base-api.spec.ts` | Existing |
-| `client/store` | Client | Redux Toolkit | Redux store with auth slice | `auth.slice.spec.ts` | Existing |
-| `server/auth` | Server | NestJS | JWT auth, guards, decorators, password reset mailer | Multiple spec files | Existing |
-| `server/poll` | Server | NestJS | Poll service, controller, SSE stream | `poll.service.spec.ts`, `poll.controller.spec.ts`, `poll-stream.service.spec.ts` | Existing |
-| `server/user` | Server | NestJS | CurrentUser decorator and middleware | `current-user.spec.ts` | Added |
-| `server/data-access` | Server | Prisma / NestJS | Prisma client setup, global exception filter | `http-exception.filter.spec.ts` | Added |
-| `server/shared` | Server | Node | Server-side shared utilities | `shared-utils.spec.ts` | Existing |
-| `shared/types` | Shared | TypeScript | Type definitions inferred from Zod schemas | `types.spec.ts` | Added |
-| `shared/dto` | Shared | Zod | DTO schemas and parsing helpers | `dto.spec.ts` | Added |
-| `shared/shared` | Shared | TypeScript | Pagination, HTTP response builders, type utilities | `shared.spec.ts` | Added |
-| `shared/validation-schemas` | Shared | Zod | All Zod validation schemas | `validation-schemas.spec.ts` | Added |
+| Library                       | Type   | Framework       | Purpose                                             | Test File(s)                                                                     | Status   |
+| ----------------------------- | ------ | --------------- | --------------------------------------------------- | -------------------------------------------------------------------------------- | -------- |
+| `client/loggedin-user`        | Client | React           | Auth state context and hooks                        | `use-logged-in-user.hook.spec.ts`                                                | Added    |
+| `client/ui`                   | Client | React           | Shared UI component library                         | `ui.spec.tsx`                                                                    | Added    |
+| `client/shared`               | Client | React           | Client utilities, hooks, helpers                    | `utils.spec.ts`, `helpers.spec.ts`, `hooks.spec.ts`                              | Added    |
+| `client/server-communication` | Client | RTK Query       | API layer — auth endpoints and base config          | `auth.api.spec.ts`, `base-api.spec.ts`                                           | Existing |
+| `client/store`                | Client | Redux Toolkit   | Redux store with auth slice                         | `auth.slice.spec.ts`                                                             | Existing |
+| `server/auth`                 | Server | NestJS          | JWT auth, guards, decorators, password reset mailer | Multiple spec files                                                              | Existing |
+| `server/poll`                 | Server | NestJS          | Poll service, controller, SSE stream                | `poll.service.spec.ts`, `poll.controller.spec.ts`, `poll-stream.service.spec.ts` | Existing |
+| `server/user`                 | Server | NestJS          | CurrentUser decorator and middleware                | `current-user.spec.ts`                                                           | Added    |
+| `server/data-access`          | Server | Prisma / NestJS | Prisma client setup, global exception filter        | `http-exception.filter.spec.ts`                                                  | Added    |
+| `server/shared`               | Server | Node            | Server-side shared utilities                        | `shared-utils.spec.ts`                                                           | Existing |
+| `shared/types`                | Shared | TypeScript      | Type definitions inferred from Zod schemas          | `types.spec.ts`                                                                  | Added    |
+| `shared/dto`                  | Shared | Zod             | DTO schemas and parsing helpers                     | `dto.spec.ts`                                                                    | Added    |
+| `shared/shared`               | Shared | TypeScript      | Pagination, HTTP response builders, type utilities  | `shared.spec.ts`                                                                 | Added    |
+| `shared/validation-schemas`   | Shared | Zod             | All Zod validation schemas                          | `validation-schemas.spec.ts`                                                     | Added    |
 
 ---
 
@@ -278,7 +278,7 @@ Coverage reports are written to the `coverage/` directory at the workspace root,
 
 ## Status Legend
 
-| Symbol | Meaning |
-|---|---|
-| Existing | Test file was already present before 2026-04-26 |
-| Added | Test file was newly created on 2026-04-26 as part of the libs coverage initiative |
+| Symbol   | Meaning                                                                           |
+| -------- | --------------------------------------------------------------------------------- |
+| Existing | Test file was already present before 2026-04-26                                   |
+| Added    | Test file was newly created on 2026-04-26 as part of the libs coverage initiative |

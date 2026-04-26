@@ -72,7 +72,10 @@ describe('AllExceptionsFilter', () => {
 
     it('handles a 400 Bad Request HttpException', () => {
       const { host, jsonMock, statusMock } = buildHost();
-      const exception = new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
+      const exception = new HttpException(
+        'Bad Request',
+        HttpStatus.BAD_REQUEST,
+      );
 
       filter.catch(exception, host);
 
@@ -82,7 +85,10 @@ describe('AllExceptionsFilter', () => {
 
     it('handles a 401 Unauthorized HttpException', () => {
       const { host, statusMock } = buildHost();
-      const exception = new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+      const exception = new HttpException(
+        'Unauthorized',
+        HttpStatus.UNAUTHORIZED,
+      );
 
       filter.catch(exception, host);
 
@@ -111,7 +117,10 @@ describe('AllExceptionsFilter', () => {
 
     it('joins all issue messages with ", "', () => {
       const { host, jsonMock } = buildHost();
-      filter.catch(makeZodError(['name is required', 'email is invalid']), host);
+      filter.catch(
+        makeZodError(['name is required', 'email is invalid']),
+        host,
+      );
       const payload = jsonMock.mock.calls[0][0];
       expect(payload.message).toBe('name is required, email is invalid');
     });
@@ -193,7 +202,11 @@ describe('AllExceptionsFilter', () => {
       const { host, jsonMock } = buildHost();
       filter.catch(new HttpException('OK', HttpStatus.OK), host);
       const payload = jsonMock.mock.calls[0][0];
-      expect(Object.keys(payload).sort()).toEqual(['message', 'statusCode', 'timestamp']);
+      expect(Object.keys(payload).sort()).toEqual([
+        'message',
+        'statusCode',
+        'timestamp',
+      ]);
     });
 
     it('timestamp is a valid ISO 8601 string', () => {
