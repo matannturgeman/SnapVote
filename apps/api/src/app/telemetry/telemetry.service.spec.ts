@@ -30,6 +30,9 @@ describe('TelemetryService', () => {
       email: 'matan@example.com',
       name: 'Matan',
     },
+    domain: {
+      pollId: null,
+    },
     metadata: {
       timestamp: new Date().toISOString(),
       ip: '127.0.0.1',

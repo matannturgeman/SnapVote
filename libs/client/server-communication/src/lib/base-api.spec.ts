@@ -133,6 +133,28 @@ describe('base-api', () => {
     expect(localStorage.removeItem).toHaveBeenCalledWith('accessToken');
   });
 
+  it('should attach requestId from x-backend-request-id header to error data', async () => {
+    const headers = {
+      get: jest.fn((name: string) =>
+        name === 'x-backend-request-id' ? 'req-abc' : null,
+      ),
+    };
+    rawBaseQueryMock.mockResolvedValue({
+      error: { status: 500, data: { message: 'Internal error' } },
+      meta: { response: { headers } },
+    });
+
+    const result = await baseQueryWithReauth(
+      '/polls',
+      { dispatch: jest.fn() } as unknown as BaseQueryApi,
+      {},
+    );
+
+    expect((result.error?.data as Record<string, unknown>)['requestId']).toBe(
+      'req-abc',
+    );
+  });
+
   it('should not clear credentials for non-401 errors', async () => {
     rawBaseQueryMock.mockResolvedValue({
       error: { status: 403, data: { message: 'Forbidden' } },
