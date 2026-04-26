@@ -9,6 +9,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TelemetryInterceptor } from './telemetry/telemetry.interceptor';
 import { TelemetryService } from './telemetry/telemetry.service';
+import { HealthModule } from './health/health.module';
 import { RATE_LIMITS } from '@libs/server-shared';
 
 @Module({
@@ -57,6 +58,7 @@ import { RATE_LIMITS } from '@libs/server-shared';
     ]),
     AuthModule,
     PollModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [

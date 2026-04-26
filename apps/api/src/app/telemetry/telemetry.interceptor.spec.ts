@@ -1,10 +1,17 @@
-import { HttpException, type CallHandler, type ExecutionContext } from '@nestjs/common';
+import {
+  HttpException,
+  type CallHandler,
+  type ExecutionContext,
+} from '@nestjs/common';
 import { lastValueFrom, of, throwError } from 'rxjs';
 import { TelemetryInterceptor } from './telemetry.interceptor';
 import type { TelemetryService } from './telemetry.service';
 
 describe('TelemetryInterceptor', () => {
-  const createHttpContext = (request: Record<string, unknown>, response: Record<string, unknown>) =>
+  const createHttpContext = (
+    request: Record<string, unknown>,
+    response: Record<string, unknown>,
+  ) =>
     ({
       getType: jest.fn().mockReturnValue('http'),
       switchToHttp: jest.fn().mockReturnValue({
@@ -49,13 +56,17 @@ describe('TelemetryInterceptor', () => {
 
     const context = createHttpContext(request, response);
     const next = {
-      handle: jest.fn(() => of({
-        userId: 7,
-        accessToken: 'token-value',
-      })),
+      handle: jest.fn(() =>
+        of({
+          userId: 7,
+          accessToken: 'token-value',
+        }),
+      ),
     } as CallHandler;
 
-    await expect(lastValueFrom(interceptor.intercept(context, next))).resolves.toEqual({
+    await expect(
+      lastValueFrom(interceptor.intercept(context, next)),
+    ).resolves.toEqual({
       userId: 7,
       accessToken: 'token-value',
     });
@@ -86,6 +97,7 @@ describe('TelemetryInterceptor', () => {
           email: 'matan@example.com',
           name: 'Matan',
         },
+        domain: { pollId: null },
         metadata: expect.objectContaining({
           ip: '127.0.0.1',
           userAgent: 'jest',
@@ -117,16 +129,21 @@ describe('TelemetryInterceptor', () => {
     };
 
     const context = createHttpContext(request, response);
-    const error = new HttpException({
-      message: 'Unauthorized',
-      code: 'AUTH_REQUIRED',
-    }, 401);
+    const error = new HttpException(
+      {
+        message: 'Unauthorized',
+        code: 'AUTH_REQUIRED',
+      },
+      401,
+    );
 
     const next = {
       handle: jest.fn(() => throwError(() => error)),
     } as CallHandler;
 
-    await expect(lastValueFrom(interceptor.intercept(context, next))).rejects.toBe(error);
+    await expect(
+      lastValueFrom(interceptor.intercept(context, next)),
+    ).rejects.toBe(error);
 
     expect(telemetryService.record).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -159,7 +176,9 @@ describe('TelemetryInterceptor', () => {
       handle: jest.fn(() => of('ok')),
     } as CallHandler;
 
-    await expect(lastValueFrom(interceptor.intercept(context, next))).resolves.toBe('ok');
+    await expect(
+      lastValueFrom(interceptor.intercept(context, next)),
+    ).resolves.toBe('ok');
 
     expect(telemetryService.generateBackendRequestId).not.toHaveBeenCalled();
     expect(telemetryService.record).not.toHaveBeenCalled();

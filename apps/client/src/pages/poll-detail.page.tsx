@@ -14,6 +14,14 @@ import {
   useUpdatePollMutation,
 } from '@libs/client-server-communication';
 import { POLL_STATUS_COLORS } from '../lib/poll-ui';
+
+function extractRequestId(err: unknown): string | null {
+  if (!err || typeof err !== 'object') return null;
+  const data = (err as Record<string, unknown>)['data'];
+  if (!data || typeof data !== 'object') return null;
+  const requestId = (data as Record<string, unknown>)['requestId'];
+  return typeof requestId === 'string' ? requestId : null;
+}
 import { Button } from '../components/ui/button';
 import {
   Card,
@@ -50,11 +58,11 @@ export function PollDetailPage() {
     { key: string; text: string }[]
   >([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [closeError, setCloseError] = useState(false);
+  const [closeError, setCloseError] = useState<string | null>(null);
   const [showShare, setShowShare] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [castVote, { isLoading: isVoting }] = useCastVoteMutation();
-  const [voteError, setVoteError] = useState(false);
+  const [voteError, setVoteError] = useState<string | null>(null);
   const { data: results } = useGetPollResultsQuery(id ?? '', { skip: !id });
   const { presence, isConnected } = usePollStream(
     poll?.status === 'OPEN' ? id : undefined,
@@ -121,21 +129,23 @@ export function PollDetailPage() {
 
   const onVote = async (optionId: string) => {
     if (!id) return;
-    setVoteError(false);
+    setVoteError(null);
     try {
       await castVote({ id, body: { optionId } }).unwrap();
-    } catch {
-      setVoteError(true);
+    } catch (err) {
+      const requestId = extractRequestId(err);
+      setVoteError(requestId ?? '');
     }
   };
 
   const onClose = async () => {
     if (!id) return;
-    setCloseError(false);
+    setCloseError(null);
     try {
       await closePoll(id).unwrap();
-    } catch {
-      setCloseError(true);
+    } catch (err) {
+      const requestId = extractRequestId(err);
+      setCloseError(requestId ?? '');
     }
   };
 
@@ -211,9 +221,14 @@ export function PollDetailPage() {
                     </li>
                   ))}
                 </ul>
-                {closeError && (
+                {closeError !== null && (
                   <p className="rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-800 dark:border-orange-800/40 dark:bg-orange-900/20 dark:text-orange-300">
                     Could not close the poll. Please try again.
+                    {closeError && (
+                      <span className="mt-0.5 block text-xs opacity-60">
+                        ID: {closeError}
+                      </span>
+                    )}
                   </p>
                 )}
                 {canEdit && (
@@ -316,6 +331,11 @@ export function PollDetailPage() {
                 {updateError ? (
                   <p className="rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-800 dark:border-orange-800/40 dark:bg-orange-900/20 dark:text-orange-300">
                     Could not save changes. Please try again.
+                    {extractRequestId(updateError) && (
+                      <span className="mt-0.5 block text-xs opacity-60">
+                        ID: {extractRequestId(updateError)}
+                      </span>
+                    )}
                   </p>
                 ) : null}
                 <div className="flex gap-2">
@@ -415,9 +435,14 @@ export function PollDetailPage() {
                 <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   {results?.myVote ? 'Your vote' : 'Cast your vote'}
                 </p>
-                {voteError && (
+                {voteError !== null && (
                   <p className="rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-800 dark:border-orange-800/40 dark:bg-orange-900/20 dark:text-orange-300">
                     Could not submit vote. Please try again.
+                    {voteError && (
+                      <span className="mt-0.5 block text-xs opacity-60">
+                        ID: {voteError}
+                      </span>
+                    )}
                   </p>
                 )}
                 <ul className="space-y-2">

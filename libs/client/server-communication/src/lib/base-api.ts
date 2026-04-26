@@ -60,6 +60,19 @@ export const baseQueryWithReauth: BaseQueryFn<
     clearPersistedToken();
   }
 
+  if (result.error) {
+    const requestId =
+      result.meta?.response?.headers?.get('x-backend-request-id') ?? undefined;
+
+    if (
+      requestId &&
+      typeof result.error.data === 'object' &&
+      result.error.data !== null
+    ) {
+      (result.error.data as Record<string, unknown>)['requestId'] = requestId;
+    }
+  }
+
   return result;
 };
 
