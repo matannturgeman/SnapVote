@@ -8,4 +8,4 @@ RUN npm install -g pnpm
 RUN pnpm install
 RUN pnpm nx build api
 
-CMD ["node", "dist/api/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/api/main.js"]
