@@ -14,8 +14,8 @@ import {
   useDeleteAccountMutation,
   useGetMeQuery,
   useUpdateProfileMutation,
+  useUploadAvatarMutation,
 } from '@libs/client-server-communication';
-import { AppShell } from '../components/app-shell';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -37,6 +37,8 @@ export function ProfilePage() {
     useChangePasswordMutation();
   const [deleteAccount, { isLoading: deletingAccount }] =
     useDeleteAccountMutation();
+  const [uploadAvatar, { isLoading: uploadingAvatar }] =
+    useUploadAvatarMutation();
 
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
@@ -57,11 +59,9 @@ export function ProfilePage() {
 
   if (userLoading) {
     return (
-      <AppShell>
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
-        </div>
-      </AppShell>
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+      </div>
     );
   }
 
@@ -125,8 +125,7 @@ export function ProfilePage() {
   };
 
   return (
-    <AppShell>
-      <div className="mx-auto max-w-2xl space-y-8 px-4 py-8">
+    <div className="mx-auto max-w-2xl space-y-8 px-4 py-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
             Profile Settings
@@ -140,7 +139,7 @@ export function ProfilePage() {
           <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
             Profile Information
           </h2>
-          <form onSubmit={onSubmitProfile} className="space-y-4">
+          <form onSubmit={onSubmitProfile} className="space-y-4" noValidate>
             <div className="flex items-center gap-4">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-cyan-100 dark:bg-cyan-900">
                 {avatarUrl ? (
@@ -154,14 +153,29 @@ export function ProfilePage() {
                 )}
               </div>
               <div className="flex-1 space-y-2">
-                <Label htmlFor="avatarUrl">Avatar URL</Label>
-                <Input
-                  id="avatarUrl"
-                  type="url"
-                  value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  placeholder="https://example.com/avatar.jpg"
-                />
+                <Label htmlFor="avatarFile">Profile Picture</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="avatarFile"
+                    type="file"
+                    accept="image/*"
+                    className="cursor-pointer"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        const updated = await uploadAvatar(file).unwrap();
+                        setAvatarUrl(updated.avatarUrl || '');
+                        setProfileMessage('Avatar updated successfully');
+                      } catch {
+                        setProfileMessage('Failed to upload avatar');
+                      }
+                    }}
+                  />
+                  {uploadingAvatar && (
+                    <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                  )}
+                </div>
               </div>
             </div>
 
@@ -219,7 +233,7 @@ export function ProfilePage() {
           <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
             Change Password
           </h2>
-          <form onSubmit={onSubmitPassword} className="space-y-4">
+          <form onSubmit={onSubmitPassword} className="space-y-4" noValidate>
             <div className="space-y-2">
               <Label htmlFor="currentPassword">Current Password</Label>
               <Input
@@ -356,7 +370,6 @@ export function ProfilePage() {
             </div>
           )}
         </section>
-      </div>
-    </AppShell>
+    </div>
   );
 }

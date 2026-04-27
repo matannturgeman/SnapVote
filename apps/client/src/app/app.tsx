@@ -2,8 +2,10 @@ import { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import {
   clearCredentials,
+  selectIsAuthenticated,
   setCredentials,
   useAppDispatch,
+  useAppSelector,
 } from '@libs/client-store';
 import { useGetMeQuery } from '@libs/client-server-communication';
 import { AppShell } from '../components/app-shell';
@@ -22,6 +24,7 @@ import { clearPersistedToken, getPersistedToken } from '../lib/token';
 export function App() {
   const dispatch = useAppDispatch();
   const token = getPersistedToken();
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   const {
     data: me,
@@ -47,7 +50,7 @@ export function App() {
     }
   }, [dispatch, isError, isSuccess, me, token]);
 
-  const isBootstrapping = Boolean(token) && isFetching;
+  const isBootstrapping = Boolean(token) && !isAuthenticated && !isError;
 
   return (
     <Routes>

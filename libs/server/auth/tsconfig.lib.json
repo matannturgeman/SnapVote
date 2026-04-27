@@ -5,7 +5,7 @@
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": false,
-    "types": ["node"]
+    "types": ["node", "multer"]
   },
   "include": ["src/**/*.ts"],
   "exclude": [

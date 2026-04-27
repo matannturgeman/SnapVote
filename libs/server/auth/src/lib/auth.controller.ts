@@ -1,4 +1,5 @@
 ﻿import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -7,7 +8,10 @@
   Patch,
   Post,
   Req,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request } from 'express';
 import {
   AuthResponseDtoSchema,
@@ -15,6 +19,7 @@ import {
   ForgotPasswordRequestDtoSchema,
   LoginDtoSchema,
   MessageResponseDtoSchema,
+  ReactivateAccountDtoSchema,
   RegisterDtoSchema,
   ResetPasswordDtoSchema,
   SuccessResponseDtoSchema,
@@ -82,6 +87,19 @@ export class AuthController {
     return parseDto(UserResponseDtoSchema, response);
   }
 
+  @Post('avatar')
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 5 * 1024 * 1024 } }))
+  async uploadAvatar(
+    @CurrentUser() user: LoggedInUser,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<UserResponseDto> {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+    const response = await this.authService.uploadAvatar(user.id, file.buffer);
+    return parseDto(UserResponseDtoSchema, response);
+  }
+
   @Patch('profile')
   async updateProfile(
     @CurrentUser() user: LoggedInUser,
@@ -119,6 +137,23 @@ export class AuthController {
     }
 
     return parseDto(SuccessResponseDtoSchema, { success: true });
+  }
+
+  @Public()
+  @HttpCode(200)
+  @Post('reactivate')
+  async reactivateAccount(
+    @Body() body: unknown,
+    @Req() request: Request,
+  ): Promise<AuthResponseDto> {
+    const dto = parseDto(ReactivateAccountDtoSchema, body);
+
+    const response = await this.authService.reactivateAccount(
+      dto,
+      this.getSessionMetadata(request),
+    );
+
+    return parseDto(AuthResponseDtoSchema, response);
   }
 
   @Public()

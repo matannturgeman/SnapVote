@@ -9,6 +9,7 @@ import { prisma } from '@libs/server-data-access';
 import type {
   AuthResponseDto,
   ChangePasswordDto,
+  ReactivateAccountDto,
   RegisterDto,
   UpdateProfileDto,
   UserResponseDto,
@@ -21,6 +22,8 @@ import {
   verifyPassword,
 } from './crypto.util';
 import { PasswordResetMailerService } from './password-reset-mailer.service';
+import { StorageService } from './storage.service';
+
 
 const DEFAULT_SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 const DEFAULT_RESET_TOKEN_TTL_MINUTES = 15;
@@ -44,6 +47,7 @@ export class AuthService {
   constructor(
     private readonly passwordResetMailer: PasswordResetMailerService,
     private readonly configService: ConfigService,
+    private readonly storage: StorageService,
   ) {}
 
   async verifyToken(token: string): Promise<LoggedInUser> {
@@ -62,12 +66,13 @@ export class AuthService {
             id: true,
             email: true,
             name: true,
+            deleted: true,
           },
         },
       },
     });
 
-    if (!session) {
+    if (!session || session.user.deleted) {
       throw new UnauthorizedException('Invalid or expired token');
     }
 
@@ -136,8 +141,8 @@ export class AuthService {
   ): Promise<AuthResponseDto> {
     const normalizedEmail = this.normalizeEmail(email);
 
-    const user = await prisma.user.findUnique({
-      where: { email: normalizedEmail },
+    const user = await prisma.user.findFirst({
+      where: { email: normalizedEmail, deleted: false },
       select: {
         id: true,
         email: true,
@@ -291,6 +296,21 @@ export class AuthService {
     return this.toUserResponse(user);
   }
 
+  async uploadAvatar(
+    userId: number,
+    buffer: Buffer,
+  ): Promise<UserResponseDto> {
+    const avatarUrl = await this.storage.uploadAvatar(buffer, userId);
+
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl },
+      select: { id: true, email: true, name: true, avatarUrl: true },
+    });
+
+    return this.toUserResponse(user);
+  }
+
   async updateProfile(
     userId: number,
     dto: UpdateProfileDto,
@@ -381,6 +401,45 @@ export class AuthService {
     ]);
   }
 
+  async reactivateAccount(
+    dto: ReactivateAccountDto,
+    metadata?: SessionMetadata,
+  ): Promise<AuthResponseDto> {
+    const normalizedEmail = this.normalizeEmail(dto.email);
+
+    const user = await prisma.user.findFirst({
+      where: { email: normalizedEmail, deleted: true },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        passwordHash: true,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException(
+        'No deleted account found for this email',
+      );
+    }
+
+    const isPasswordValid = await verifyPassword(
+      dto.password,
+      user.passwordHash,
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { deleted: false, deletedAt: null },
+    });
+
+    return this.issueAuthResponse(user, metadata);
+  }
+
   async deleteAccount(userId: number): Promise<void> {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -399,7 +458,6 @@ export class AuthService {
         data: {
           deleted: true,
           deletedAt: now,
-          email: `${userId}-deleted-${now.toISOString()}@deleted.local`,
         },
       }),
       prisma.session.updateMany({
