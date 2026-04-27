@@ -22,7 +22,7 @@ import { RATE_LIMITS } from '@libs/server-shared';
           host: config.get<string>('REDIS_HOST'),
           port: config.get<number>('REDIS_PORT', 6379),
           password: config.get<string>('REDIS_PASSWORD'),
-          tls: {},
+          ...(config.get<string>('REDIS_TLS') === 'true' && { tls: {} }),
         },
       }),
     }),

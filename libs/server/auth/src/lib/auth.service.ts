@@ -24,7 +24,6 @@ import {
 import { PasswordResetMailerService } from './password-reset-mailer.service';
 import { StorageService } from './storage.service';
 
-
 const DEFAULT_SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 const DEFAULT_RESET_TOKEN_TTL_MINUTES = 15;
 
@@ -296,10 +295,7 @@ export class AuthService {
     return this.toUserResponse(user);
   }
 
-  async uploadAvatar(
-    userId: number,
-    buffer: Buffer,
-  ): Promise<UserResponseDto> {
+  async uploadAvatar(userId: number, buffer: Buffer): Promise<UserResponseDto> {
     const avatarUrl = await this.storage.uploadAvatar(userId, buffer);
 
     const user = await prisma.user.update({

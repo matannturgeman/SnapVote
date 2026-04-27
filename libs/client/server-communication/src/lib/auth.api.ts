@@ -109,9 +109,7 @@ export const authApi = baseApi.injectEndpoints({
       },
       async onQueryStarted(_file, { dispatch, queryFulfilled }) {
         const { data } = await queryFulfilled;
-        dispatch(
-          authApi.util.updateQueryData('getMe', undefined, () => data),
-        );
+        dispatch(authApi.util.updateQueryData('getMe', undefined, () => data));
       },
     }),
   }),
