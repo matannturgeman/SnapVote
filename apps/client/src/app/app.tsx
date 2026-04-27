@@ -28,7 +28,6 @@ export function App() {
 
   const {
     data: me,
-    isFetching,
     isSuccess,
     isError,
   } = useGetMeQuery(undefined, {
