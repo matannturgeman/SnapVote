@@ -28,8 +28,7 @@ import { RATE_LIMITS } from '@libs/server-shared';
           keepAlive: 10000,
           connectTimeout: 10000,
           maxRetriesPerRequest: 3,
-          retryStrategy: (times: number) =>
-            Math.min(times * 200, 5000),
+          retryStrategy: (times: number) => Math.min(times * 200, 5000),
         },
       }),
     }),
