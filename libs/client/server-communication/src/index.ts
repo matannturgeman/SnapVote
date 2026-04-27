@@ -25,6 +25,8 @@ export {
   useUpdateProfileMutation,
   useChangePasswordMutation,
   useDeleteAccountMutation,
+  useReactivateAccountMutation,
+  useUploadAvatarMutation,
 } from './lib/auth.api';
 
 // ---------------------------------------------------------------------------

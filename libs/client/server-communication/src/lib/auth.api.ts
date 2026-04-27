@@ -3,6 +3,7 @@ import type {
   LoginDto,
   RegisterDto,
   ForgotPasswordRequestDto,
+  ReactivateAccountDto,
   ResetPasswordDto,
   AuthResponseDto,
   MessageResponseDto,
@@ -90,6 +91,27 @@ export const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Auth'],
     }),
+
+    reactivateAccount: build.mutation<AuthResponseDto, ReactivateAccountDto>({
+      query: (body) => ({
+        url: '/auth/reactivate',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Auth'],
+    }),
+
+    uploadAvatar: build.mutation<UserResponseDto, File>({
+      query: (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return { url: '/auth/avatar', method: 'POST', body: formData };
+      },
+      async onQueryStarted(_file, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled;
+        dispatch(authApi.util.updateQueryData('getMe', undefined, () => data));
+      },
+    }),
   }),
   overrideExisting: false,
 });
@@ -105,4 +127,6 @@ export const {
   useUpdateProfileMutation,
   useChangePasswordMutation,
   useDeleteAccountMutation,
+  useReactivateAccountMutation,
+  useUploadAvatarMutation,
 } = authApi;

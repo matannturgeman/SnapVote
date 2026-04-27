@@ -46,6 +46,14 @@ const rawBaseQuery = fetchBaseQuery({
   },
 });
 
+// Endpoints that legitimately return 401 for "wrong credentials" (not expired session).
+// These should NOT trigger a logout.
+const CREDENTIAL_CHECK_ENDPOINTS = [
+  '/auth/change-password',
+  '/auth/login',
+  '/auth/reactivate',
+];
+
 export const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
@@ -54,8 +62,14 @@ export const baseQueryWithReauth: BaseQueryFn<
   const result = await rawBaseQuery(args, api, extraOptions);
 
   if (result.error?.status === 401) {
-    api.dispatch({ type: 'auth/clearCredentials' });
-    clearPersistedToken();
+    const url = typeof args === 'string' ? args : args.url;
+    const isCredentialCheck = CREDENTIAL_CHECK_ENDPOINTS.some((ep) =>
+      url.includes(ep),
+    );
+    if (!isCredentialCheck) {
+      api.dispatch({ type: 'auth/clearCredentials' });
+      clearPersistedToken();
+    }
   }
 
   if (result.error) {

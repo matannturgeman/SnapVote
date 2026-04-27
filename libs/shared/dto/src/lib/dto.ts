@@ -8,6 +8,7 @@ import {
   registerSchema,
   forgotPasswordRequestSchema,
   resetPasswordSchema,
+  reactivateAccountSchema,
   authResponseSchema,
   messageResponseSchema,
   successResponseSchema,
@@ -54,6 +55,7 @@ export const ResetPasswordDtoSchema = resetPasswordSchema;
 export const AuthResponseDtoSchema = authResponseSchema;
 export const UpdateProfileDtoSchema = updateProfileSchema;
 export const ChangePasswordDtoSchema = changePasswordSchema;
+export const ReactivateAccountDtoSchema = reactivateAccountSchema;
 
 export type LoginDto = z.infer<typeof LoginDtoSchema>;
 export type RegisterDto = z.infer<typeof RegisterDtoSchema>;
@@ -64,6 +66,7 @@ export type ResetPasswordDto = z.infer<typeof ResetPasswordDtoSchema>;
 export type AuthResponseDto = z.infer<typeof AuthResponseDtoSchema>;
 export type UpdateProfileDto = z.infer<typeof UpdateProfileDtoSchema>;
 export type ChangePasswordDto = z.infer<typeof ChangePasswordDtoSchema>;
+export type ReactivateAccountDto = z.infer<typeof ReactivateAccountDtoSchema>;
 
 // ---------------------------------------------------------------------------
 // Common response DTOs
