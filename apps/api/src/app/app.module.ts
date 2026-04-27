@@ -22,7 +22,9 @@ import { RATE_LIMITS } from '@libs/server-shared';
           host: config.get<string>('REDIS_HOST'),
           port: config.get<number>('REDIS_PORT', 6379),
           password: config.get<string>('REDIS_PASSWORD'),
-          tls: { rejectUnauthorized: false },
+          ...(config.get<string>('REDIS_TLS') === 'true' && {
+            tls: { rejectUnauthorized: false },
+          }),
           keepAlive: 10000,
           connectTimeout: 10000,
           maxRetriesPerRequest: 3,
