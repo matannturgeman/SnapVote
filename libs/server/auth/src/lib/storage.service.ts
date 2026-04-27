@@ -5,8 +5,8 @@ import { CloudinaryService } from './cloudinary.service';
 export class StorageService {
   constructor(private readonly cloudinary: CloudinaryService) {}
 
-  async uploadAvatar(buffer: Buffer, userId: number): Promise<string> {
-    const result = await this.cloudinary.uploadAvatar(buffer, userId);
+  async uploadAvatar(userId: number, buffer: Buffer): Promise<string> {
+    const result = await this.cloudinary.uploadAvatar(userId, buffer);
     return result.secure_url;
   }
 }

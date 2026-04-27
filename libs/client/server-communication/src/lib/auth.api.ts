@@ -107,7 +107,12 @@ export const authApi = baseApi.injectEndpoints({
         formData.append('file', file);
         return { url: '/auth/avatar', method: 'POST', body: formData };
       },
-      invalidatesTags: ['Auth'],
+      async onQueryStarted(_file, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled;
+        dispatch(
+          authApi.util.updateQueryData('getMe', undefined, () => data),
+        );
+      },
     }),
   }),
   overrideExisting: false,

@@ -12,8 +12,8 @@ export class CloudinaryService {
   ) {}
 
   async uploadAvatar(
-    buffer: Buffer,
     userId: number,
+    buffer: Buffer,
   ): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
       this.cloudinary.uploader

@@ -300,7 +300,7 @@ export class AuthService {
     userId: number,
     buffer: Buffer,
   ): Promise<UserResponseDto> {
-    const avatarUrl = await this.storage.uploadAvatar(buffer, userId);
+    const avatarUrl = await this.storage.uploadAvatar(userId, buffer);
 
     const user = await prisma.user.update({
       where: { id: userId },

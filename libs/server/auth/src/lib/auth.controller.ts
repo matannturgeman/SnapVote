@@ -88,7 +88,12 @@ export class AuthController {
   }
 
   @Post('avatar')
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 5 * 1024 * 1024 } }))
+  @UseInterceptors(FileInterceptor('file', {
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (_req, file, cb) => {
+      cb(null, file.mimetype.startsWith('image/'));
+    },
+  }))
   async uploadAvatar(
     @CurrentUser() user: LoggedInUser,
     @UploadedFile() file: Express.Multer.File,

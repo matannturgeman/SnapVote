@@ -120,7 +120,7 @@ export function ProfilePage() {
       dispatch(clearCredentials(undefined));
       navigate('/login', { replace: true });
     } catch {
-      // Error handling - account deletion may fail if already deleted
+      // deletion silently fails — user is already navigated away on success
     }
   };
 
