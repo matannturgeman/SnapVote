@@ -16,6 +16,8 @@ export class CloudinaryService {
     buffer: Buffer,
   ): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => reject(new Error('Cloudinary upload timed out')), 30_000);
+
       this.cloudinary.uploader
         .upload_stream(
           {
@@ -26,6 +28,7 @@ export class CloudinaryService {
             resource_type: 'image',
           },
           (error, result) => {
+            clearTimeout(timeout);
             if (error || !result) {
               this.logger.error('Cloudinary upload failed', error);
               reject(error ?? new Error('Upload returned no result'));

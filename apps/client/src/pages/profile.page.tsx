@@ -51,7 +51,10 @@ export function ProfilePage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [profileMessage, setProfileMessage] = useState('');
+  const [profileSuccess, setProfileSuccess] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -74,6 +77,7 @@ export function ProfilePage() {
         email: email || undefined,
         avatarUrl: avatarUrl || undefined,
       }).unwrap();
+      setProfileSuccess(true);
       setProfileMessage('Profile updated successfully');
       if (currentUser) {
         dispatch(
@@ -84,6 +88,7 @@ export function ProfilePage() {
       setEmail(updated.email || '');
       setAvatarUrl(updated.avatarUrl || '');
     } catch {
+      setProfileSuccess(false);
       setProfileMessage('Failed to update profile');
     }
   };
@@ -92,20 +97,24 @@ export function ProfilePage() {
     event.preventDefault();
     setPasswordMessage('');
     if (newPassword !== confirmPassword) {
+      setPasswordSuccess(false);
       setPasswordMessage('New passwords do not match');
       return;
     }
     if (newPassword.length < 8) {
+      setPasswordSuccess(false);
       setPasswordMessage('Password must be at least 8 characters');
       return;
     }
     try {
       await changePassword({ currentPassword, newPassword }).unwrap();
+      setPasswordSuccess(true);
       setPasswordMessage('Password changed successfully');
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch {
+      setPasswordSuccess(false);
       setPasswordMessage('Current password is incorrect');
     }
   };
@@ -120,7 +129,7 @@ export function ProfilePage() {
       dispatch(clearCredentials(undefined));
       navigate('/login', { replace: true });
     } catch {
-      // deletion silently fails — user is already navigated away on success
+      setDeleteError('Failed to delete account. Please try again.');
     }
   };
 
@@ -166,8 +175,10 @@ export function ProfilePage() {
                       try {
                         const updated = await uploadAvatar(file).unwrap();
                         setAvatarUrl(updated.avatarUrl || '');
+                        setProfileSuccess(true);
                         setProfileMessage('Avatar updated successfully');
                       } catch {
+                        setProfileSuccess(false);
                         setProfileMessage('Failed to upload avatar');
                       }
                     }}
@@ -215,13 +226,7 @@ export function ProfilePage() {
                 )}
               </Button>
               {profileMessage && (
-                <span
-                  className={`text-sm ${
-                    profileMessage.includes('success')
-                      ? 'text-green-600'
-                      : 'text-red-600'
-                  }`}
-                >
+                <span className={`text-sm ${profileSuccess ? 'text-green-600' : 'text-red-600'}`}>
                   {profileMessage}
                 </span>
               )}
@@ -287,13 +292,7 @@ export function ProfilePage() {
                 )}
               </Button>
               {passwordMessage && (
-                <span
-                  className={`text-sm ${
-                    passwordMessage.includes('success')
-                      ? 'text-green-600'
-                      : 'text-red-600'
-                  }`}
-                >
+                <span className={`text-sm ${passwordSuccess ? 'text-green-600' : 'text-red-600'}`}>
                   {passwordMessage}
                 </span>
               )}
@@ -337,6 +336,9 @@ export function ProfilePage() {
                   placeholder='Type "delete" to confirm'
                   className="border-red-300 dark:border-red-700"
                 />
+                {deleteError && (
+                  <p className="text-sm text-red-600">{deleteError}</p>
+                )}
                 <div className="flex gap-2">
                   <Button
                     type="button"
