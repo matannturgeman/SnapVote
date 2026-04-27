@@ -1,6 +1,6 @@
 version: 2
 paths-ignore:
-  - "**/*.spec.ts"
-  - "**/*.spec.js"
-  - "**/*.test.ts"
-  - "**/*.test.js"
+  - '**/*.spec.ts'
+  - '**/*.spec.js'
+  - '**/*.test.ts'
+  - '**/*.test.js'
