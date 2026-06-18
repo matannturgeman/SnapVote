@@ -13,7 +13,7 @@
     "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "test:unit": "nx run-many -t test --exclude=api-e2e",
     "test:integration": "nx run api-integration:test",
-    "test:e2e": "nx run api-e2e:test && nx run client-e2e:e2e"
+    "test:e2e": "nx run api-e2e:e2e && nx run client-e2e:e2e"
   },
   "private": true,
   "devDependencies": {

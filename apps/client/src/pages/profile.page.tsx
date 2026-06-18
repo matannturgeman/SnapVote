@@ -191,6 +191,17 @@ export function ProfilePage() {
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="avatarUrl">Avatar URL</Label>
+            <Input
+              id="avatarUrl"
+              type="text"
+              value={avatarUrl}
+              onChange={(e) => setAvatarUrl(e.target.value)}
+              placeholder="https://example.com/avatar.png"
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="name">Name</Label>
             <Input
               id="name"

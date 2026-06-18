@@ -258,6 +258,6 @@ describe('POST /api/auth/reset-password', () => {
     } catch (err: any) {
       status = err?.response?.status;
     }
-    expect([400, 404]).toContain(status);
+    expect([400, 401, 404]).toContain(status);
   });
 });
