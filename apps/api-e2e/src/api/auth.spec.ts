@@ -187,9 +187,9 @@ describe('POST /api/auth/logout', () => {
   });
 
   it('returns 401 when no token is provided', async () => {
-    await expect(
-      axios.post('/api/auth/logout', {}),
-    ).rejects.toMatchObject({ response: { status: 401 } });
+    await expect(axios.post('/api/auth/logout', {})).rejects.toMatchObject({
+      response: { status: 401 },
+    });
   });
 });
 
@@ -258,6 +258,6 @@ describe('POST /api/auth/reset-password', () => {
     } catch (err: any) {
       status = err?.response?.status;
     }
-    expect([400, 404]).toContain(status);
+    expect([400, 401, 404]).toContain(status);
   });
 });

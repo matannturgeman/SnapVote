@@ -4,7 +4,7 @@ services:
   postgres:
     image: postgres:18
     container_name: nx_postgres
-    restart: always
+    restart: 'no'
     environment:
       POSTGRES_USER: nxuser
       POSTGRES_PASSWORD: nxpass
@@ -17,7 +17,7 @@ services:
   redis:
     image: redis/redis-stack-server:latest
     container_name: nx_redis
-    restart: always
+    restart: 'no'
     ports:
       - '6379:6379'
 
