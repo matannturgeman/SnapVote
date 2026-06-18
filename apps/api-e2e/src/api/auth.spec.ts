@@ -187,9 +187,9 @@ describe('POST /api/auth/logout', () => {
   });
 
   it('returns 401 when no token is provided', async () => {
-    await expect(
-      axios.post('/api/auth/logout', {}),
-    ).rejects.toMatchObject({ response: { status: 401 } });
+    await expect(axios.post('/api/auth/logout', {})).rejects.toMatchObject({
+      response: { status: 401 },
+    });
   });
 });
 
