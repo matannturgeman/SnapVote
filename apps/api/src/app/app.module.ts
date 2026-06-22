@@ -5,7 +5,6 @@ import { RedisModule } from '@nestjs-labs/nestjs-ioredis';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from '@libs/server-auth';
 import { PollModule } from '@libs/server-poll';
-import { UserModule } from '@libs/server-user';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TelemetryInterceptor } from './telemetry/telemetry.interceptor';
@@ -70,7 +69,6 @@ import { RATE_LIMITS } from '@libs/server-shared';
     }),
     AuthModule,
     PollModule,
-    UserModule,
     HealthModule,
   ],
   controllers: [AppController],

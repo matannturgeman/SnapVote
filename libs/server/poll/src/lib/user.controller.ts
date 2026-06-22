@@ -15,9 +15,8 @@ import {
   type UserVoteHistoryItemDto,
   type UserVoteHistoryQueryDto,
 } from '@libs/shared-dto';
-import { CurrentUser } from './logged-in-user.decorator';
-import type { LoggedInUser } from './logged-in-user.interface';
-import { PollService } from '@libs/server-poll';
+import { CurrentUser, type LoggedInUser } from '@libs/server-user';
+import { PollService } from './poll.service';
 
 function parseQuery<T>(
   schema: { parse: (data: unknown) => T },
@@ -35,7 +34,7 @@ function parseQuery<T>(
 }
 
 @Controller('users')
-export class UserController {
+export class UserVotesController {
   constructor(private readonly pollService: PollService) {}
 
   @Get(':id/votes')
