@@ -155,7 +155,7 @@ describe('App auth flow', () => {
 
     renderAt('/login');
 
-    expect(screen.getByText('My Polls')).toBeTruthy();
+    expect(screen.getAllByText('My Polls')[0]).toBeTruthy();
   });
 
   it('shows session bootstrap state when token exists and profile is loading', () => {
@@ -286,7 +286,7 @@ describe('App auth flow', () => {
 
     renderAt('/register');
 
-    expect(screen.getByText('My Polls')).toBeTruthy();
+    expect(screen.getAllByText('My Polls')[0]).toBeTruthy();
   });
 
   it('shows register error message when mutation returns an error state', () => {
@@ -454,7 +454,7 @@ describe('App auth flow', () => {
     localStorage.setItem('accessToken', 'persisted-token');
 
     renderAt('/another-unknown');
-    expect(screen.getByText('My Polls')).toBeTruthy();
+    expect(screen.getAllByText('My Polls')[0]).toBeTruthy();
   });
 
   it('clears local auth state on logout even if server logout fails', async () => {
