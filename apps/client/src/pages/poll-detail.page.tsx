@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Check, Copy, Loader2, Plus, Users, X } from 'lucide-react';
 import { selectCurrentUser, useAppSelector } from '@libs/client-store';
@@ -15,14 +15,6 @@ import {
   useUpdatePollMutation,
 } from '@libs/client-server-communication';
 import { POLL_STATUS_COLORS } from '../lib/poll-ui';
-
-function extractRequestId(err: unknown): string | null {
-  if (!err || typeof err !== 'object') return null;
-  const data = (err as Record<string, unknown>)['data'];
-  if (!data || typeof data !== 'object') return null;
-  const requestId = (data as Record<string, unknown>)['requestId'];
-  return typeof requestId === 'string' ? requestId : null;
-}
 import { Button } from '../components/ui/button';
 import {
   Card,
@@ -34,6 +26,14 @@ import {
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Modal } from '../components/ui/modal';
+
+function extractRequestId(err: unknown): string | null {
+  if (!err || typeof err !== 'object') return null;
+  const data = (err as Record<string, unknown>)['data'];
+  if (!data || typeof data !== 'object') return null;
+  const requestId = (data as Record<string, unknown>)['requestId'];
+  return typeof requestId === 'string' ? requestId : null;
+}
 
 export function PollDetailPage() {
   const { id } = useParams<{ id?: string }>();
@@ -74,12 +74,6 @@ export function PollDetailPage() {
     optionText: string;
     voters: { id: number; name: string | null }[];
   } | null>(null);
-  const openVoterModal = useCallback(
-    (optionText: string, voters: { id: number; name: string | null }[]) => {
-      setVoterModal({ optionText, voters });
-    },
-    [],
-  );
 
   useEffect(() => {
     if (poll && !isEditing) {
@@ -554,7 +548,10 @@ export function PollDetailPage() {
                               <button
                                 type="button"
                                 onClick={() =>
-                                  openVoterModal(opt.text, resultOpt.voters!)
+                                  setVoterModal({
+                                    optionText: opt.text,
+                                    voters: resultOpt.voters ?? [],
+                                  })
                                 }
                                 className="mt-1 flex items-center gap-1 text-xs text-slate-400 hover:text-cyan-600 dark:text-slate-500 dark:hover:text-cyan-400"
                               >
@@ -615,7 +612,10 @@ export function PollDetailPage() {
                               <button
                                 type="button"
                                 onClick={() =>
-                                  openVoterModal(opt.text, opt.voters!)
+                                  setVoterModal({
+                                    optionText: opt.text,
+                                    voters: opt.voters ?? [],
+                                  })
                                 }
                                 className="mt-1 flex items-center gap-1 text-xs text-slate-400 hover:text-cyan-600 dark:text-slate-500 dark:hover:text-cyan-400"
                               >
@@ -648,7 +648,6 @@ export function PollDetailPage() {
       </div>
       {voterModal && (
         <Modal
-          open={true}
           onClose={() => setVoterModal(null)}
           title={`Voters — ${voterModal.optionText}`}
         >
