@@ -199,7 +199,7 @@ test.describe('Closed poll', () => {
 
     await loginAndNavigate(page, voter.accessToken, `/polls/${poll.id}`);
 
-    await expect(page.getByText('CLOSED')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('CLOSED', { exact: true })).toBeVisible({ timeout: 10000 });
     await expect(page.getByText(/^Results$/)).toBeVisible({ timeout: 10000 });
     await expect(page.getByText(/cast your vote/i)).not.toBeVisible();
   });

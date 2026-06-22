@@ -66,13 +66,19 @@ body {
   animation: auth-float 9s ease-in-out infinite;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .auth-float {
+    animation: none;
+  }
+}
+
 @keyframes auth-float {
   0%,
   100% {
-    transform: translateY(0px);
+    box-shadow: 0 4px 24px -4px rgba(14, 165, 233, 0.08);
   }
   50% {
-    transform: translateY(-8px);
+    box-shadow: 0 16px 48px -8px rgba(14, 165, 233, 0.2);
   }
 }
 

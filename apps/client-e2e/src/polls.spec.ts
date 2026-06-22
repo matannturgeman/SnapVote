@@ -65,7 +65,7 @@ test.describe('Home page — My Polls', () => {
     await expect(page.getByRole('heading', { name: /my polls/i })).toBeVisible({
       timeout: 10000,
     });
-    await expect(page.getByRole('link', { name: /new poll/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /new poll/i }).first()).toBeVisible();
   });
 
   test('shows empty-state card when user has no polls', async ({ page }) => {
@@ -219,7 +219,7 @@ test.describe('Poll detail page — owner', () => {
 
     await expect(page.getByText('Detail View Poll')).toBeVisible({ timeout: 10000 });
     await expect(page.getByText('OPEN')).toBeVisible();
-    await expect(page.getByText('Option A')).toBeVisible();
+    await expect(page.getByText('Option A').first()).toBeVisible();
   });
 
   test('owner sees Edit and Close poll buttons', async ({ page }) => {
@@ -265,7 +265,7 @@ test.describe('Poll detail page — owner', () => {
     const poll = await apiCreatePoll(accessToken);
     await loginAndNavigate(page, accessToken, `/polls/${poll.id}`);
 
-    await page.getByRole('link', { name: /back/i }).click({ timeout: 10000 });
+    await page.getByRole('link', { name: 'Back', exact: true }).click({ timeout: 10000 });
     await expect(page).toHaveURL('/', { timeout: 10000 });
   });
 });

@@ -271,8 +271,9 @@ export function PollDetailPage() {
             ) : (
               <form onSubmit={onSaveEdit} className="space-y-3">
                 <div className="space-y-2">
-                  <Label>Title</Label>
+                  <Label htmlFor="edit-title">Title</Label>
                   <Input
+                    id="edit-title"
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
                     required
