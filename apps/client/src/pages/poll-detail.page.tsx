@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Check, Copy, Loader2, Plus, X } from 'lucide-react';
+import { Check, Copy, Loader2, Plus, Users, X } from 'lucide-react';
 import { selectCurrentUser, useAppSelector } from '@libs/client-store';
 import {
   useCastVoteMutation,
@@ -15,14 +15,6 @@ import {
   useUpdatePollMutation,
 } from '@libs/client-server-communication';
 import { POLL_STATUS_COLORS } from '../lib/poll-ui';
-
-function extractRequestId(err: unknown): string | null {
-  if (!err || typeof err !== 'object') return null;
-  const data = (err as Record<string, unknown>)['data'];
-  if (!data || typeof data !== 'object') return null;
-  const requestId = (data as Record<string, unknown>)['requestId'];
-  return typeof requestId === 'string' ? requestId : null;
-}
 import { Button } from '../components/ui/button';
 import {
   Card,
@@ -33,6 +25,15 @@ import {
 } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
+import { Modal } from '../components/ui/modal';
+
+function extractRequestId(err: unknown): string | null {
+  if (!err || typeof err !== 'object') return null;
+  const data = (err as Record<string, unknown>)['data'];
+  if (!data || typeof data !== 'object') return null;
+  const requestId = (data as Record<string, unknown>)['requestId'];
+  return typeof requestId === 'string' ? requestId : null;
+}
 
 export function PollDetailPage() {
   const { id } = useParams<{ id?: string }>();
@@ -69,6 +70,10 @@ export function PollDetailPage() {
   const { presence, isConnected } = usePollStream(
     poll?.status === 'OPEN' ? id : undefined,
   );
+  const [voterModal, setVoterModal] = useState<{
+    optionText: string;
+    voters: { id: number; name: string | null }[];
+  } | null>(null);
 
   useEffect(() => {
     if (poll && !isEditing) {
@@ -446,15 +451,22 @@ export function PollDetailPage() {
             )}
             {poll.status === 'OPEN' && !ownerCheck && (
               <div className="border-t border-slate-100 pt-4 space-y-3 dark:border-slate-700/50">
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  {(results?.myVotes?.length ?? 0) > 0
-                    ? poll.allowMultipleAnswers
-                      ? 'Your votes'
-                      : 'Your vote'
-                    : poll.allowMultipleAnswers
-                      ? 'Cast your votes'
-                      : 'Cast your vote'}
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    {(results?.myVotes?.length ?? 0) > 0
+                      ? poll.allowMultipleAnswers
+                        ? 'Your votes'
+                        : 'Your vote'
+                      : poll.allowMultipleAnswers
+                        ? 'Cast your votes'
+                        : 'Cast your vote'}
+                  </p>
+                  {poll.allowMultipleAnswers && (
+                    <span className="text-xs text-slate-400 dark:text-slate-500">
+                      Select all that apply
+                    </span>
+                  )}
+                </div>
                 {voteError !== null && (
                   <p className="rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-800 dark:border-orange-800/40 dark:bg-orange-900/20 dark:text-orange-300">
                     Could not submit vote. Please try again.
@@ -533,11 +545,27 @@ export function PollDetailPage() {
                           {isTransparent &&
                             resultOpt?.voters &&
                             resultOpt.voters.length > 0 && (
-                              <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setVoterModal({
+                                    optionText: opt.text,
+                                    voters: resultOpt.voters ?? [],
+                                  })
+                                }
+                                className="mt-1 flex items-center gap-1 text-xs text-slate-400 hover:text-cyan-600 dark:text-slate-500 dark:hover:text-cyan-400"
+                              >
+                                <Users className="h-3 w-3" />
                                 {resultOpt.voters
+                                  .slice(0, 2)
                                   .map((v) => v.name ?? `User ${v.id}`)
                                   .join(', ')}
-                              </p>
+                                {resultOpt.voters.length > 2 && (
+                                  <span>
+                                    +{resultOpt.voters.length - 2} more
+                                  </span>
+                                )}
+                              </button>
                             )}
                         </div>
                       </li>
@@ -581,11 +609,25 @@ export function PollDetailPage() {
                           {results.visibilityMode === 'TRANSPARENT' &&
                             opt.voters &&
                             opt.voters.length > 0 && (
-                              <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setVoterModal({
+                                    optionText: opt.text,
+                                    voters: opt.voters ?? [],
+                                  })
+                                }
+                                className="mt-1 flex items-center gap-1 text-xs text-slate-400 hover:text-cyan-600 dark:text-slate-500 dark:hover:text-cyan-400"
+                              >
+                                <Users className="h-3 w-3" />
                                 {opt.voters
+                                  .slice(0, 2)
                                   .map((v) => v.name ?? `User ${v.id}`)
                                   .join(', ')}
-                              </p>
+                                {opt.voters.length > 2 && (
+                                  <span>+{opt.voters.length - 2} more</span>
+                                )}
+                              </button>
                             )}
                         </div>
                       </li>
@@ -604,6 +646,30 @@ export function PollDetailPage() {
           Poll ID: {poll.id}
         </p>
       </div>
+      {voterModal && (
+        <Modal
+          onClose={() => setVoterModal(null)}
+          title={`Voters — ${voterModal.optionText}`}
+        >
+          <ul className="max-h-64 space-y-2 overflow-y-auto">
+            {voterModal.voters.map((v) => (
+              <li
+                key={v.id}
+                className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200"
+              >
+                <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-100 text-xs font-semibold text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300">
+                  {(v.name ?? `U${v.id}`).charAt(0).toUpperCase()}
+                </span>
+                {v.name ?? `User ${v.id}`}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">
+            {voterModal.voters.length} voter
+            {voterModal.voters.length !== 1 ? 's' : ''}
+          </p>
+        </Modal>
+      )}
     </div>
   );
 }

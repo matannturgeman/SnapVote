@@ -393,4 +393,128 @@ describe('PollDetailPage', () => {
     expect(screen.queryByRole('button', { name: 'Save' })).toBeNull();
     expect(document.querySelector('.animate-spin')).toBeTruthy();
   });
+
+  // ---------------------------------------------------------------------------
+  // Voter list modal (transparent polls)
+  // ---------------------------------------------------------------------------
+
+  it('opens voter modal when voter preview clicked on transparent poll (voter view)', () => {
+    mockCurrentUser = { id: 99, email: 'voter@example.com', name: 'Voter' };
+    mockUseGetPollQuery.mockReturnValue({
+      data: { ...OPEN_POLL, visibilityMode: 'TRANSPARENT' },
+      isLoading: false,
+      isError: false,
+    });
+    mockUseGetPollResultsQuery.mockReturnValue({
+      data: {
+        pollId: 'poll-1',
+        totalVotes: 2,
+        visibilityMode: 'TRANSPARENT',
+        options: [
+          {
+            id: 'opt-1',
+            text: 'React',
+            order: 0,
+            voteCount: 2,
+            voters: [
+              { id: 1, name: 'Alice' },
+              { id: 2, name: 'Bob' },
+            ],
+          },
+          { id: 'opt-2', text: 'Vue', order: 1, voteCount: 0, voters: [] },
+        ],
+        myVotes: [{ optionId: 'opt-1' }],
+      },
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByText(/Alice/));
+
+    expect(screen.getByRole('dialog')).toBeTruthy();
+    expect(screen.getByText('Bob')).toBeTruthy();
+  });
+
+  it('closes voter modal when X button clicked', () => {
+    mockCurrentUser = { id: 99, email: 'voter@example.com', name: 'Voter' };
+    mockUseGetPollQuery.mockReturnValue({
+      data: { ...OPEN_POLL, visibilityMode: 'TRANSPARENT' },
+      isLoading: false,
+      isError: false,
+    });
+    mockUseGetPollResultsQuery.mockReturnValue({
+      data: {
+        pollId: 'poll-1',
+        totalVotes: 1,
+        visibilityMode: 'TRANSPARENT',
+        options: [
+          {
+            id: 'opt-1',
+            text: 'React',
+            order: 0,
+            voteCount: 1,
+            voters: [{ id: 1, name: 'Alice' }],
+          },
+          { id: 'opt-2', text: 'Vue', order: 1, voteCount: 0, voters: [] },
+        ],
+        myVotes: [{ optionId: 'opt-1' }],
+      },
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByText(/Alice/));
+    expect(screen.getByRole('dialog')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('shows "+N more" when voters exceed 2', () => {
+    mockCurrentUser = { id: 99, email: 'voter@example.com', name: 'Voter' };
+    mockUseGetPollQuery.mockReturnValue({
+      data: { ...OPEN_POLL, visibilityMode: 'TRANSPARENT' },
+      isLoading: false,
+      isError: false,
+    });
+    mockUseGetPollResultsQuery.mockReturnValue({
+      data: {
+        pollId: 'poll-1',
+        totalVotes: 3,
+        visibilityMode: 'TRANSPARENT',
+        options: [
+          {
+            id: 'opt-1',
+            text: 'React',
+            order: 0,
+            voteCount: 3,
+            voters: [
+              { id: 1, name: 'Alice' },
+              { id: 2, name: 'Bob' },
+              { id: 3, name: 'Carol' },
+            ],
+          },
+          { id: 'opt-2', text: 'Vue', order: 1, voteCount: 0, voters: [] },
+        ],
+        myVotes: [{ optionId: 'opt-1' }],
+      },
+    });
+
+    renderPage();
+
+    expect(screen.getByText(/\+1 more/)).toBeTruthy();
+  });
+
+  it('shows "Select all that apply" hint for multi-select polls (voter view)', () => {
+    mockCurrentUser = { id: 99, email: 'voter@example.com', name: 'Voter' };
+    mockUseGetPollQuery.mockReturnValue({
+      data: { ...OPEN_POLL, allowMultipleAnswers: true },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderPage();
+
+    expect(screen.getByText('Select all that apply')).toBeTruthy();
+  });
 });
