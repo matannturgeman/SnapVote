@@ -89,9 +89,9 @@ test.describe('Share link management — owner', () => {
     await loginAndNavigate(page, accessToken, `/polls/${poll.id}`);
 
     await page.getByRole('button', { name: /manage/i }).click({ timeout: 10000 });
-    await page
-      .getByRole('button', { name: /generate share link/i })
-      .click({ timeout: 10000 });
+    const generateBtn = page.getByRole('button', { name: /generate share link/i });
+    await expect(generateBtn).toBeVisible({ timeout: 5000 });
+    await generateBtn.click({ timeout: 10000 });
 
     // A token preview should appear in the panel
     await expect(page.getByText(/\/polls\/join\//i)).toBeVisible({ timeout: 10000 });
