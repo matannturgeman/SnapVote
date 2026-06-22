@@ -53,6 +53,13 @@ pnpm prisma migrate deploy
 pnpm prisma generate
 ```
 
+> **Windows (PowerShell):** The `.env` file lives in `apps/api/` but Prisma runs from the repo root.
+> Set `DATABASE_URL` inline before running Prisma commands:
+>
+> ```powershell
+> $env:DATABASE_URL = (Get-Content apps/api/.env | Select-String "^DATABASE_URL").Line.Split('=',2)[1].Trim('"'); pnpm prisma migrate deploy
+> ```
+
 ### Run
 
 ```sh
