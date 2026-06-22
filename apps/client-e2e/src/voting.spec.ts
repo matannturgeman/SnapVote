@@ -172,7 +172,9 @@ test.describe('Voting UI — non-owner participant', () => {
 
     await page.getByRole('button', { name: 'Red' }).click({ timeout: 10000 });
     // Wait for first vote to register before casting second vote
-    await expect(page.getByTitle(/remove vote/i)).toHaveCount(1, { timeout: 10000 });
+    await expect(page.getByTitle(/remove vote/i)).toHaveCount(1, {
+      timeout: 10000,
+    });
     const greenBtn = page.getByRole('button', { name: 'Green' });
     await expect(greenBtn).toBeEnabled({ timeout: 5000 });
     await greenBtn.click({ timeout: 5000 });

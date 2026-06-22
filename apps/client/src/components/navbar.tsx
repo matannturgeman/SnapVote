@@ -58,7 +58,7 @@ export function Navbar({ sidebarOpen, onToggleSidebar }: NavbarProps) {
       </div>
 
       <div className="flex items-center gap-2">
-{user?.name && (
+        {user?.name && (
           <Link
             to="/profile"
             className="hidden text-sm text-slate-500 hover:text-cyan-700 dark:text-slate-400 dark:hover:text-cyan-400 sm:block"

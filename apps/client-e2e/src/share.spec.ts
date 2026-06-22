@@ -64,7 +64,9 @@ test.describe('Share link management — owner', () => {
     const poll = await apiCreatePoll(accessToken);
     await loginAndNavigate(page, accessToken, `/polls/${poll.id}`);
 
-    await expect(page.getByText(/share links/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/share links/i)).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test('clicking "Manage" reveals the share panel with "Generate share link" button', async ({
@@ -74,7 +76,9 @@ test.describe('Share link management — owner', () => {
     const poll = await apiCreatePoll(accessToken);
     await loginAndNavigate(page, accessToken, `/polls/${poll.id}`);
 
-    await page.getByRole('button', { name: /manage/i }).click({ timeout: 10000 });
+    await page
+      .getByRole('button', { name: /manage/i })
+      .click({ timeout: 10000 });
 
     await expect(
       page.getByRole('button', { name: /generate share link/i }),
@@ -88,13 +92,19 @@ test.describe('Share link management — owner', () => {
     const poll = await apiCreatePoll(accessToken);
     await loginAndNavigate(page, accessToken, `/polls/${poll.id}`);
 
-    await page.getByRole('button', { name: /manage/i }).click({ timeout: 10000 });
-    const generateBtn = page.getByRole('button', { name: /generate share link/i });
+    await page
+      .getByRole('button', { name: /manage/i })
+      .click({ timeout: 10000 });
+    const generateBtn = page.getByRole('button', {
+      name: /generate share link/i,
+    });
     await expect(generateBtn).toBeVisible({ timeout: 5000 });
     await generateBtn.click({ timeout: 10000 });
 
     // A token preview should appear in the panel
-    await expect(page.getByText(/\/polls\/join\//i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/\/polls\/join\//i)).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test('copy button shows a check icon after clicking', async ({ page }) => {
@@ -102,13 +112,17 @@ test.describe('Share link management — owner', () => {
     const poll = await apiCreatePoll(accessToken);
     await loginAndNavigate(page, accessToken, `/polls/${poll.id}`);
 
-    await page.getByRole('button', { name: /manage/i }).click({ timeout: 10000 });
+    await page
+      .getByRole('button', { name: /manage/i })
+      .click({ timeout: 10000 });
     await page
       .getByRole('button', { name: /generate share link/i })
       .click({ timeout: 10000 });
 
     // Wait for link to appear then click copy button
-    await expect(page.getByText(/\/polls\/join\//i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/\/polls\/join\//i)).toBeVisible({
+      timeout: 10000,
+    });
     await page.getByTitle(/copy link/i).click();
 
     // The copy icon should be replaced by a check icon temporarily
@@ -121,12 +135,16 @@ test.describe('Share link management — owner', () => {
     const poll = await apiCreatePoll(accessToken);
     await loginAndNavigate(page, accessToken, `/polls/${poll.id}`);
 
-    await page.getByRole('button', { name: /manage/i }).click({ timeout: 10000 });
+    await page
+      .getByRole('button', { name: /manage/i })
+      .click({ timeout: 10000 });
     await page
       .getByRole('button', { name: /generate share link/i })
       .click({ timeout: 10000 });
 
-    await expect(page.getByText(/\/polls\/join\//i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/\/polls\/join\//i)).toBeVisible({
+      timeout: 10000,
+    });
 
     // Revoke by clicking X on the link row
     await page.getByTitle(/revoke link/i).click();
@@ -158,7 +176,9 @@ test.describe('Join via share link — unauthenticated', () => {
     await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
   });
 
-  test('revoked share token shows "revoked or expired" error', async ({ page }) => {
+  test('revoked share token shows "revoked or expired" error', async ({
+    page,
+  }) => {
     const { accessToken } = await apiRegister('share-join-revoked-owner');
     const poll = await apiCreatePoll(accessToken);
     const link = await apiCreateShareLink(accessToken, poll.id);
@@ -172,9 +192,9 @@ test.describe('Join via share link — unauthenticated', () => {
 
     await page.goto(`/polls/join/${link.token}`);
 
-    await expect(
-      page.getByText(/revoked or has expired/i),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/revoked or has expired/i)).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test('non-existent share token shows "not found" error', async ({ page }) => {
@@ -197,9 +217,15 @@ test.describe('Join via share link — authenticated user', () => {
     const poll = await apiCreatePoll(owner.accessToken);
     const link = await apiCreateShareLink(owner.accessToken, poll.id);
 
-    await loginAndNavigate(page, voter.accessToken, `/polls/join/${link.token}`);
+    await loginAndNavigate(
+      page,
+      voter.accessToken,
+      `/polls/join/${link.token}`,
+    );
 
     await expect(page).toHaveURL(`/polls/${poll.id}`, { timeout: 10000 });
-    await expect(page.getByText('Share Link Poll')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Share Link Poll')).toBeVisible({
+      timeout: 10000,
+    });
   });
 });

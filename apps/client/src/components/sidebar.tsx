@@ -7,7 +7,7 @@ const NAV_LINKS = [
 ];
 
 interface SidebarProps {
-  expanded: boolean;   // desktop: full labels vs icons-only
+  expanded: boolean; // desktop: full labels vs icons-only
   mobileOpen: boolean; // mobile: visible vs hidden
   onCloseMobile: () => void;
 }
