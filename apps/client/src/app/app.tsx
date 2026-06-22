@@ -19,6 +19,7 @@ import { ResetPasswordPage } from '../pages/reset-password.page';
 import { CreatePollPage } from '../pages/create-poll.page';
 import { PollDetailPage } from '../pages/poll-detail.page';
 import { PollJoinPage } from '../pages/poll-join.page';
+import { ExplorePage } from '../pages/explore.page';
 import { clearPersistedToken, getPersistedToken } from '../lib/token';
 
 export function App() {
@@ -88,6 +89,16 @@ export function App() {
         }
       />
       <Route path="/polls/join/:token" element={<PollJoinPage />} />
+      <Route
+        path="/explore"
+        element={
+          <SessionGate isBootstrapping={isBootstrapping}>
+            <AppShell>
+              <ExplorePage />
+            </AppShell>
+          </SessionGate>
+        }
+      />
       <Route
         path="/profile"
         element={

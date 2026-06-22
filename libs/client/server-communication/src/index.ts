@@ -52,3 +52,15 @@ export {
   useListMyPollsQuery,
 } from './lib/poll.api';
 export { usePollStream } from './lib/poll-stream';
+
+// ---------------------------------------------------------------------------
+// Explore / Theme / Vote History endpoints & hooks
+// ---------------------------------------------------------------------------
+export { exploreApi } from './lib/explore.api';
+export {
+  useListThemesQuery,
+  useCreateThemeMutation,
+  useExplorePollsQuery,
+  useSetPollThemesMutation,
+  useGetUserVotesQuery,
+} from './lib/explore.api';

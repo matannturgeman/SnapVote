@@ -24,9 +24,11 @@ import {
   CreateShareLinkDtoSchema,
   JoinPollResponseDtoSchema,
   PaginatedResponseDtoSchema,
+  PollExploreQueryDtoSchema,
   PollListQueryDtoSchema,
   PollResponseDtoSchema,
   PollResultsDtoSchema,
+  SetPollThemesDtoSchema,
   ShareLinkResponseDtoSchema,
   UpdatePollDtoSchema,
   parseDto,
@@ -87,6 +89,16 @@ export class PollController {
     return parseDto(PaginatedResponseDtoSchema(PollResponseDtoSchema), result);
   }
 
+  @Get('explore')
+  async explore(
+    @CurrentUser() user: LoggedInUser,
+    @Query() query: any,
+  ): Promise<PaginatedResponseDto<PollResponseDto>> {
+    const dto = parsePollDto(PollExploreQueryDtoSchema, query);
+    const result = await this.pollService.explore(user.id, dto);
+    return parseDto(PaginatedResponseDtoSchema(PollResponseDtoSchema), result);
+  }
+
   @Post()
   @Throttle({ poll_create: { ttl: 60000, limit: 10 } })
   async create(
@@ -115,6 +127,18 @@ export class PollController {
     const dto = parsePollDto(UpdatePollDtoSchema, body);
     const result = await this.pollService.update(id, user.id, dto);
     return parseDto(PollResponseDtoSchema, result);
+  }
+
+  @HttpCode(200)
+  @Patch(':id/themes')
+  async setThemes(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @CurrentUser() user: LoggedInUser,
+  ): Promise<{ success: boolean }> {
+    const dto = parsePollDto(SetPollThemesDtoSchema, body);
+    await this.pollService.setThemes(id, user.id, dto.slugs);
+    return { success: true };
   }
 
   @HttpCode(200)

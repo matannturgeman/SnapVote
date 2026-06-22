@@ -30,7 +30,13 @@ function clearPersistedToken(): void {
   getLocalStorage()?.removeItem('accessToken');
 }
 
-export type ApiTagType = 'User' | 'Auth' | 'Poll' | 'ShareLink' | 'Vote';
+export type ApiTagType =
+  | 'User'
+  | 'Auth'
+  | 'Poll'
+  | 'ShareLink'
+  | 'Vote'
+  | 'Theme';
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
@@ -97,6 +103,7 @@ export const baseApi = createApi({
     'Poll',
     'ShareLink',
     'Vote',
+    'Theme',
   ] satisfies ApiTagType[],
   endpoints: () => ({}),
 });
