@@ -271,8 +271,9 @@ export function PollDetailPage() {
             ) : (
               <form onSubmit={onSaveEdit} className="space-y-3">
                 <div className="space-y-2">
-                  <Label>Title</Label>
+                  <Label htmlFor="edit-title">Title</Label>
                   <Input
+                    id="edit-title"
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
                     required
@@ -466,14 +467,19 @@ export function PollDetailPage() {
                 )}
                 <ul className="space-y-2">
                   {poll.options.map((opt) => {
-                    const myVotedIds = results?.myVotes?.map((v) => v.optionId) ?? [];
+                    const myVotedIds =
+                      results?.myVotes?.map((v) => v.optionId) ?? [];
                     const voted = myVotedIds.includes(opt.id);
                     const hasAnyVote = myVotedIds.length > 0;
-                    const resultOpt = results?.options.find((o) => o.id === opt.id);
+                    const resultOpt = results?.options.find(
+                      (o) => o.id === opt.id,
+                    );
                     const count = resultOpt?.voteCount ?? 0;
                     const total = results?.totalVotes ?? 0;
-                    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-                    const isTransparent = results?.visibilityMode === 'TRANSPARENT';
+                    const pct =
+                      total > 0 ? Math.round((count / total) * 100) : 0;
+                    const isTransparent =
+                      results?.visibilityMode === 'TRANSPARENT';
                     const canVote = poll.allowMultipleAnswers
                       ? !voted
                       : !hasAnyVote;
@@ -524,11 +530,15 @@ export function PollDetailPage() {
                               />
                             </div>
                           )}
-                          {isTransparent && resultOpt?.voters && resultOpt.voters.length > 0 && (
-                            <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-                              {resultOpt.voters.map((v) => v.name ?? `User ${v.id}`).join(', ')}
-                            </p>
-                          )}
+                          {isTransparent &&
+                            resultOpt?.voters &&
+                            resultOpt.voters.length > 0 && (
+                              <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                                {resultOpt.voters
+                                  .map((v) => v.name ?? `User ${v.id}`)
+                                  .join(', ')}
+                              </p>
+                            )}
                         </div>
                       </li>
                     );

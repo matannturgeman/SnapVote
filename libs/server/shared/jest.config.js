@@ -1,5 +1,6 @@
 module.exports = {
   displayName: 'server-shared',
+  passWithNoTests: true,
   preset: '../../../jest.preset.js',
   testEnvironment: 'node',
   transform: {

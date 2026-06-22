@@ -113,6 +113,11 @@ export function ProfilePage() {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
+      // All sessions are revoked after password change; log out after showing the message.
+      setTimeout(() => {
+        clearPersistedToken();
+        dispatch(clearCredentials(undefined));
+      }, 2000);
     } catch {
       setPasswordSuccess(false);
       setPasswordMessage('Current password is incorrect');

@@ -81,7 +81,6 @@ export const authApi = baseApi.injectEndpoints({
         method: 'POST',
         body,
       }),
-      invalidatesTags: ['Auth'],
     }),
 
     deleteAccount: build.mutation<SuccessResponseDto, void>({

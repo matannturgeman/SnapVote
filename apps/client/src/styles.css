@@ -33,8 +33,7 @@ body {
 
 .auth-canvas {
   min-height: 100vh;
-  background:
-    radial-gradient(
+  background: radial-gradient(
       1000px 500px at -15% -10%,
       rgba(34, 211, 238, 0.22),
       transparent 60%
@@ -48,8 +47,7 @@ body {
 }
 
 .dark .auth-canvas {
-  background:
-    radial-gradient(
+  background: radial-gradient(
       1000px 500px at -15% -10%,
       rgba(34, 211, 238, 0.1),
       transparent 60%
@@ -66,20 +64,25 @@ body {
   animation: auth-float 9s ease-in-out infinite;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .auth-float {
+    animation: none;
+  }
+}
+
 @keyframes auth-float {
   0%,
   100% {
-    transform: translateY(0px);
+    box-shadow: 0 4px 24px -4px rgba(14, 165, 233, 0.08);
   }
   50% {
-    transform: translateY(-8px);
+    box-shadow: 0 16px 48px -8px rgba(14, 165, 233, 0.2);
   }
 }
 
 @media (max-width: 640px) {
   .auth-canvas {
-    background:
-      radial-gradient(
+    background: radial-gradient(
         580px 260px at -20% -6%,
         rgba(34, 211, 238, 0.25),
         transparent 65%
@@ -93,8 +96,7 @@ body {
   }
 
   .dark .auth-canvas {
-    background:
-      radial-gradient(
+    background: radial-gradient(
         580px 260px at -20% -6%,
         rgba(34, 211, 238, 0.12),
         transparent 65%
