@@ -52,17 +52,3 @@ export {
   useListMyPollsQuery,
 } from './lib/poll.api';
 export { usePollStream } from './lib/poll-stream';
-
-// ---------------------------------------------------------------------------
-// Users endpoints & hooks
-// ---------------------------------------------------------------------------
-export { usersApi } from './lib/users.api';
-export {
-  useGetUsersQuery,
-  useLazyGetUsersQuery,
-  useGetUserByIdQuery,
-  useLazyGetUserByIdQuery,
-  useCreateUserMutation,
-  useUpdateUserMutation,
-  useDeleteUserMutation,
-} from './lib/users.api';
