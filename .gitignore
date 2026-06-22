@@ -66,3 +66,4 @@ vite.config.*.timestamp*
 test-output-e2e/
 **/test-output/
 
+**/.history/
