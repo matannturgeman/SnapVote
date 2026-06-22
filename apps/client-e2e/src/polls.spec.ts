@@ -65,14 +65,18 @@ test.describe('Home page — My Polls', () => {
     await expect(page.getByRole('heading', { name: /my polls/i })).toBeVisible({
       timeout: 10000,
     });
-    await expect(page.getByRole('link', { name: /new poll/i }).first()).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: /new poll/i }).first(),
+    ).toBeVisible();
   });
 
   test('shows empty-state card when user has no polls', async ({ page }) => {
     const { accessToken } = await apiRegister('home-empty');
     await loginAndNavigate(page, accessToken, '/');
 
-    await expect(page.getByText(/no polls yet/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/no polls yet/i)).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test('shows created poll in the list', async ({ page }) => {
@@ -80,9 +84,9 @@ test.describe('Home page — My Polls', () => {
     await apiCreatePoll(accessToken, { title: 'My Unique Poll Title 1234' });
     await loginAndNavigate(page, accessToken, '/');
 
-    await expect(
-      page.getByText('My Unique Poll Title 1234'),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('My Unique Poll Title 1234')).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test('status filter tabs are visible', async ({ page }) => {
@@ -138,14 +142,18 @@ test.describe('Create poll page', () => {
     const { accessToken } = await apiRegister('create-ui-1');
     await loginAndNavigate(page, accessToken, '/polls/new');
 
-    await expect(page.getByRole('heading', { name: /create a poll/i })).toBeVisible({
+    await expect(
+      page.getByRole('heading', { name: /create a poll/i }),
+    ).toBeVisible({
       timeout: 10000,
     });
     await expect(page.locator('#poll-title')).toBeVisible();
     await expect(page.locator('#poll-description')).toBeVisible();
   });
 
-  test('Create poll button is disabled when title is empty', async ({ page }) => {
+  test('Create poll button is disabled when title is empty', async ({
+    page,
+  }) => {
     const { accessToken } = await apiRegister('create-ui-disabled');
     await loginAndNavigate(page, accessToken, '/polls/new');
 
@@ -164,15 +172,17 @@ test.describe('Create poll page', () => {
     await inputs.nth(0).fill('');
     await inputs.nth(1).fill('');
 
-    await expect(
-      page.getByText(/fill in at least 2 options/i),
-    ).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/fill in at least 2 options/i)).toBeVisible({
+      timeout: 5000,
+    });
     await expect(
       page.getByRole('button', { name: /create poll/i }),
     ).toBeDisabled();
   });
 
-  test('creating a poll redirects to the poll detail page', async ({ page }) => {
+  test('creating a poll redirects to the poll detail page', async ({
+    page,
+  }) => {
     const { accessToken } = await apiRegister('create-ui-redirect');
     await loginAndNavigate(page, accessToken, '/polls/new');
 
@@ -202,7 +212,9 @@ test.describe('Create poll page', () => {
     const { accessToken } = await apiRegister('create-ui-cancel');
     await loginAndNavigate(page, accessToken, '/polls/new');
 
-    await page.getByRole('button', { name: /cancel/i }).click({ timeout: 10000 });
+    await page
+      .getByRole('button', { name: /cancel/i })
+      .click({ timeout: 10000 });
     await expect(page).toHaveURL('/', { timeout: 10000 });
   });
 });
@@ -214,10 +226,14 @@ test.describe('Create poll page', () => {
 test.describe('Poll detail page — owner', () => {
   test('shows poll title, status badge, and options', async ({ page }) => {
     const { accessToken } = await apiRegister('detail-owner-1');
-    const poll = await apiCreatePoll(accessToken, { title: 'Detail View Poll' });
+    const poll = await apiCreatePoll(accessToken, {
+      title: 'Detail View Poll',
+    });
     await loginAndNavigate(page, accessToken, `/polls/${poll.id}`);
 
-    await expect(page.getByText('Detail View Poll')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Detail View Poll')).toBeVisible({
+      timeout: 10000,
+    });
     await expect(page.getByText('OPEN')).toBeVisible();
     await expect(page.getByText('Option A').first()).toBeVisible();
   });
@@ -230,7 +246,9 @@ test.describe('Poll detail page — owner', () => {
     await expect(page.getByRole('button', { name: /edit/i })).toBeVisible({
       timeout: 10000,
     });
-    await expect(page.getByRole('button', { name: /close poll/i })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: /close poll/i }),
+    ).toBeVisible();
   });
 
   test('owner can close poll — status changes to CLOSED', async ({ page }) => {
@@ -238,10 +256,14 @@ test.describe('Poll detail page — owner', () => {
     const poll = await apiCreatePoll(accessToken, { title: 'Close Me Poll' });
     await loginAndNavigate(page, accessToken, `/polls/${poll.id}`);
 
-    await page.getByRole('button', { name: /close poll/i }).click({ timeout: 10000 });
+    await page
+      .getByRole('button', { name: /close poll/i })
+      .click({ timeout: 10000 });
 
     await expect(page.getByText('CLOSED')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByRole('button', { name: /close poll/i })).not.toBeVisible();
+    await expect(
+      page.getByRole('button', { name: /close poll/i }),
+    ).not.toBeVisible();
   });
 
   test('owner can edit poll title and save', async ({ page }) => {
@@ -257,7 +279,9 @@ test.describe('Poll detail page — owner', () => {
 
     await page.getByRole('button', { name: /^save$/i }).click();
 
-    await expect(page.getByText('Updated Title')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Updated Title')).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test('Back link navigates to home page', async ({ page }) => {
@@ -265,7 +289,9 @@ test.describe('Poll detail page — owner', () => {
     const poll = await apiCreatePoll(accessToken);
     await loginAndNavigate(page, accessToken, `/polls/${poll.id}`);
 
-    await page.getByRole('link', { name: 'Back', exact: true }).click({ timeout: 10000 });
+    await page
+      .getByRole('link', { name: 'Back', exact: true })
+      .click({ timeout: 10000 });
     await expect(page).toHaveURL('/', { timeout: 10000 });
   });
 });
@@ -279,6 +305,8 @@ test.describe('Poll detail — error states', () => {
     const { accessToken } = await apiRegister('detail-404');
     await loginAndNavigate(page, accessToken, '/polls/nonexistent-poll-id');
 
-    await expect(page.getByText(/poll not found/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/poll not found/i)).toBeVisible({
+      timeout: 10000,
+    });
   });
 });

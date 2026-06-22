@@ -33,8 +33,7 @@ body {
 
 .auth-canvas {
   min-height: 100vh;
-  background:
-    radial-gradient(
+  background: radial-gradient(
       1000px 500px at -15% -10%,
       rgba(34, 211, 238, 0.22),
       transparent 60%
@@ -48,8 +47,7 @@ body {
 }
 
 .dark .auth-canvas {
-  background:
-    radial-gradient(
+  background: radial-gradient(
       1000px 500px at -15% -10%,
       rgba(34, 211, 238, 0.1),
       transparent 60%
@@ -84,8 +82,7 @@ body {
 
 @media (max-width: 640px) {
   .auth-canvas {
-    background:
-      radial-gradient(
+    background: radial-gradient(
         580px 260px at -20% -6%,
         rgba(34, 211, 238, 0.25),
         transparent 65%
@@ -99,8 +96,7 @@ body {
   }
 
   .dark .auth-canvas {
-    background:
-      radial-gradient(
+    background: radial-gradient(
         580px 260px at -20% -6%,
         rgba(34, 211, 238, 0.12),
         transparent 65%

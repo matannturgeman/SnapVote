@@ -68,10 +68,14 @@ test.describe('Voting UI — non-owner participant', () => {
 
     await loginAndNavigate(page, voter.accessToken, `/polls/${poll.id}`);
 
-    await expect(page.getByText(/cast your vote/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/cast your vote/i)).toBeVisible({
+      timeout: 10000,
+    });
   });
 
-  test('clicking an option selects it and shows it as voted', async ({ page }) => {
+  test('clicking an option selects it and shows it as voted', async ({
+    page,
+  }) => {
     const owner = await apiRegister('vote-owner-select');
     const voter = await apiRegister('voter-select');
     const poll = await apiCreatePoll(owner.accessToken);
@@ -84,9 +88,9 @@ test.describe('Voting UI — non-owner participant', () => {
 
     // After voting the option row should indicate it is selected (cyan styling)
     // and the deselect button (X) should appear
-    await expect(
-      page.getByTitle(/remove vote/i),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTitle(/remove vote/i)).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test('after voting, percentage and count are displayed', async ({ page }) => {
@@ -112,7 +116,9 @@ test.describe('Voting UI — non-owner participant', () => {
 
     // Vote Red
     await page.getByRole('button', { name: 'Red' }).click({ timeout: 10000 });
-    await expect(page.getByTitle(/remove vote/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTitle(/remove vote/i)).toBeVisible({
+      timeout: 10000,
+    });
 
     // Remove vote by clicking X
     await page.getByTitle(/remove vote/i).click();
@@ -122,10 +128,14 @@ test.describe('Voting UI — non-owner participant', () => {
 
     // Red should no longer have the deselect icon; Green should
     // totalVotes should remain 1
-    await expect(page.getByText(/1 vote total/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/1 vote total/i)).toBeVisible({
+      timeout: 10000,
+    });
   });
 
-  test('clicking the deselect button (X) removes the vote', async ({ page }) => {
+  test('clicking the deselect button (X) removes the vote', async ({
+    page,
+  }) => {
     const owner = await apiRegister('vote-owner-desel');
     const voter = await apiRegister('voter-desel');
     const poll = await apiCreatePoll(owner.accessToken);
@@ -133,12 +143,16 @@ test.describe('Voting UI — non-owner participant', () => {
     await loginAndNavigate(page, voter.accessToken, `/polls/${poll.id}`);
 
     await page.getByRole('button', { name: 'Red' }).click({ timeout: 10000 });
-    await expect(page.getByTitle(/remove vote/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTitle(/remove vote/i)).toBeVisible({
+      timeout: 10000,
+    });
 
     await page.getByTitle(/remove vote/i).click();
 
     // After deselect, the "Cast your vote" heading should reappear
-    await expect(page.getByText(/cast your vote/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/cast your vote/i)).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test('multi-select poll shows "Cast your votes" and allows multiple selections', async ({
@@ -152,7 +166,9 @@ test.describe('Voting UI — non-owner participant', () => {
 
     await loginAndNavigate(page, voter.accessToken, `/polls/${poll.id}`);
 
-    await expect(page.getByText(/cast your votes/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/cast your votes/i)).toBeVisible({
+      timeout: 10000,
+    });
 
     await page.getByRole('button', { name: 'Red' }).click({ timeout: 10000 });
     await page.getByRole('button', { name: 'Green' }).click({ timeout: 5000 });
@@ -185,7 +201,9 @@ test.describe('Results view — owner', () => {
 // ---------------------------------------------------------------------------
 
 test.describe('Closed poll', () => {
-  test('shows Results section but no voting UI for any user', async ({ page }) => {
+  test('shows Results section but no voting UI for any user', async ({
+    page,
+  }) => {
     const owner = await apiRegister('closed-owner');
     const voter = await apiRegister('closed-voter');
     const poll = await apiCreatePoll(owner.accessToken);
@@ -199,7 +217,9 @@ test.describe('Closed poll', () => {
 
     await loginAndNavigate(page, voter.accessToken, `/polls/${poll.id}`);
 
-    await expect(page.getByText('CLOSED', { exact: true })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('CLOSED', { exact: true })).toBeVisible({
+      timeout: 10000,
+    });
     await expect(page.getByText(/^Results$/)).toBeVisible({ timeout: 10000 });
     await expect(page.getByText(/cast your vote/i)).not.toBeVisible();
   });
