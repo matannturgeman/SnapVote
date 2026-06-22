@@ -1,108 +1,97 @@
+# SnapVote
 
-# New Nx Repository
+A real-time polling platform. Create polls, share them, cast votes, and watch results update live.
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+## Tech Stack
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+| Layer | Technology |
+|---|---|
+| Monorepo | Nx + pnpm workspaces |
+| Backend | NestJS 11, Prisma 6, PostgreSQL, Redis |
+| Frontend | React 19, Redux Toolkit + RTK Query, React Router |
+| Validation | Zod (shared schemas across client + server) |
+| Styling | Tailwind CSS v4, dark mode |
+| Testing | Jest (unit), Playwright (e2e) |
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/js?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
-## Finish your Nx platform setup
+## Project Structure
 
-🚀 [Finish setting up your workspace](https://cloud.nx.app/connect/gIKXcfsR7v) to get faster builds with remote caching, distributed task execution, and self-healing CI. [Learn more about Nx Cloud](https://nx.dev/ci/intro/why-nx-cloud).
+```
+apps/
+  api/          # NestJS backend
+  client/       # React frontend
+  api-e2e/      # Playwright API e2e tests
+  client-e2e/   # Playwright client e2e tests
+libs/
+  server/       # auth, poll, data-access, user, shared
+  client/       # store, server-communication, loggedin-user, shared, ui
+  shared/       # validation-schemas, dto, types, shared
+docs/
+  features/     # Feature specs
+```
 
-## Generate a library
+## Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- pnpm
+- Docker (for PostgreSQL + Redis)
+
+### Setup
 
 ```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
+# Install dependencies
+pnpm install
+
+# Start infrastructure
+docker compose -f docker/docker-compose.yml up -d
+
+# Apply DB migrations
+pnpm prisma migrate deploy
+
+# Generate Prisma client
+pnpm prisma generate
 ```
 
-## Run tasks
-
-To build the library use:
+### Run
 
 ```sh
-npx nx build pkg1
+# API (port 3000)
+pnpm nx serve api
+
+# Client (port 4200)
+pnpm nx serve client
 ```
 
-To run any task with Nx use:
+### Test
 
 ```sh
-npx nx <target> <project-name>
+# Unit tests
+pnpm nx run-many -t test
+
+# E2E tests
+pnpm nx run api-e2e:e2e
+pnpm nx run client-e2e:e2e
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+## Features
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Versioning and releasing
-
-To version and release the library use
-
-```
-npx nx release
-```
-
-Pass `--dry-run` to see what would happen without actually releasing the library.
-
-[Learn more about Nx release &raquo;](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Keep TypeScript project references up to date
-
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
-
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
-
-```sh
-npx nx sync
-```
-
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
-
-```sh
-npx nx sync:check
-```
-
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
-
-## Nx Cloud
-
-Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Set up CI (non-Github Actions CI)
-
-**Note:** This is only required if your CI provider is not GitHub Actions.
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
-```
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/nx-api/js?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+| # | Feature | Status |
+|---|---|---|
+| 01 | Auth, session, account recovery | Done |
+| 02 | Poll creation and management | Done |
+| 03 | Poll sharing and access control | Done |
+| 04 | Vote casting and idempotency | Done |
+| 04.5 | App shell, navbar, my polls list | Done |
+| 04.6 | Dark mode | Done |
+| 05 | Live results and presence (SSE + Redis pub/sub) | Done |
+| 06 | Results history and insights | Done |
+| 07 | Moderation and abuse protection | Done |
+| 08 | Observability and operability | Done |
+| 09 | User profile management and account reactivation | Done |
+| 10 | WhatsApp-style voting mechanism | Planned |
+| 11 | User, category, and theme vote explorer | Planned |
+| 12 | User alignment and outstanding users insights | Planned |
+| 13 | User statistics page | Planned |
+| 14 | Real-time vote notifications | Planned |
+| 15 | LLM poll insights and narrative conclusions | Planned |
