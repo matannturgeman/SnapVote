@@ -290,6 +290,67 @@ export const PollSchemas = {
 } as const;
 
 // ---------------------------------------------------------------------------
+// Theme schemas
+// ---------------------------------------------------------------------------
+
+export const themeSchema = z.object({
+  id: z.string(),
+  slug: z.string().min(1).max(50),
+  label: z.string().min(1).max(100),
+  createdAt: z.date(),
+});
+
+export const createThemeSchema = z.object({
+  slug: z
+    .string()
+    .min(1)
+    .max(50)
+    .regex(/^[a-z0-9-]+$/, 'slug must be lowercase alphanumeric with hyphens'),
+  label: z.string().min(1).max(100),
+});
+
+export const pollExploreQuerySchema = z.object({
+  theme: z.string().optional(),
+  category: z.string().optional(), // alias for theme
+  voterId: z.coerce.number().int().positive().optional(),
+  ownerId: z.coerce.number().int().positive().optional(),
+  status: z.enum(['DRAFT', 'OPEN', 'CLOSED', 'LOCKED']).optional(),
+  from: z.coerce.date().optional(),
+  to: z.coerce.date().optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+export const setPollThemesSchema = z.object({
+  slugs: z.array(z.string().min(1).max(50)).max(10),
+});
+
+export const userVoteHistoryQuerySchema = z.object({
+  theme: z.string().optional(),
+  category: z.string().optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+export const userVoteHistoryItemSchema = z.object({
+  pollId: z.string(),
+  pollTitle: z.string(),
+  pollStatus: z.enum(['DRAFT', 'OPEN', 'CLOSED', 'LOCKED']),
+  themes: z.array(z.string()),
+  votedOptionIds: z.array(z.string()),
+  votedAt: z.date(),
+});
+
+export const ThemeSchemas = {
+  theme: themeSchema,
+  create: createThemeSchema,
+  setPollThemes: setPollThemesSchema,
+  pollExploreQuery: pollExploreQuerySchema,
+  userVoteHistoryQuery: userVoteHistoryQuerySchema,
+  userVoteHistoryItem: userVoteHistoryItemSchema,
+} as const;
+
+// ---------------------------------------------------------------------------
 // Moderation schemas
 // ---------------------------------------------------------------------------
 

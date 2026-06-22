@@ -28,6 +28,14 @@ jest.mock('@libs/server-data-access', () => ({
       create: jest.fn(),
       upsert: jest.fn(),
       deleteMany: jest.fn(),
+      count: jest.fn(),
+    },
+    pollTheme: {
+      deleteMany: jest.fn(),
+      createMany: jest.fn(),
+    },
+    theme: {
+      findMany: jest.fn(),
     },
     $transaction: jest.fn(),
     moderationReport: {
@@ -60,6 +68,7 @@ type PrismaMock = {
     create: jest.Mock;
     upsert: jest.Mock;
     deleteMany: jest.Mock;
+    count: jest.Mock;
   };
   $transaction: jest.Mock;
   moderationReport: {
@@ -67,6 +76,13 @@ type PrismaMock = {
   };
   moderationLog: {
     create: jest.Mock;
+  };
+  pollTheme: {
+    deleteMany: jest.Mock;
+    createMany: jest.Mock;
+  };
+  theme: {
+    findMany: jest.Mock;
   };
 };
 
@@ -118,9 +134,15 @@ const POLL_WITH_VOTE_COUNTS = {
 };
 
 // Shorthand: mock getResults' two findUnique calls (visibility check + full poll)
-function mockGetResults(prismaMock: PrismaMock, pollWithVoteCounts = POLL_WITH_VOTE_COUNTS, myVoteOptionIds: string[] = []) {
+function mockGetResults(
+  prismaMock: PrismaMock,
+  pollWithVoteCounts = POLL_WITH_VOTE_COUNTS,
+  myVoteOptionIds: string[] = [],
+) {
   prismaMock.poll.findUnique
-    .mockResolvedValueOnce({ visibilityMode: pollWithVoteCounts.visibilityMode })
+    .mockResolvedValueOnce({
+      visibilityMode: pollWithVoteCounts.visibilityMode,
+    })
     .mockResolvedValueOnce(pollWithVoteCounts);
   prismaMock.vote.findMany.mockResolvedValueOnce(
     myVoteOptionIds.map((optionId) => ({ optionId })),
@@ -156,6 +178,8 @@ describe('PollService', () => {
       const result = await service.create(1, {
         title: 'Favourite framework?',
         options: ['React', 'Vue'],
+        visibilityMode: 'PRIVATE',
+        allowMultipleAnswers: false,
       });
 
       expect(prismaMock.poll.create).toHaveBeenCalledWith(
@@ -186,6 +210,8 @@ describe('PollService', () => {
       const result = await service.create(1, {
         title: 'Test',
         options: ['A', 'B'],
+        visibilityMode: 'PRIVATE',
+        allowMultipleAnswers: false,
       });
 
       expect(result.description).toBeUndefined();
@@ -201,6 +227,8 @@ describe('PollService', () => {
         title: 'Test',
         description: 'Some context',
         options: ['A', 'B'],
+        visibilityMode: 'PRIVATE',
+        allowMultipleAnswers: false,
       });
 
       expect(result.description).toBe('Some context');
@@ -553,7 +581,10 @@ describe('PollService', () => {
   describe('castVote', () => {
     it('replaces existing vote via transaction for single-select poll', async () => {
       prismaMock.poll.findUnique.mockResolvedValueOnce(POLL_WITH_OPTIONS);
-      prismaMock.$transaction.mockResolvedValue([{ count: 1 }, { id: 'vote-new' }]);
+      prismaMock.$transaction.mockResolvedValue([
+        { count: 1 },
+        { id: 'vote-new' },
+      ]);
       mockGetResults(prismaMock, POLL_WITH_VOTE_COUNTS, ['opt-1']);
 
       const result = await service.castVote('poll-1', 2, { optionId: 'opt-1' });
@@ -578,7 +609,13 @@ describe('PollService', () => {
 
       expect(prismaMock.vote.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { pollId_participantId_optionId: { pollId: 'poll-1', participantId: 2, optionId: 'opt-2' } },
+          where: {
+            pollId_participantId_optionId: {
+              pollId: 'poll-1',
+              participantId: 2,
+              optionId: 'opt-2',
+            },
+          },
         }),
       );
       expect(result.myVotes).toHaveLength(2);
@@ -851,6 +888,148 @@ describe('PollService', () => {
       await expect(service.deletePoll('poll-1', 1)).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // explore
+  // ---------------------------------------------------------------------------
+
+  describe('explore', () => {
+    const TRANSPARENT_POLL = {
+      ...POLL_WITH_OPTIONS,
+      visibilityMode: 'TRANSPARENT' as const,
+      ownerId: 99,
+      _count: { votes: 0 },
+    };
+
+    it('returns paginated polls accessible to requester', async () => {
+      prismaMock.poll.findMany.mockResolvedValue([TRANSPARENT_POLL]);
+      prismaMock.poll.count.mockResolvedValue(1);
+
+      const result = await service.explore(1, { page: 1, limit: 20 });
+
+      expect(result.total).toBe(1);
+      expect(result.data).toHaveLength(1);
+      expect(prismaMock.poll.findMany).toHaveBeenCalled();
+    });
+
+    it('filters by theme slug when theme provided', async () => {
+      prismaMock.poll.findMany.mockResolvedValue([]);
+      prismaMock.poll.count.mockResolvedValue(0);
+
+      await service.explore(1, { page: 1, limit: 20, theme: 'anime' });
+
+      const call = prismaMock.poll.findMany.mock.calls[0][0];
+      expect(call.where.themes).toBeDefined();
+    });
+
+    it('filters by voterId when provided', async () => {
+      prismaMock.poll.findMany.mockResolvedValue([]);
+      prismaMock.poll.count.mockResolvedValue(0);
+
+      await service.explore(1, { page: 1, limit: 20, voterId: 5 });
+
+      const call = prismaMock.poll.findMany.mock.calls[0][0];
+      expect(call.where.votes).toBeDefined();
+    });
+
+    it('filters by ownerId when provided', async () => {
+      prismaMock.poll.findMany.mockResolvedValue([]);
+      prismaMock.poll.count.mockResolvedValue(0);
+
+      await service.explore(1, { page: 1, limit: 20, ownerId: 7 });
+
+      const call = prismaMock.poll.findMany.mock.calls[0][0];
+      expect(call.where.ownerId).toBe(7);
+    });
+
+    it('treats category param as alias for theme', async () => {
+      prismaMock.poll.findMany.mockResolvedValue([]);
+      prismaMock.poll.count.mockResolvedValue(0);
+
+      await service.explore(1, { page: 1, limit: 20, category: 'movies' });
+
+      const call = prismaMock.poll.findMany.mock.calls[0][0];
+      expect(call.where.themes).toBeDefined();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // setThemes
+  // ---------------------------------------------------------------------------
+
+  describe('setThemes', () => {
+    it('replaces themes for a poll owned by requester', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue(POLL_WITH_OPTIONS);
+      prismaMock.theme.findMany.mockResolvedValue([
+        { id: 'theme-1', slug: 'anime', label: 'Anime', createdAt: new Date() },
+      ]);
+      prismaMock.$transaction.mockResolvedValue([]);
+
+      await service.setThemes('poll-1', 1, ['anime']);
+
+      expect(prismaMock.$transaction).toHaveBeenCalled();
+    });
+
+    it('throws ForbiddenException when non-owner calls setThemes', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue(POLL_WITH_OPTIONS);
+
+      await expect(service.setThemes('poll-1', 999, ['anime'])).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+
+    it('throws NotFoundException when poll does not exist', async () => {
+      prismaMock.poll.findUnique.mockResolvedValue(null);
+
+      await expect(service.setThemes('poll-1', 1, ['anime'])).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // listUserVotes
+  // ---------------------------------------------------------------------------
+
+  describe('listUserVotes', () => {
+    const VOTE_ROW = {
+      pollId: 'poll-1',
+      optionId: 'opt-1',
+      updatedAt: new Date('2026-01-01'),
+      poll: {
+        title: 'Best anime?',
+        status: 'OPEN' as const,
+        ownerId: 1,
+        visibilityMode: 'TRANSPARENT' as const,
+        themes: [{ theme: { slug: 'anime' } }],
+      },
+    };
+
+    it('returns vote history grouped by poll', async () => {
+      prismaMock.vote.findMany.mockResolvedValue([VOTE_ROW]);
+      prismaMock.vote.count.mockResolvedValue(1);
+
+      const result = await service.listUserVotes(1, 1, { page: 1, limit: 20 });
+
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].pollId).toBe('poll-1');
+      expect(result.data[0].themes).toContain('anime');
+    });
+
+    it('filters by theme when provided', async () => {
+      prismaMock.vote.findMany.mockResolvedValue([]);
+      prismaMock.vote.count.mockResolvedValue(0);
+
+      await service.listUserVotes(1, 1, {
+        page: 1,
+        limit: 20,
+        theme: 'anime',
+      });
+
+      const call = prismaMock.vote.findMany.mock.calls[0][0];
+      expect(call.where.poll.themes).toBeDefined();
     });
   });
 });

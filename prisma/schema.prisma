@@ -83,9 +83,32 @@ model Poll {
   options              PollOption[]
   shareLinks           PollShareLink[]
   votes                Vote[]
+  themes               PollTheme[]
 
   @@index([ownerId])
   @@index([status])
+  @@index([createdAt])
+}
+
+model Theme {
+  id        String      @id @default(cuid())
+  slug      String      @unique
+  label     String
+  createdAt DateTime    @default(now())
+  polls     PollTheme[]
+
+  @@index([slug])
+}
+
+model PollTheme {
+  pollId    String
+  themeId   String
+  poll      Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  theme     Theme  @relation(fields: [themeId], references: [id], onDelete: Cascade)
+
+  @@id([pollId, themeId])
+  @@index([pollId])
+  @@index([themeId])
 }
 
 model PollShareLink {

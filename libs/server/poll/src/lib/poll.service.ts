@@ -13,11 +13,14 @@ import type {
   CreateShareLinkDto,
   JoinPollResponseDto,
   PaginatedResponseDto,
+  PollExploreQueryDto,
   PollListQueryDto,
   PollResponseDto,
   PollResultsDto,
   ShareLinkResponseDto,
   UpdatePollDto,
+  UserVoteHistoryItemDto,
+  UserVoteHistoryQueryDto,
 } from '@libs/shared-dto';
 import { PollStreamService } from './poll-stream.service';
 
@@ -342,7 +345,11 @@ export class PollService {
           include: {
             _count: { select: { votes: true } },
             ...(isTransparent
-              ? { votes: { include: { voter: { select: { id: true, name: true } } } } }
+              ? {
+                  votes: {
+                    include: { voter: { select: { id: true, name: true } } },
+                  },
+                }
               : {}),
           },
         },
@@ -450,6 +457,166 @@ export class PollService {
         order: o.order,
       })),
       totalVotes: poll._count?.votes,
+    };
+  }
+
+  async explore(
+    requesterId: number,
+    query: PollExploreQueryDto,
+  ): Promise<PaginatedResponseDto<PollResponseDto>> {
+    const { page, limit, theme, category, voterId, ownerId, status, from, to } =
+      query;
+    const skip = (page - 1) * limit;
+    const themeSlug = theme ?? category;
+
+    const where: Record<string, unknown> = {
+      // Visibility: caller sees their own polls + all TRANSPARENT polls
+      OR: [{ ownerId: requesterId }, { visibilityMode: 'TRANSPARENT' }],
+      ...(ownerId !== undefined ? { ownerId } : {}),
+      ...(status ? { status } : {}),
+      ...(from || to
+        ? {
+            createdAt: {
+              ...(from ? { gte: from } : {}),
+              ...(to ? { lte: to } : {}),
+            },
+          }
+        : {}),
+      ...(themeSlug
+        ? { themes: { some: { theme: { slug: themeSlug } } } }
+        : {}),
+      ...(voterId !== undefined
+        ? { votes: { some: { participantId: voterId } } }
+        : {}),
+    };
+
+    const [polls, total] = await Promise.all([
+      prisma.poll.findMany({
+        where,
+        include: {
+          options: { orderBy: { order: 'asc' } },
+          _count: { select: { votes: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.poll.count({ where }),
+    ]);
+
+    return {
+      data: polls.map((p) => this.toDto(p)),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async setThemes(
+    pollId: string,
+    requesterId: number,
+    slugs: string[],
+  ): Promise<void> {
+    const poll = await prisma.poll.findUnique({ where: { id: pollId } });
+    if (!poll) throw new NotFoundException(`Poll ${pollId} not found`);
+    if (poll.ownerId !== requesterId) {
+      throw new ForbiddenException('Only the poll owner can set themes');
+    }
+
+    const themes = await prisma.theme.findMany({
+      where: { slug: { in: slugs } },
+      select: { id: true },
+    });
+
+    await prisma.$transaction([
+      prisma.pollTheme.deleteMany({ where: { pollId } }),
+      prisma.pollTheme.createMany({
+        data: themes.map((t) => ({ pollId, themeId: t.id })),
+      }),
+    ]);
+  }
+
+  async listUserVotes(
+    targetUserId: number,
+    requesterId: number,
+    query: UserVoteHistoryQueryDto,
+  ): Promise<PaginatedResponseDto<UserVoteHistoryItemDto>> {
+    const { page, limit, theme, category } = query;
+    const skip = (page - 1) * limit;
+    const themeSlug = theme ?? category;
+
+    const where: Record<string, unknown> = {
+      participantId: targetUserId,
+      poll: {
+        // requester can only see polls they own or that are TRANSPARENT
+        OR: [{ ownerId: requesterId }, { visibilityMode: 'TRANSPARENT' }],
+        ...(themeSlug
+          ? { themes: { some: { theme: { slug: themeSlug } } } }
+          : {}),
+      },
+    };
+
+    const [votes, total] = await Promise.all([
+      prisma.vote.findMany({
+        where,
+        include: {
+          poll: {
+            select: {
+              title: true,
+              status: true,
+              ownerId: true,
+              visibilityMode: true,
+              themes: { include: { theme: { select: { slug: true } } } },
+            },
+          },
+        },
+        orderBy: { updatedAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.vote.count({ where }),
+    ]);
+
+    // Group by pollId to aggregate voted option IDs
+    const byPoll = new Map<
+      string,
+      {
+        pollId: string;
+        pollTitle: string;
+        pollStatus: 'DRAFT' | 'OPEN' | 'CLOSED' | 'LOCKED';
+        themes: string[];
+        votedOptionIds: string[];
+        votedAt: Date;
+      }
+    >();
+
+    for (const v of votes) {
+      const existing = byPoll.get(v.pollId);
+      if (existing) {
+        existing.votedOptionIds.push(v.optionId);
+      } else {
+        byPoll.set(v.pollId, {
+          pollId: v.pollId,
+          pollTitle: v.poll.title,
+          pollStatus: v.poll.status as 'DRAFT' | 'OPEN' | 'CLOSED' | 'LOCKED',
+          themes: v.poll.themes.map(
+            (pt: { theme: { slug: string } }) => pt.theme.slug,
+          ),
+          votedOptionIds: [v.optionId],
+          votedAt: v.updatedAt,
+        });
+      }
+    }
+
+    const data = Array.from(byPoll.values());
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
     };
   }
 

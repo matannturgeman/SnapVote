@@ -28,6 +28,12 @@ import {
   reportReasonSchema,
   reportStatusSchema,
   moderationActionSchema,
+  themeSchema,
+  createThemeSchema,
+  pollExploreQuerySchema,
+  setPollThemesSchema,
+  userVoteHistoryQuerySchema,
+  userVoteHistoryItemSchema,
 } from '@libs/shared-validation-schemas';
 
 // ---------------------------------------------------------------------------
@@ -142,6 +148,28 @@ export type CastVoteDto = z.infer<typeof CastVoteDtoSchema>;
 export type PollResultsDto = z.infer<typeof PollResultsDtoSchema>;
 export type PollStreamEventDto = z.infer<typeof PollStreamEventDtoSchema>;
 export type CreateReportDto = z.infer<typeof CreateReportDtoSchema>;
+
+// ---------------------------------------------------------------------------
+// Theme DTOs
+// ---------------------------------------------------------------------------
+
+export const ThemeResponseDtoSchema = themeSchema;
+export const CreateThemeDtoSchema = createThemeSchema;
+export const PollExploreQueryDtoSchema = pollExploreQuerySchema;
+export const SetPollThemesDtoSchema = setPollThemesSchema;
+export const UserVoteHistoryQueryDtoSchema = userVoteHistoryQuerySchema;
+export const UserVoteHistoryItemDtoSchema = userVoteHistoryItemSchema;
+
+export type ThemeResponseDto = z.infer<typeof ThemeResponseDtoSchema>;
+export type CreateThemeDto = z.infer<typeof CreateThemeDtoSchema>;
+export type PollExploreQueryDto = z.infer<typeof PollExploreQueryDtoSchema>;
+export type SetPollThemesDto = z.infer<typeof SetPollThemesDtoSchema>;
+export type UserVoteHistoryQueryDto = z.infer<
+  typeof UserVoteHistoryQueryDtoSchema
+>;
+export type UserVoteHistoryItemDto = z.infer<
+  typeof UserVoteHistoryItemDtoSchema
+>;
 
 // ---------------------------------------------------------------------------
 // Helpers
